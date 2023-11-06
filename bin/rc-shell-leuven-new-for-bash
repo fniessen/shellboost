@@ -51,7 +51,6 @@ fi
 export HISTCONTROL=ignoreboth
 # === default in Ubuntu
 
-echo "FNI settings loaded..."
 
 
 # Enable case-insensitive directory completion.
@@ -60,12 +59,12 @@ bind "set show-all-if-ambiguous on"
 
 
 
-PATH=~/winbin:~/bin:$PATH
+PATH="$HOME/winbin:$HOME/bin:$PATH"
 
 alias g=git
 alias hgrep='history | grep -i'
 
-alias cc="cd ~/1-Clients/consilium"
+alias cc="cd $HOME/1-Clients/consilium"
 
 alias abstart=WEB-INF/config/deploy/tools/01_START.sh
 alias abstop=WEB-INF/config/deploy/tools/02_STOP.sh
@@ -75,12 +74,12 @@ alias abstop=WEB-INF/config/deploy/tools/02_STOP.sh
 # Source all files beginning with 'rc-bash' or 'rc-common' in the ~/bin directory.
 for file in ~/bin/rc-bash* ~/bin/rc-common*; do
     if [ -f "$file" ]; then
+        printf "Sourcing %s...\n" "$file"
         . "$file"
-        printf "Sourced: %s\n" "$file"
     fi
 done
 
-echo "Update time!!!"
+printf "Synchronizing system time with a time server...\n"
 sudo ntpdate pool.ntp.org
 
 # velib-metropole.fr - travel@pirilampo.be - d3F4ult%Wgo%
