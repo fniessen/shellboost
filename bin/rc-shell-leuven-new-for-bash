@@ -76,7 +76,7 @@ alias abstop=WEB-INF/config/deploy/tools/02_STOP.sh
 for file in ~/bin/rc-bash* ~/bin/rc-common*; do
     if [ -f "$file" ]; then
         . "$file"
-        echo "Sourced: $file"
+        printf "Sourced: %s\n" "$file"
     fi
 done
 
