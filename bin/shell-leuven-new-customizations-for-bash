@@ -64,12 +64,6 @@ PATH="$HOME/winbin:$HOME/bin:$PATH"
 alias g=git
 alias hgrep='history | grep -i'
 
-alias cc="cd $HOME/1-Clients/consilium"
-
-alias abstart=WEB-INF/config/deploy/tools/01_START.sh
-alias abstop=WEB-INF/config/deploy/tools/02_STOP.sh
-
-
 
 # Source all files beginning with 'rc-bash' or 'rc-common' in the ~/bin directory.
 for file in ~/bin/rc-bash* ~/bin/rc-common*; do
