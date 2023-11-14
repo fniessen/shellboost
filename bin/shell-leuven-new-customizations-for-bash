@@ -79,14 +79,6 @@ for file in ~/bin/rc-bash* ~/bin/rc-common*; do
     fi
 done
 
-printf "Synchronizing system time with a time server...\n"
-sudo ntpdate pool.ntp.org
-
-# velib-metropole.fr - travel@pirilampo.be - d3F4ult%Wgo%
-
-# emacs boost emacsboost@gmail.com Mobiel hersteltelefoonnummer 0477 95 73 36
-
-
 __git_ps1() {
     local git_info
     git_info="$(git rev-parse --is-inside-work-tree --short HEAD 2>/dev/null)"
