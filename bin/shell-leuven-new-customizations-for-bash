@@ -159,14 +159,14 @@ __git_ps1() {
     fi
 
     if git ls-files --others --exclude-standard --directory --no-empty-directory --error-unmatch -- ':/*' >/dev/null 2>/dev/null; then
-        untracked=" %untracked"
+        untracked=" ?untracked"
     fi
 
     local count_unpushed=0
-    local upstream_branch="$(git rev-parse --symbolic-full-name --abbrev-ref @{upstream} 2>/dev/null)"
+    local upstream_branch="$(git rev-parse --abbrev-ref @{u} 2>/dev/null)"
 
     if [ -n "$upstream_branch" ]; then
-        count_unpushed=$(git rev-list --count --left-right @{upstream}...HEAD | awk '{print $2}')
+        count_unpushed=$(git rev-list --count --left-right @{u}...HEAD | awk '{print $2}')
     fi
 
     if (( $count_unpushed > 0 )); then
