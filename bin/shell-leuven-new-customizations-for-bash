@@ -144,6 +144,7 @@ __git_ps1() {
     local staged=""
     local stash=""
     local untracked=""
+    local unpushed=""
 
     if [ -n "$(git diff --no-ext-diff --quiet || echo '*')" ]; then
         dirty=" *dirty"
@@ -161,12 +162,16 @@ __git_ps1() {
         untracked=" %untracked"
     fi
 
-    local status_info="$dirty$staged$stash$untracked"
+    local count_unpushed=$(git rev-list --count --left-right @{upstream}...HEAD | awk '{print $2}')
+    if (( "$count_unpushed" > 0 )); then
+        unpushed=" ↑$count_unpushed"
+    fi
+
+    local status_info="$dirty$staged$stash$untracked$unpushed"
 
     branch="${branch##refs/heads/}"
     printf -- " (%s)" "$branch$(tput setaf 6)${status_info:+$status_info}$(tput setaf 3)"
 }
-
 
 # Set the in-memory history size.  This controls the number of commands
 # available for the current session.
