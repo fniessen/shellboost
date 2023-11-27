@@ -162,8 +162,14 @@ __git_ps1() {
         untracked=" %untracked"
     fi
 
-    local count_unpushed=$(git rev-list --count --left-right @{upstream}...HEAD | awk '{print $2}')
-    if (( "$count_unpushed" > 0 )); then
+    local count_unpushed=0
+    local upstream_branch="$(git rev-parse --symbolic-full-name --abbrev-ref @{upstream} 2>/dev/null)"
+
+    if [ -n "$upstream_branch" ]; then
+        count_unpushed=$(git rev-list --count --left-right @{upstream}...HEAD | awk '{print $2}')
+    fi
+
+    if (( $count_unpushed > 0 )); then
         unpushed=" ↑$count_unpushed"
     fi
 
