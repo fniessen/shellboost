@@ -140,11 +140,11 @@ __git_ps1() {
         branch="${head_ref#ref: }"
     fi
 
-    local dirty=""
-    local staged=""
-    local stash=""
-    local untracked=""
-    local unpushed=""
+    local dirty=""                      # should be in red
+    local staged=""                     # should be in magenta
+    local stash=""                      # should be in blue
+    local untracked=""                  # should be in green
+    local unpushed=""                   # should be in yellow
 
     if [ -n "$(git diff --no-ext-diff --quiet || echo '*')" ]; then
         dirty=" *dirty"
