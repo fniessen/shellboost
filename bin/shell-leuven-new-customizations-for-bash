@@ -133,7 +133,7 @@ __git_ps1() {
 
 # Set the in-memory history size.  This controls the number of commands
 # available for the current session.
-export HISTSIZE=5000
+export HISTSIZE=10000
 
 # Set the on-disk history size.  This controls the number of commands stored in
 # the history file.
