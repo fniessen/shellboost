@@ -144,3 +144,24 @@ export HISTTIMEFORMAT="%Y-%m-%d %H:%M  "
 
 # Exclude common navigation and administrative commands from history.
 export HISTIGNORE="ls:cd:pwd:clear:history:exit:top:df"
+
+# Detect the current shell.
+case "$SHELL" in
+    */bash)
+        # Set a common history file.
+        HISTFILE=$HOME/.bash_history
+
+        # Append to the history file instead of overwriting.
+        shopt -s histappend
+        ;;
+    */zsh)
+        # Set a common history file.
+        HISTFILE=$HOME/.zsh_history
+
+        # Append to the history file instead of overwriting.
+        setopt APPEND_HISTORY
+
+        # Show full command history without line numbers.
+        alias history="history 0"
+        ;;
+esac
