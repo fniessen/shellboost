@@ -1,0 +1,62 @@
+#+title: Leuven shell configuration files
+
+* 1. Environment variables
+
+set -x VARIABLE_NAME value
+
+* 2. Paths
+
+set PATH $PATH /new/path/directory
+
+* 3. Aliases
+
+alias ll "ls -l"
+
+* 4. Functions
+
+function my_function
+    echo "Hello, Fish!"
+end
+
+* 5. Key bindings
+
+bind \ct command_name
+
+* 6. Prompt configuration
+
+set fish_prompt "custom_prompt"
+
+* 7. Autosuggestions
+
+fish_add_path_to_function_path /path/to/function
+
+* 8. Completions
+
+complete -c command_name -f -n '__fish_use_subcommand'
+
+* 9. Universal variables
+
+set -Ux UNIVERSAL_VARIABLE value
+
+* 10. Abbreviations
+
+abbr --add git "git_command"
+
+* 11. Event handling
+
+function fish_title
+    echo "Terminal Title"
+end
+
+* 12. Miscellaneous settings
+
+set -g fish_color_autosuggestion brblack
+set -g fish_color_match yellow
+
+* Additional custom configurations or settings
+
+** Bash-specific settings
+
+** Zsh-specific settings
+
+** Common settings
