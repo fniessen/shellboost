@@ -5,7 +5,7 @@
 # Define a custom function to display the exit code in red if it's non-zero.
 show_exit_code() {
     local exit_code=$?
-    if [ $exit_code -ne 0 ]; then
+    if [[ $exit_code -ne 0 ]]; then
         printf "\033[01;31m%s\033[00m\n" "$exit_code"
     else
         printf "%s" ""
@@ -65,24 +65,16 @@ alias g=git
 alias hgrep='history | grep -i'
 
 
-# Source all files beginning with 'rc-bash' or 'rc-common' in the ~/bin directory.
-for file in ~/bin/rc-bash* ~/bin/rc-common*; do
-    if [ -f "$file" ]; then
-        printf "Sourcing %s...\n" "$file"
-        . "$file"
-    fi
-done
-
 __git_ps1() {
     local git_info
     git_info="$(git rev-parse --is-inside-work-tree --short HEAD 2>/dev/null)"
 
-    if [ -z "$git_info" ]; then
+    if [[ -z "$git_info" ]]; then
         return $?
     fi
 
     local branch
-    if [ -h "$(git rev-parse --git-path HEAD 2>/dev/null)" ]; then
+    if [[ -h "$(git rev-parse --git-path HEAD 2>/dev/null)" ]]; then
         branch="$(git symbolic-ref HEAD 2>/dev/null)"
     else
         local head_ref
@@ -98,11 +90,11 @@ __git_ps1() {
     local untracked=""                  # should be in green
     local unpushed=""                   # should be in yellow
 
-    if [ -n "$(git diff --no-ext-diff --quiet || echo '*')" ]; then
+    if [[ -n "$(git diff --no-ext-diff --quiet || echo '*')" ]]; then
         dirty=" *dirty"
     fi
 
-    if [ -n "$(git diff --no-ext-diff --cached --quiet || echo '+')" ]; then
+    if [[ -n "$(git diff --no-ext-diff --cached --quiet || echo '+')" ]]; then
         staged=" +staged"
     fi
 
@@ -117,11 +109,11 @@ __git_ps1() {
     local count_unpushed=0
     local upstream_branch="$(git rev-parse --abbrev-ref @{u} 2>/dev/null)"
 
-    if [ -n "$upstream_branch" ]; then
+    if [[ -n "$upstream_branch" ]]; then
         count_unpushed=$(git rev-list --count --left-right @{u}...HEAD | awk '{print $2}')
     fi
 
-    if (( $count_unpushed > 0 )); then
+    if (( count_unpushed > 0 )); then
         unpushed=" ↑$count_unpushed"
     fi
 
@@ -165,3 +157,54 @@ case "$SHELL" in
         alias history="history 0"
         ;;
 esac
+
+
+
+
+
+
+alias lsd='ls -d */'
+alias l='ls -CF'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+alias -- -='cd -'
+alias back='cd -'
+
+alias d='dirs -v'
+alias 1='cd -1'
+alias 2='cd -2'
+alias 3='cd -3'
+alias 4='cd -4'
+alias 5='cd -5'
+alias 6='cd -6'
+alias 7='cd -7'
+alias 8='cd -8'
+alias 9='cd -9'
+
+# autopushd() {
+#     if [[ -n "$BASH_VERSION" ]]; then
+#         # For Bash.
+#         old_dir="$(pwd)"
+#         builtin cd "$@"
+#         if [[ ":$DIRSTACK:" != *":$old_dir:"* ]]; then
+#             echo "Bash - Pushing $old_dir onto the stack:"
+#             pushd "$old_dir"
+#         else
+#             echo "Bash - Directory already in stack, not pushing."
+#         fi
+#     elif [[ -n "$ZSH_VERSION" ]]; then
+#         # For Zsh.
+#         old_dir="$(pwd)"
+#         cd "$@"
+#         if [[ ! -v dirstack || ":$DIRSTACK:" != *":$old_dir:"* ]]; then
+#             echo "Zsh - Pushing $old_dir onto the stack:"
+#             pushd "$old_dir"
+#         else
+#             echo "Zsh - Directory already in stack, not pushing."
+#         fi
+#     fi
+# }
+#
+# alias cd='autopushd'
