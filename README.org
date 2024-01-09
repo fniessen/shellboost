@@ -1,18 +1,59 @@
 #+title: Leuven shell configuration files
 
+#+PROPERTY:  header-args :tangle bin/rc-bash-specific-settings-shell-leuven-new
+
+#+begin_src shell
+#!/usr/bin/env bash
+#+end_src
+
 * 1. Environment variables
+
+These are variables that are accessible to all parts of the shell
+environment.
 
 set -x VARIABLE_NAME value
 
+#+begin_src shell
+if [ -r ~/.dircolors ]; then
+    eval "$(dircolors ~/.dircolors)"
+fi
+#+end_src
+
+This command sets the ~LS_COLORS~ environment variable by evaluating the output of
+the ~dircolors~ command.
+
 * 2. Paths
+
+These are specific paths to files and directories.
+
+For example, the ~PATH~ environment variable tells the shell where to look for
+executable files.
+
+#+begin_src shell
+export PATH="$HOME/winbin:$HOME/bin:$PATH"
+#+end_src
 
 set PATH $PATH /new/path/directory
 
 * 3. Aliases
 
-alias ll "ls -l"
+These are shortened names for commands.
+
+For example, you might set an alias for the ~ls~ command to ~ll~.
+
+#+begin_src shell
+alias ll='ls -l'
+#+end_src
+
+#+begin_src shell
+alias g=git
+alias hgrep='history | grep -i'
+#+end_src
 
 * 4. Functions
+
+These are blocks of code that can be executed by name. For example, you might
+create a function to format your prompt.
 
 function my_function
     echo "Hello, Fish!"
@@ -20,35 +61,60 @@ end
 
 * 5. Key bindings
 
+These are mappings of keys to commands. For example, you might bind the Ctrl+A
+key to move the cursor to the beginning of the line.
+
 bind \ct command_name
 
 * 6. Prompt configuration
+
+This is the configuration of the terminal prompt. This includes things like the
+colors, the text that is displayed, and the layout of the prompt.
 
 set fish_prompt "custom_prompt"
 
 * 7. Autosuggestions
 
+These are suggestions for commands that are based on the current input. For
+example, if you type ls, the shell might show you suggestions for other commands
+that start with ls.
+
 fish_add_path_to_function_path /path/to/function
 
 * 8. Completions
+
+These are completions for commands and file paths. For example, if you type cd,
+the shell might show you a list of directories that you can change to.
 
 complete -c command_name -f -n '__fish_use_subcommand'
 
 * 9. Universal variables
 
+These are variables that are shared by all shells. For example, the USER
+variable tells the shell your username.
+
 set -Ux UNIVERSAL_VARIABLE value
 
 * 10. Abbreviations
 
+These are shortened names for words or phrases. For example, you might set an
+abbreviation for the word Linux to lx.
+
 abbr --add git "git_command"
 
 * 11. Event handling
+
+This is the configuration of how the shell responds to events, such as key
+presses and file system changes.
 
 function fish_title
     echo "Terminal Title"
 end
 
 * 12. Miscellaneous settings
+
+This is a catch-all category for settings that don't fit into any of the other
+categories.
 
 set -g fish_color_autosuggestion brblack
 set -g fish_color_match yellow
@@ -60,3 +126,212 @@ set -g fish_color_match yellow
 ** Zsh-specific settings
 
 ** Common settings
+
+#+begin_src shell
+# Customize PS1 prompt.
+
+# Define a custom function to display the exit code in red if it's non-zero.
+show_exit_code() {
+    local exit_code=$?
+    if [[ $exit_code -ne 0 ]]; then
+        printf "\033[01;31m%s\033[00m\n" "$exit_code"
+    else
+        printf "%s" ""
+    fi
+}
+
+# Set the PROMPT_COMMAND to call the custom function.
+PROMPT_COMMAND='show_exit_code'
+
+
+
+PS1='\n\
+\[\e]0;\u@\h: \w\a\]\
+${debian_chroot:+($debian_chroot)}\
+\[\033[01;32m\]\u@\h\[\033[00m\]\
+\[\033[01;30m\]:\[\033[00m\]\
+\[\033[01;34m\]\w\[\033[00m\] \
+\[\033[01;33m\]($(git branch 2>/dev/null | grep '^*' | colrm 1 2))\
+\[\033[0m\]\n\$ '
+
+PS1='\n\
+\[\e]0;\u@\h: \w\a\]\
+${debian_chroot:+($debian_chroot)}\
+\[\033[01;32m\]\u@\h\[\033[00m\]\
+\[\033[01;30m\]:\[\033[00m\]\
+\[\033[01;34m\]\w\[\033[00m\]\
+\[\033[01;33m\]$(__git_ps1)\
+\[\033[0m\]\n\$ '
+
+
+
+
+# XXX Make use of color_prompt variable?
+
+# Check if history search bindings are already set.
+if ! bind -q history-search-backward &>/dev/null; then
+    # If not set, configure Up and Down arrow keys for history search.
+    bind '"\e[A": history-search-backward'   # Up arrow: Search backward in command history.
+    bind '"\e[B": history-search-forward'    # Down arrow: Search forward in command history.
+fi
+
+# Configure HISTCONTROL to ignore both leading space and consecutive duplicates.
+export HISTCONTROL=ignoreboth
+# === default in Ubuntu
+
+
+
+# Enable case-insensitive directory completion.
+bind "set completion-ignore-case on"
+bind "set show-all-if-ambiguous on"
+
+
+
+
+__git_ps1() {
+    local git_info
+    git_info="$(git rev-parse --is-inside-work-tree --short HEAD 2>/dev/null)"
+
+    if [[ -z "$git_info" ]]; then
+        return $?
+    fi
+
+    local branch
+    if [[ -h "$(git rev-parse --git-path HEAD 2>/dev/null)" ]]; then
+        branch="$(git symbolic-ref HEAD 2>/dev/null)"
+    else
+        local head_ref
+        if ! __git_eread "$(git rev-parse --git-path HEAD)" head_ref; then
+            return $?
+        fi
+        branch="${head_ref#ref: }"
+    fi
+
+    local dirty=""                      # should be in red
+    local staged=""                     # should be in magenta
+    local stash=""                      # should be in blue
+    local untracked=""                  # should be in green
+    local unpushed=""                   # should be in yellow
+
+    if [[ -n "$(git diff --no-ext-diff --quiet || echo '*')" ]]; then
+        dirty=" *dirty"
+    fi
+
+    if [[ -n "$(git diff --no-ext-diff --cached --quiet || echo '+')" ]]; then
+        staged=" +staged"
+    fi
+
+    if git rev-parse --verify --quiet refs/stash >/dev/null; then
+        stash=" \$stash"
+    fi
+
+    if git ls-files --others --exclude-standard --directory --no-empty-directory --error-unmatch -- ':/*' >/dev/null 2>/dev/null; then
+        untracked=" ?untracked"
+    fi
+
+    local count_unpushed=0
+    local upstream_branch="$(git rev-parse --abbrev-ref @{u} 2>/dev/null)"
+
+    if [[ -n "$upstream_branch" ]]; then
+        count_unpushed=$(git rev-list --count --left-right @{u}...HEAD | awk '{print $2}')
+    fi
+
+    if (( count_unpushed > 0 )); then
+        unpushed=" ↑$count_unpushed"
+    fi
+
+    local status_info="$dirty$staged$stash$untracked$unpushed"
+
+    branch="${branch##refs/heads/}"
+    printf -- " (%s)" "$branch$(tput setaf 6)${status_info:+$status_info}$(tput setaf 3)"
+}
+
+# Set the in-memory history size.  This controls the number of commands
+# available for the current session.
+export HISTSIZE=10000
+
+# Set the on-disk history size.  This controls the number of commands stored in
+# the history file.
+export HISTFILESIZE=$HISTSIZE
+
+# Set the history timestamp format to ISO8601 (yyyy-mm-dd hh:mm).
+export HISTTIMEFORMAT="%Y-%m-%d %H:%M  "
+
+# Exclude common navigation and administrative commands from history.
+export HISTIGNORE="ls:cd:pwd:clear:history:exit:top:df"
+
+# Detect the current shell.
+case "$SHELL" in
+    */bash)
+        # Set a common history file.
+        HISTFILE=$HOME/.bash_history
+
+        # Append to the history file instead of overwriting.
+        shopt -s histappend
+        ;;
+    */zsh)
+        # Set a common history file.
+        HISTFILE=$HOME/.zsh_history
+
+        # Append to the history file instead of overwriting.
+        setopt APPEND_HISTORY
+
+        # Show full command history without line numbers.
+        alias history="history 0"
+        ;;
+esac
+
+
+
+
+
+
+alias lsd='ls -d */'
+alias l='ls -CF'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+alias -- -='cd -'
+alias back='cd -'
+
+alias d='dirs -v'
+alias 1='cd -1'
+alias 2='cd -2'
+alias 3='cd -3'
+alias 4='cd -4'
+alias 5='cd -5'
+alias 6='cd -6'
+alias 7='cd -7'
+alias 8='cd -8'
+alias 9='cd -9'
+
+# autopushd() {
+#     if [[ -n "$BASH_VERSION" ]]; then
+#         # For Bash.
+#         old_dir="$(pwd)"
+#         builtin cd "$@"
+#         if [[ ":$DIRSTACK:" != *":$old_dir:"* ]]; then
+#             echo "Bash - Pushing $old_dir onto the stack:"
+#             pushd "$old_dir"
+#         else
+#             echo "Bash - Directory already in stack, not pushing."
+#         fi
+#     elif [[ -n "$ZSH_VERSION" ]]; then
+#         # For Zsh.
+#         old_dir="$(pwd)"
+#         cd "$@"
+#         if [[ ! -v dirstack || ":$DIRSTACK:" != *":$old_dir:"* ]]; then
+#             echo "Zsh - Pushing $old_dir onto the stack:"
+#             pushd "$old_dir"
+#         else
+#             echo "Zsh - Directory already in stack, not pushing."
+#         fi
+#     fi
+# }
+#
+# alias cd='autopushd'
+
+
+export GREP_COLORS='ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32'
+#+end_src

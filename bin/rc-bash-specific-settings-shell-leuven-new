@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
 
+if [ -r ~/.dircolors ]; then
+    eval "$(dircolors ~/.dircolors)"
+fi
+
+export PATH="$HOME/winbin:$HOME/bin:$PATH"
+
+alias ll='ls -l'
+
+alias g=git
+alias hgrep='history | grep -i'
+
 # Customize PS1 prompt.
 
 # Define a custom function to display the exit code in red if it's non-zero.
@@ -58,11 +69,6 @@ bind "set completion-ignore-case on"
 bind "set show-all-if-ambiguous on"
 
 
-
-PATH="$HOME/winbin:$HOME/bin:$PATH"
-
-alias g=git
-alias hgrep='history | grep -i'
 
 
 __git_ps1() {
@@ -208,3 +214,6 @@ alias 9='cd -9'
 # }
 #
 # alias cd='autopushd'
+
+
+export GREP_COLORS='ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32'
