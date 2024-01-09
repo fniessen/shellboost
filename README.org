@@ -11,8 +11,6 @@
 These are variables that are accessible to all parts of the shell
 environment.
 
-set -x VARIABLE_NAME value
-
 #+begin_src shell
 if [ -r ~/.dircolors ]; then
     eval "$(dircolors ~/.dircolors)"
@@ -33,8 +31,6 @@ executable files.
 export PATH="$HOME/winbin:$HOME/bin:$PATH"
 #+end_src
 
-set PATH $PATH /new/path/directory
-
 * 3. Aliases
 
 These are shortened names for commands.
@@ -48,6 +44,27 @@ alias ll='ls -l'
 #+begin_src shell
 alias g=git
 alias hgrep='history | grep -i'
+#+end_src
+
+#+begin_src shell
+alias lsd='ls -d */'
+alias l='ls -CF'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+alias -- -='cd -'
+
+alias d='dirs -v'
+alias 1='cd -1'
+alias 2='cd -2'
+alias 3='cd -3'
+alias 4='cd -4'
+alias 5='cd -5'
+alias 6='cd -6'
+alias 7='cd -7'
+alias 8='cd -8'
+alias 9='cd -9'
 #+end_src
 
 * 4. Functions
@@ -70,62 +87,6 @@ bind \ct command_name
 
 This is the configuration of the terminal prompt. This includes things like the
 colors, the text that is displayed, and the layout of the prompt.
-
-set fish_prompt "custom_prompt"
-
-* 7. Autosuggestions
-
-These are suggestions for commands that are based on the current input. For
-example, if you type ls, the shell might show you suggestions for other commands
-that start with ls.
-
-fish_add_path_to_function_path /path/to/function
-
-* 8. Completions
-
-These are completions for commands and file paths. For example, if you type cd,
-the shell might show you a list of directories that you can change to.
-
-complete -c command_name -f -n '__fish_use_subcommand'
-
-* 9. Universal variables
-
-These are variables that are shared by all shells. For example, the USER
-variable tells the shell your username.
-
-set -Ux UNIVERSAL_VARIABLE value
-
-* 10. Abbreviations
-
-These are shortened names for words or phrases. For example, you might set an
-abbreviation for the word Linux to lx.
-
-abbr --add git "git_command"
-
-* 11. Event handling
-
-This is the configuration of how the shell responds to events, such as key
-presses and file system changes.
-
-function fish_title
-    echo "Terminal Title"
-end
-
-* 12. Miscellaneous settings
-
-This is a catch-all category for settings that don't fit into any of the other
-categories.
-
-set -g fish_color_autosuggestion brblack
-set -g fish_color_match yellow
-
-* Additional custom configurations or settings
-
-** Bash-specific settings
-
-** Zsh-specific settings
-
-** Common settings
 
 #+begin_src shell
 # Customize PS1 prompt.
@@ -162,31 +123,6 @@ ${debian_chroot:+($debian_chroot)}\
 \[\033[01;34m\]\w\[\033[00m\]\
 \[\033[01;33m\]$(__git_ps1)\
 \[\033[0m\]\n\$ '
-
-
-
-
-# XXX Make use of color_prompt variable?
-
-# Check if history search bindings are already set.
-if ! bind -q history-search-backward &>/dev/null; then
-    # If not set, configure Up and Down arrow keys for history search.
-    bind '"\e[A": history-search-backward'   # Up arrow: Search backward in command history.
-    bind '"\e[B": history-search-forward'    # Down arrow: Search forward in command history.
-fi
-
-# Configure HISTCONTROL to ignore both leading space and consecutive duplicates.
-export HISTCONTROL=ignoreboth
-# === default in Ubuntu
-
-
-
-# Enable case-insensitive directory completion.
-bind "set completion-ignore-case on"
-bind "set show-all-if-ambiguous on"
-
-
-
 
 __git_ps1() {
     local git_info
@@ -246,6 +182,84 @@ __git_ps1() {
     printf -- " (%s)" "$branch$(tput setaf 6)${status_info:+$status_info}$(tput setaf 3)"
 }
 
+# XXX Make use of color_prompt variable?
+#+end_src
+
+* 7. Autosuggestions
+
+These are suggestions for commands that are based on the current input. For
+example, if you type ls, the shell might show you suggestions for other commands
+that start with ls.
+
+fish_add_path_to_function_path /path/to/function
+
+* 8. Completions
+
+These are completions for commands and file paths. For example, if you type cd,
+the shell might show you a list of directories that you can change to.
+
+complete -c command_name -f -n '__fish_use_subcommand'
+
+* 9. Universal variables
+
+These are variables that are shared by all shells. For example, the USER
+variable tells the shell your username.
+
+set -Ux UNIVERSAL_VARIABLE value
+
+* 10. Abbreviations
+
+These are shortened names for words or phrases. For example, you might set an
+abbreviation for the word Linux to lx.
+
+abbr --add git "git_command"
+
+* 11. Event handling
+
+This is the configuration of how the shell responds to events, such as key
+presses and file system changes.
+
+function fish_title
+    echo "Terminal Title"
+end
+
+* 12. Miscellaneous settings
+
+This is a catch-all category for settings that don't fit into any of the other
+categories.
+
+set -g fish_color_autosuggestion brblack
+set -g fish_color_match yellow
+
+* Additional custom configurations or settings
+
+** Bash-specific settings
+
+** Zsh-specific settings
+
+** Common settings
+
+#+begin_src shell
+# Check if history search bindings are already set.
+if ! bind -q history-search-backward &>/dev/null; then
+    # If not set, configure Up and Down arrow keys for history search.
+    bind '"\e[A": history-search-backward'   # Up arrow: Search backward in command history.
+    bind '"\e[B": history-search-forward'    # Down arrow: Search forward in command history.
+fi
+
+# Configure HISTCONTROL to ignore both leading space and consecutive duplicates.
+export HISTCONTROL=ignoreboth
+# === default in Ubuntu
+
+
+
+# Enable case-insensitive directory completion.
+bind "set completion-ignore-case on"
+bind "set show-all-if-ambiguous on"
+
+
+
+
 # Set the in-memory history size.  This controls the number of commands
 # available for the current session.
 export HISTSIZE=10000
@@ -282,29 +296,6 @@ case "$SHELL" in
 esac
 
 
-
-
-
-
-alias lsd='ls -d */'
-alias l='ls -CF'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-
-alias -- -='cd -'
-alias back='cd -'
-
-alias d='dirs -v'
-alias 1='cd -1'
-alias 2='cd -2'
-alias 3='cd -3'
-alias 4='cd -4'
-alias 5='cd -5'
-alias 6='cd -6'
-alias 7='cd -7'
-alias 8='cd -8'
-alias 9='cd -9'
 
 # autopushd() {
 #     if [[ -n "$BASH_VERSION" ]]; then
