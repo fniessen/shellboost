@@ -8,9 +8,6 @@ export PATH="$HOME/winbin:$HOME/bin:$PATH"
 
 alias ll='ls -l'
 
-alias g=git
-alias hgrep='history | grep -i'
-
 alias lsd='ls -d */'
 alias l='ls -CF'
 alias ..='cd ..'
