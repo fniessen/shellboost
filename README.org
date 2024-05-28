@@ -42,8 +42,17 @@ alias ll='ls -l'
 #+end_src
 
 #+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
-alias g=git
+# Alias 'hgrep' to search command history with case-insensitive grep.
 alias hgrep='history | grep -i'
+
+# Check if 'rg' command is available.
+if command -v rg > /dev/null 2>&1; then
+    # Alias 'rgno' to 'rg -l' to list filenames with matches.
+    alias rgno='rg -l'
+
+    # Alias 'rgext' to 'rg --type' to search within specific file types.
+    alias rgext='rg --type'
+fi
 #+end_src
 
 #+begin_src shell
