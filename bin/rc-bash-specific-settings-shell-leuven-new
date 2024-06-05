@@ -64,7 +64,7 @@ ${debian_chroot:+($debian_chroot)}\
 
 __git_ps1() {
     local git_info
-    git_info="$(git rev-parse --is-inside-work-tree --short HEAD 2>/dev/null)"
+    git_info="$(git rev-parse --is-inside-work-tree 2>/dev/null)"
 
     if [[ -z "$git_info" ]]; then
         return $?
@@ -104,10 +104,10 @@ __git_ps1() {
     fi
 
     local count_unpushed=0
-    local upstream_branch="$(git rev-parse --abbrev-ref @{u} 2>/dev/null)"
+    local upstream_branch
 
-    if [[ -n "$upstream_branch" ]]; then
-        count_unpushed=$(git rev-list --count --left-right @{u}...HEAD | awk '{print $2}')
+    if upstream_branch="$(git rev-parse --abbrev-ref @{u} 2>/dev/null)"; then
+        count_unpushed=$(git rev-list --count --left-right @{u}...HEAD 2>/dev/null | awk '{print $2}')
     fi
 
     if (( count_unpushed > 0 )); then
