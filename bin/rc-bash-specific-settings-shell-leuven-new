@@ -4,7 +4,15 @@ if [ -r ~/.dircolors ]; then
     eval "$(dircolors ~/.dircolors)"
 fi
 
-export PATH="$HOME/winbin:$HOME/bin:$PATH"
+# Add ~/bin to PATH if not already present.
+if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
+    export PATH="$HOME/bin:$PATH";
+fi
+
+# Add ~/winbin to PATH if not already present.
+if [[ ":$PATH:" != *":$HOME/winbin:"* ]]; then
+    export PATH="$HOME/winbin:$PATH";
+fi
 
 alias ll='ls -l'
 
