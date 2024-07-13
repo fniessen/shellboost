@@ -194,18 +194,6 @@ __git_ps1() {
 # XXX Make use of color_prompt variable?
 #+end_src
 
-XXX ERROR qd le repo n'a pas encore d'historique sur origin/master:
-
-#+begin_src shell :tangle no
-fni@BENB-163:~/.dotfiles/pirilampo-admin (master)
-$ git st
-## No commits yet on master...origin/master [gone]
-?? 1-Invoices-In/
-fatal: ambiguous argument '@{u}...HEAD': unknown revision or path not in the working tree.
-Use '--' to separate paths from revisions, like this:
-'git <command> [<revision>...] -- [<file>...]'
-#+end_src
-
 * 7. Autosuggestions
 
 These are suggestions for commands that are based on the current input. For
