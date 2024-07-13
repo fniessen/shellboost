@@ -79,14 +79,10 @@ __git_ps1() {
     fi
 
     local branch
-    if [[ -h "$(git rev-parse --git-path HEAD 2>/dev/null)" ]]; then
-        branch="$(git symbolic-ref HEAD 2>/dev/null)"
+    if branch="$(git symbolic-ref --short -q HEAD 2>/dev/null)"; then
+        : # We are on a branch, nothing to do here.
     else
-        local head_ref
-        if ! __git_eread "$(git rev-parse --git-path HEAD)" head_ref; then
-            return $?
-        fi
-        branch="${head_ref#ref: }"
+        branch="$(git rev-parse --short HEAD 2>/dev/null)"
     fi
 
     local dirty=""                      # should be in red
