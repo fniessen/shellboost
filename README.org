@@ -265,8 +265,12 @@ set -g fish_color_match yellow
 # Check if history search bindings are already set.
 if ! bind -q history-search-backward &>/dev/null; then
     # If not set, configure Up and Down arrow keys for history search.
-    bind '"\e[A": history-search-backward'   # Up arrow: Search backward in command history.
-    bind '"\e[B": history-search-forward'    # Down arrow: Search forward in command history.
+    bind '"\e[A": history-search-backward'
+                                        # Up arrow: Search backward in command
+                                        # history.
+    bind '"\e[B": history-search-forward'
+                                        # Down arrow: Search forward in command
+                                        # history.
 fi
 
 # Configure HISTCONTROL to ignore both leading space and consecutive duplicates.
@@ -282,13 +286,8 @@ bind "set show-all-if-ambiguous on"
 
 
 
-# Set the in-memory history size.  This controls the number of commands
-# available for the current session.
+# Set the number of commands to remember in the in-memory history.
 export HISTSIZE=10000
-
-# Set the on-disk history size.  This controls the number of commands stored in
-# the history file.
-export HISTFILESIZE=$HISTSIZE
 
 # Set the history timestamp format to ISO8601 (yyyy-mm-dd hh:mm).
 export HISTTIMEFORMAT="%Y-%m-%d %H:%M  "
@@ -298,27 +297,56 @@ export HISTIGNORE="ls:cd:pwd:clear:history:exit:top:df"
 
 # Detect the current shell.
 case "$SHELL" in
-    */bash)
+    ,*/bash)
         # Set a common history file.
         HISTFILE=$HOME/.bash_history
 
-        # Append to the history file instead of overwriting.
+        # Set the number of history entries to save to the (on-disk history)
+        # file.
+        export HISTFILESIZE=20000
+
+        # Append to the history file instead of overwriting it.
         shopt -s histappend
+
+        # Add history management to the existing PROMPT_COMMAND: after each
+        # command, append to the history file and reload it.
+        if [ -n "$PROMPT_COMMAND" ]; then
+            PROMPT_COMMAND="$PROMPT_COMMAND; history -a; history -n"
+        else
+            PROMPT_COMMAND="history -a; history -n"
+        fi
         ;;
-    */zsh)
+    ,*/zsh)
         # Set a common history file.
         HISTFILE=$HOME/.zsh_history
 
-        # Append to the history file instead of overwriting.
+        # Set the number of history entries to save to the (on-disk history)
+        # file.
+        SAVEHIST=20000
+
+        # Share history between all running sessions.
+        setopt SHARE_HISTORY
+
+        # Append commands to the history file incrementally, instead of
+        # overwriting the history file when the shell exits.
+        setopt INC_APPEND_HISTORY
+
+        # Append to the history file instead of overwriting it.
         setopt APPEND_HISTORY
+
+        setopt HIST_IGNORE_SPACE
+        setopt HIST_SAVE_NO_DUPS
+        setopt HIST_EXPIRE_DUPS_FIRST
 
         # Show full command history without line numbers.
         alias history="history 0"
         ;;
 esac
+#+end_src
 
 
 
+#+begin_src shell
 # autopushd() {
 #     if [[ -n "$BASH_VERSION" ]]; then
 #         # For Bash.
@@ -344,7 +372,8 @@ esac
 # }
 #
 # alias cd='autopushd'
+#+end_src
 
-
+#+begin_src shell
 export GREP_COLORS='ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32'
 #+end_src
