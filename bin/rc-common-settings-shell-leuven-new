@@ -10,5 +10,5 @@ if command -v rg > /dev/null 2>&1; then
 
     # Alias 'rgext' to perform a case-insensitive search within files matching
     # a specific pattern.
-    alias rgext='function _rgext() { rg --glob "*.$1" -i "$2"; }; _rgext'
+    alias rgext='function _rgext() { rg --glob "*.$1" -i -C 1 "$2"; }; _rgext'
 fi
