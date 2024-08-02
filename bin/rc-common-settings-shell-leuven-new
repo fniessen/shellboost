@@ -8,6 +8,7 @@ if command -v rg > /dev/null 2>&1; then
     # Alias 'rgno' to 'rg -l' to list filenames with matches.
     alias rgno='rg -l'
 
-    # Alias 'rgext' to search within specific file patterns.
-    alias rgext='function _rgext() { rg --glob "*.$1" "$2"; }; _rgext'
+    # Alias 'rgext' to perform a case-insensitive search within files matching
+    # a specific pattern.
+    alias rgext='function _rgext() { rg --glob "*.$1" -i "$2"; }; _rgext'
 fi

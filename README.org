@@ -60,8 +60,9 @@ if command -v rg > /dev/null 2>&1; then
     # Alias 'rgno' to 'rg -l' to list filenames with matches.
     alias rgno='rg -l'
 
-    # Alias 'rgext' to 'rg --type' to search within specific file types.
-    alias rgext='rg --type'
+    # Alias 'rgext' to perform a case-insensitive search within files matching
+    # a specific pattern.
+    alias rgext='function _rgext() { rg --glob "*.$1" -i "$2"; }; _rgext'
 fi
 #+end_src
 
@@ -297,7 +298,7 @@ export HISTIGNORE="ls:cd:pwd:clear:history:exit:top:df"
 
 # Detect the current shell.
 case "$SHELL" in
-    ,*/bash)
+    */bash)
         # Set a common history file.
         HISTFILE=$HOME/.bash_history
 
@@ -316,7 +317,7 @@ case "$SHELL" in
             PROMPT_COMMAND="history -a; history -n"
         fi
         ;;
-    ,*/zsh)
+    */zsh)
         # Set a common history file.
         HISTFILE=$HOME/.zsh_history
 
