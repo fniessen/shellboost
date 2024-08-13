@@ -378,3 +378,36 @@ esac
 #+begin_src shell
 export GREP_COLORS='ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32'
 #+end_src
+
+* Adding custom configuration to .bashrc or .zshrc
+
+To automatically source custom settings files every time you start a new
+terminal session, you can add the following code snippet to your =.bashrc= or
+=.zshrc= file. This script will look for files matching specific patterns in your
+=~/bin/= directory and source them if they exist.
+
+** For Bash users
+
+#+begin_src shell :tangle no
+# Source custom settings files (beginning with 'rc-bash' or 'rc-common') from
+# ~/bin.
+for file in ~/bin/rc-bash-specific-settings-* ~/bin/rc-common-settings-*; do
+    if [[ -f "$file" ]]; then
+        printf "Sourcing %s...\n" "$file"
+        source "$file"
+    fi
+done
+#+end_src
+
+** For Zsh users
+
+#+begin_src shell :tangle no
+# Source custom settings files (beginning with 'rc-zsh' or 'rc-common') from
+# ~/bin.
+for file in ~/bin/rc-zsh-specific-settings-* ~/bin/rc-common-settings-*; do
+    if [[ -f "$file" ]]; then
+        printf "Sourcing %s...\n" "$file"
+        source "$file"
+    fi
+done
+#+end_src
