@@ -11,14 +11,34 @@
 These are variables that are accessible to all parts of the shell
 environment.
 
+** Configuring colors for 'ls'
+
+The following example sets up ~LS_COLORS~ to define color schemes for ~ls~ based
+on file types.
+
 #+begin_src shell
 if [ -r ~/.dircolors ]; then
     eval "$(dircolors ~/.dircolors)"
 fi
 #+end_src
 
-This command sets the ~LS_COLORS~ environment variable by evaluating the output of
-the ~dircolors~ command.
+The ~dircolors~ command reads a configuration file (e.g., =~/.dircolors=) to define
+color mappings and assigns the output to the ~LS_COLORS~ variable.
+
+** Customizing time format for 'ls'
+
+The ~TIME_STYLE~ environment variable customizes the display of dates and times in
+the output of the ~ls~ command. For instance:
+
+#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+#!/usr/bin/env bash
+
+# Configure the time format for `ls` to display dates as "YYYY-MM-DD Day HH:MM".
+export TIME_STYLE=+"%Y-%m-%d %a %H:%M"
+#+end_src
+
+This setting formats timestamps in a human-readable ISO-like format with the day
+of the week included.
 
 * 2. Paths
 
@@ -50,19 +70,31 @@ alias ll='ls -l'
 #+end_src
 
 #+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
-#!/usr/bin/env bash
-
 # Alias 'hgrep' to search command history with case-insensitive grep.
 alias hgrep='history | grep -i'
 
 # Check if 'rg' command is available.
 if command -v rg > /dev/null 2>&1; then
-    # Alias 'rgno' to 'rg -l' to list filenames with matches.
+    # Define a function 'rgc' to always include the '-C 1' option for context
+    # lines.
+    rgc() {
+        rg -C 1 "$@" | sed '/'"$@"'/! s/^.*$/\x1b[90m&\x1b[0m/; s/\('"$@"'\)/\x1b[1;31m\1\x1b[0m/g'
+    }
+
+    alias rg='rg --hidden'
+
+    # Alias 'rgno' to 'rg -l' for listing filenames with matches.
     alias rgno='rg -l'
 
-    # Alias 'rgext' to perform a case-insensitive search within files matching
-    # a specific pattern.
-    alias rgext='function _rgext() { rg --glob "*.$1" -i -C 1 "$2"; }; _rgext'
+    # Define a function 'rgext' for a case-insensitive search within files
+    # matching a specific extension.
+    rgext() {
+        if [[ $# -ne 2 ]]; then
+            printf "Usage: rgext EXTENSION PATTERN\n"
+            return 2
+        fi
+        rg --glob "*.$1" -i -C 1 "$2"
+    }
 fi
 #+end_src
 

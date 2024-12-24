@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Configure the time format for `ls` to display dates as "YYYY-MM-DD Day HH:MM".
+export TIME_STYLE=+"%Y-%m-%d %a %H:%M"
+
 # Alias 'hgrep' to search command history with case-insensitive grep.
 alias hgrep='history | grep -i'
 
