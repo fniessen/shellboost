@@ -135,6 +135,34 @@ key to move the cursor to the beginning of the line.
 
 bind \ct command_name
 
+| Key binding | Meaning                                |
+|-------------+----------------------------------------|
+| M-s         | Prepend 'sudo ' to the current command |
+
+** M-s: Prepend sudo
+
+This configuration binds the ~M-s~ key combination to prepend ~sudo~ to the current
+command in both Bash and Zsh shells.
+
+For Bash:
+
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+# M-s: Prepend sudo.
+bind '"\es": "\C-asudo \C-e"'
+#+end_src
+
+For Zsh:
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+# M-s: Prepend sudo.
+prepend-sudo() {
+  [[ -z $BUFFER ]] && zle up-history
+  LBUFFER="sudo $LBUFFER"
+}
+zle -N prepend-sudo
+bindkey "\es" prepend-sudo
+#+end_src
+
 * 6. Prompt configuration
 
 This is the configuration of the terminal prompt. This includes things like the

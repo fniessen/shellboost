@@ -1,0 +1,7 @@
+# M-s: Prepend sudo.
+prepend-sudo() {
+  [[ -z $BUFFER ]] && zle up-history
+  LBUFFER="sudo $LBUFFER"
+}
+zle -N prepend-sudo
+bindkey "\es" prepend-sudo

@@ -35,6 +35,9 @@ alias 7='cd -7'
 alias 8='cd -8'
 alias 9='cd -9'
 
+# M-s: Prepend sudo.
+bind '"\es": "\C-asudo \C-e"'
+
 # Customize PS1 prompt.
 
 # Define a custom function to display the exit code in red if it's non-zero.
