@@ -1,3 +1,11 @@
+# C-M-u: Move to parent directory.
+up-directory() {
+  cd ..
+  zle reset-prompt
+}
+zle -N up-directory
+bindkey '\e\C-u' up-directory
+
 # M-s: Prepend sudo.
 prepend-sudo() {
   [[ -z $BUFFER ]] && zle up-history

@@ -128,6 +128,38 @@ function my_function
     echo "Hello, Fish!"
 end
 
+#+begin_src shell :tangle no
+confirm() {
+    # Prompt the user for confirmation with a customizable message.
+    read -p "$1 [y/N] " response
+    case "$response" in
+        [yY][eE][sS]|[yY])
+            # Confirm with yes or y.
+            return 0
+            ;;
+        ,*)
+            # Default to no.
+            return 1
+            ;;
+    esac
+}
+
+empty_trash() {
+    # Confirm before proceeding.
+    if confirm "Are you sure you want to empty the trash?"; then
+        # Remove contents of the trash directory.
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            rm -rf ~/.Trash/*
+        else
+            rm -rf ~/.local/share/Trash/*
+        fi
+        printf "Trash emptied.\n"
+    else
+        printf "Operation cancelled.\n"
+    fi
+}
+#+end_src
+
 * 5. Key bindings
 
 These are mappings of keys to commands. For example, you might bind the Ctrl+A
@@ -137,7 +169,36 @@ bind \ct command_name
 
 | Key binding | Meaning                                |
 |-------------+----------------------------------------|
+| C-M-u       | Move to parent directory               |
 | M-s         | Prepend 'sudo ' to the current command |
+
+** C-M-u: Move to parent directory
+
+This configuration binds the ~C-M-u~ key combination to the ~up-directory~ function
+in both Bash and Zsh shells. The function changes the current directory to its
+parent (~cd ..~).
+
+For Bash:
+
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+# C-M-u: Move to parent directory.
+bind '"\e\C-u": "cd ..\n"'
+#+end_src
+
+For Zsh:
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+# C-M-u: Move to parent directory.
+up-directory() {
+  cd ..
+  zle reset-prompt
+}
+zle -N up-directory
+bindkey '\e\C-u' up-directory
+#+end_src
+
+*Key note:* In Zsh, the *prompt* is refreshed to *reflect the new directory* after the
+change.
 
 ** M-s: Prepend sudo
 
