@@ -167,6 +167,73 @@ key to move the cursor to the beginning of the line.
 
 bind \ct command_name
 
+** Cursor movement
+
+- ~C-a~: Move cursor to the beginning of the line.
+- ~C-e~: Move cursor to the end of the line.
+- ~C-b~: Move cursor backward one character.
+- ~C-f~: Move cursor forward one character.
+- ~C-w~: Move cursor forward one word.
+- ~C-q~: Move cursor backward one word.
+
+** Command History and Navigation
+
+- ~<up>~: Navigate through command history.
+- ~C-r~: Perform a reverse history search.
+
+** Command Editing
+
+- ~C-d~: Delete the character under the cursor or exit the shell if the line is empty.
+- ~C-k~: Kill (cut) text from the cursor to the end of the line.
+- ~C-y~: Yank (paste) the killed text.
+- ~C-c~: Cancel the current command.
+
+** Case and Word Manipulation
+
+- ~M-c~: Capitalize the current word.
+- ~M-u~: Uppercase the current word.
+- ~M-l~: Lowercase the current word.
+- ~M-t~: Transpose (swap) the last two words.
+
+** Shell Utilities
+
+- ~M-l~: List directory contents.
+- ~M-w~: Show short description of a command.
+- ~M-d~: Show documentation for current command.
+- ~M-p~: Prepend 'sudo' to the current command.
+- ~M-.~: Insert the last argument of the previous command.
+- ~C-z~: Activate complete-and-search functionality.
+
+** Text Manipulation / Navigation
+
+- ~C-a~: Move to the beginning of the line.
+- ~C-e~: Move to the end of the line.
+- ~M-<left>~: Move the cursor backward one word.
+- ~M-<right>~: Move the cursor forward one word.
+- ~C-c~: Cancel the current command or foreground process.
+
+** Editing
+
+- ~M-e~: Open the current command line in your preferred text editor.
+- ~C-u~: Clear the line from the cursor to the beginning.
+- ~C-k~: Cut text from the cursor to the end of the line.
+- ~C-y~: Paste previously cut text.
+
+** History and Search
+
+- ~C-r~: Initiate a reverse search through command history.
+- ~C-s~: Initiate a forward search through command history.
+- ~M-<up>~ (with input): Search command history for commands starting with the current input.
+- ~M-<down>~ (with input): Search command history for the next matching command.
+
+** Custom key bindings
+
+You can create custom key bindings.
+
+For example:
+
+M-u: Refresh command line
+
 | Key binding | Meaning                                |
 |-------------+----------------------------------------|
 | C-M-u       | Move to parent directory               |
