@@ -35,11 +35,60 @@ alias 7='cd -7'
 alias 8='cd -8'
 alias 9='cd -9'
 
+# M-S-l: Send the string 'ls' followed by a newline.
+bind '"\eL": "ls\n"'
+
 # C-M-u: Move to parent directory.
 bind '"\e\C-u": "cd ..\n"'
 
 # M-s: Prepend sudo.
 bind '"\es": "\C-asudo \C-e"'
+
+# Function to copy the previous word.
+copy-prev-word() {
+    local words=($READLINE_LINE)
+    local cursor_position=$READLINE_POINT
+    local word_index=${#words[@]}
+
+    # Find the word before the cursor
+    for ((i=${#words[@]}-1; i>=0; i--)); do
+        if ((${#words[i]} + ${#words[i+1]} + 1 < cursor_position)); then
+            word_index=$i
+            break
+        fi
+        cursor_position=$((cursor_position - ${#words[i]} - 1))
+    done
+
+    # Insert the previous word at the cursor position
+    if ((word_index > 0)); then
+        READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${words[word_index-1]}${READLINE_LINE:READLINE_POINT}"
+        READLINE_POINT=$((READLINE_POINT + ${#words[word_index-1]}))
+    fi
+}
+
+# Bind the function to C-x C-d.
+bind -x '"\C-x\C-d":copy-prev-word'
+
+# Function to run help on the current command
+run-help() {
+    # Get the first word of the line (i.e., the command).
+    local cmd=$(printf "%s" "$READLINE_LINE" | awk '{print $1}')
+
+    # Check if there's a command typed.
+    if [[ -n "$cmd" ]]; then
+        # Show the man page for the command (if it exists).
+        man "$cmd" 2>/dev/null || {
+            # If no man page, use the `whatis` command for a brief description.
+            whatis "$cmd" || printf "No help available for '%s'.\n" "$cmd"
+        }
+    else
+        printf "No command to show help for.\n"
+        return 1
+    fi
+}
+
+# Bind the function run-help to M-h.
+bind -x '"\eh": run-help'
 
 # Customize PS1 prompt.
 
