@@ -224,7 +224,7 @@ Refresh command line
 | M-s         | Prepend 'sudo ' to the current command |
 | M-S-l       | List directory contents                |
 
-** ls
+*** ls
 
 For Bash:
 
@@ -242,7 +242,7 @@ bindkey -x '"\eL": ls'
 # bindkey -s '\eL' 'ls\n'
 #+end_src
 
-** C-M-u: Move to parent directory
+*** C-M-u: Move to parent directory
 
 This configuration binds the ~C-M-u~ key combination to the ~up-directory~ function
 in both Bash and Zsh shells. The function changes the current directory to its
@@ -270,7 +270,7 @@ bindkey '\e\C-u' up-directory
 *Key note:* In Zsh, the *prompt* is refreshed to *reflect the new directory* after the
 change.
 
-** M-s: Prepend sudo
+*** M-s: Prepend sudo
 
 This configuration binds the ~M-s~ key combination to prepend ~sudo~ to the current
 command in both Bash and Zsh shells.
@@ -294,7 +294,7 @@ zle -N prepend-sudo
 bindkey "\es" prepend-sudo
 #+end_src
 
-** Copy the previous word
+*** Copy the previous word
 
 For Bash:
 
@@ -332,7 +332,7 @@ bindkey '^X^D' copy-prev-word
 # Instead of C-M-_.
 #+end_src
 
-** Run help
+*** Run help
 
 For Bash:
 
