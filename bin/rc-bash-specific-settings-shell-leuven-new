@@ -71,10 +71,11 @@ bind -x '"\C-x\C-d":copy-prev-word'
 
 # Function to run help on the current command
 run-help() {
-    # Get the first word of the line (i.e., the command).
-    local cmd=$(printf "%s" "$READLINE_LINE" | awk '{print $1}')
+    # Get the first word of the last command (i.e., the last command in the
+    # pipeline or sequence).
+    local cmd=$(printf "%s" "$READLINE_LINE" | awk -F'\\||;' '{print $NF}' | awk '{print $1}')
 
-    # Check if there's a command typed.
+    # Check if there's a command to process.
     if [[ -n "$cmd" ]]; then
         # Show the man page for the command (if it exists).
         man "$cmd" 2>/dev/null || {
