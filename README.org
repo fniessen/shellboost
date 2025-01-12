@@ -88,7 +88,9 @@ alias l='ls -CF'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
+#+end_src
 
+#+begin_src shell
 # Define an alias for changing to the previous directory.
 alias -- -='cd -'
 #+end_src
@@ -200,12 +202,7 @@ fi
 
 * 4. Functions
 
-These are blocks of code that can be executed by name. For example, you might
-create a function to format your prompt.
-
-function my_function
-    echo "Hello, Fish!"
-end
+These are blocks of code that can be executed by name.
 
 #+begin_src shell :tangle no
 confirm() {
@@ -661,40 +658,30 @@ __git_ps1() {
 * 7. Autosuggestions
 
 These are suggestions for commands that are based on the current input. For
-example, if you type ls, the shell might show you suggestions for other commands
-that start with ls.
-
-fish_add_path_to_function_path /path/to/function
+example, if you type ~ls~, the shell might show you suggestions for other commands
+that start with ~ls~.
 
 * 8. Completions
 
-These are completions for commands and file paths. For example, if you type cd,
+These are completions for commands and file paths. For example, if you type ~cd~,
 the shell might show you a list of directories that you can change to.
-
-complete -c command_name -f -n '__fish_use_subcommand'
 
 * 9. Universal variables
 
-These are variables that are shared by all shells. For example, the USER
+These are variables that are shared by all shells. For example, the ~USER~
 variable tells the shell your username.
-
-set -Ux UNIVERSAL_VARIABLE value
 
 * 10. Abbreviations
 
 These are shortened names for words or phrases. For example, you might set an
-abbreviation for the word Linux to lx.
-
-abbr --add git "git_command"
+abbreviation for the word git to g.
 
 * 11. Event handling
 
 This is the configuration of how the shell responds to events, such as key
 presses and file system changes.
 
-function fish_title
-    echo "Terminal Title"
-end
+"Terminal Title"
 
 * 12. Miscellaneous settings
 
