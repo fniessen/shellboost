@@ -8,6 +8,7 @@ alias hgrep='history | grep -i'
 
 # Check if 'rg' command is available.
 if command -v rg > /dev/null 2>&1; then
+
     # Define a function 'rgc' to always include the '-C 1' option for context
     # lines.
     rgc() {
@@ -28,4 +29,5 @@ if command -v rg > /dev/null 2>&1; then
         fi
         rg --glob "*.$1" -i -C 1 "$2"
     }
+
 fi

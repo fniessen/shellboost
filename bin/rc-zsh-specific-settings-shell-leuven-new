@@ -5,8 +5,7 @@ bindkey -x '"\eL": ls'
 
 # C-M-u: Move to parent directory.
 up-directory() {
-  cd ..
-  zle reset-prompt
+  cd .. && zle reset-prompt
 }
 zle -N up-directory
 bindkey '\e\C-u' up-directory
