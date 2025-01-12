@@ -1,4 +1,4 @@
-#+title: Leuven shell configuration files
+#+TITLE: Leuven shell configuration files
 
 #+PROPERTY:  header-args :tangle bin/rc-bash-specific-settings-shell-leuven-new
 
@@ -162,10 +162,7 @@ empty_trash() {
 
 * 5. Key bindings
 
-These are mappings of keys to commands. For example, you might bind the Ctrl+A
-key to move the cursor to the beginning of the line.
-
-bind \ct command_name
+These are mappings of keys to commands.
 
 | Key binding | Meaning                                |
 |-------------+----------------------------------------|
