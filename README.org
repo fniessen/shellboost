@@ -164,12 +164,82 @@ empty_trash() {
 
 These are mappings of keys to commands.
 
+- ~C-l~: clear the terminal screen.
+
+** Cursor movement
+
+- ~C-a~: Move cursor to the beginning of the line.
+- ~C-e~: Move cursor to the end of the line.
+- ~C-b~: Move cursor backward one character.
+- ~C-f~: Move cursor forward one character.
+- ~M-b~ or ~C-<left>~ or ~M-<left>~: Move cursor backward one word.
+- ~M-f~ or ~C-<right>~ or ~M-<right>~: Move cursor forward one word.
+
+** Command History and Search
+
+- ~<up>~: Navigate through command history.
+- ~C-r~: Initiate a reverse search through command history.
+- ~C-s~: Initiate a forward search through command history.
+- ~M-<up>~ (with input): Search command history for commands starting with the current input.
+- ~M-<down>~ (with input): Search command history for the next matching command.
+
+** Command Editing
+
+- ~C-d~: Delete the character under the cursor or exit the shell if the line is empty.
+- ~C-k~: Kill (cut) text from the cursor to the end of the line.
+- ~C-y~: Yank (paste) the previously killed text.
+- ~C-c~: Cancel the current command (and clear the command line).
+- ~M-e~: Open the current command line in your preferred text editor.
+- ~C-u~: Clear the line from the cursor to the beginning.
+
+** Case and Word Manipulation
+
+- ~M-c~: Capitalize the current word.
+- ~M-u~: Uppercase the current word.
+- ~M-l~: Lowercase the current word.
+- ~M-t~: Transpose (swap) the last two words.
+
+** Shell Utilities
+
+- ~M-w~: Show short description of a command.
+- ~M-d~: Show documentation for current command.
+- ~M-p~: Prepend 'sudo' to the current command.
+- ~M-.~: Insert the last argument of the previous command.
+- ~C-z~: Activate complete-and-search functionality.
+
+** Custom key bindings
+
+You can create custom key bindings.
+
+For example:
+
+Refresh command line
+
 | Key binding | Meaning                                |
 |-------------+----------------------------------------|
 | C-M-u       | Move to parent directory               |
 | M-s         | Prepend 'sudo ' to the current command |
+| M-S-l       | List directory contents                |
 
-** C-M-u: Move to parent directory
+*** ls
+
+For Bash:
+
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+# M-S-l: Send the string 'ls' followed by a newline.
+bind '"\eL": "ls\n"'
+#+end_src
+
+For Zsh:
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+# M-S-l: Execute the ls command directly.
+bindkey -x '"\eL": ls'
+# # M-S-l: Send the string 'ls' followed by a newline.
+# bindkey -s '\eL' 'ls\n'
+#+end_src
+
+*** C-M-u: Move to parent directory
 
 This configuration binds the ~C-M-u~ key combination to the ~up-directory~ function
 in both Bash and Zsh shells. The function changes the current directory to its
@@ -197,7 +267,7 @@ bindkey '\e\C-u' up-directory
 *Key note:* In Zsh, the *prompt* is refreshed to *reflect the new directory* after the
 change.
 
-** M-s: Prepend sudo
+*** M-s: Prepend sudo
 
 This configuration binds the ~M-s~ key combination to prepend ~sudo~ to the current
 command in both Bash and Zsh shells.
@@ -220,6 +290,189 @@ prepend-sudo() {
 zle -N prepend-sudo
 bindkey "\es" prepend-sudo
 #+end_src
+
+*** Copy the previous word
+
+For Bash:
+
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+# Function to copy the previous word.
+copy-prev-word() {
+    local words=($READLINE_LINE)
+    local cursor_position=$READLINE_POINT
+    local word_index=${#words[@]}
+
+    # Find the word before the cursor
+    for ((i=${#words[@]}-1; i>=0; i--)); do
+        if ((${#words[i]} + ${#words[i+1]} + 1 < cursor_position)); then
+            word_index=$i
+            break
+        fi
+        cursor_position=$((cursor_position - ${#words[i]} - 1))
+    done
+
+    # Insert the previous word at the cursor position
+    if ((word_index > 0)); then
+        READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${words[word_index-1]}${READLINE_LINE:READLINE_POINT}"
+        READLINE_POINT=$((READLINE_POINT + ${#words[word_index-1]}))
+    fi
+}
+
+# Bind the function to C-x C-d.
+bind -x '"\C-x\C-d":copy-prev-word'
+#+end_src
+
+For Zsh:
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+bindkey '^X^D' copy-prev-word
+# Instead of C-M-_.
+#+end_src
+
+*** Run help
+
+For Bash:
+
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+# Function to run help on the current command
+run-help() {
+    # Get the first word of the last command (i.e., the last command in the
+    # pipeline or sequence).
+    local cmd=$(printf "%s" "$READLINE_LINE" | awk -F'\\||;' '{print $NF}' | awk '{print $1}')
+
+    # Check if there's a command to process.
+    if [[ -n "$cmd" ]]; then
+        # Show the man page for the command (if it exists).
+        man "$cmd" 2>/dev/null || {
+            # If no man page, use the `whatis` command for a brief description.
+            whatis "$cmd" || printf "No help available for '%s'.\n" "$cmd"
+        }
+    else
+        printf "No command to show help for.\n"
+        return 1
+    fi
+}
+
+# Bind the function run-help to M-h.
+bind -x '"\eh": run-help'
+#+end_src
+
+For Zsh, use 'M-h'.
+
+** See all current key bindings
+
+: bind -P
+
+| Abort and Exit                      |
+| Line and Word Movement              |
+| History Navigation                  |
+| Editing                             |
+| Case and Word Manipulation          |
+| Command Completion                  |
+| Miscellaneous                       |
+| Bracketed Paste                     |
+| Character Deletion and Modification |
+| Keyboard Macros                     |
+| Character Search                    |
+| Display and Redraw                  |
+| Command and History Expansion       |
+| Line and Word Editing               |
+| Completion and Expansion            |
+| Other Commands                      |
+
+
+From Zsh, in table:
+| C-x ? | _complete_debug                         |
+| C-x a | _expand_alias                           |
+| C-x c | _correct_word (or _correct_filename ??) |
+| C-x d | _list_expansions                        |
+| C-x e | _expand_word                            |
+| C-x h | _complete_help                          |
+| C-x m | _most_recent_file                       |
+| M-a   | accept-and-hold                         |
+| M-g   | get-line                                |
+
+
+|                                       | Zsh function                        | Bash                                   |                                                                                                                                                  |
+|---------------------------------------+-------------------------------------+----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------|
+| M-w                                   | copy-region-as-kill                 |                                        |                                                                                                                                                  |
+| M-q                                   | push-line                           |                                        |                                                                                                                                                  |
+| M-h                                   | run-help                            |                                        |                                                                                                                                                  |
+| C-h, C-<backspace>                    | backward-delete-char                | backward-delete-char                   | Backward Delete Character                                                                                                                        |
+| M-\                                   |                                     | delete-horizontal-space                | Delete Horizontal Space                                                                                                                          |
+| C-x e                                 |                                     | call-last-kbd-macro                    | Call Last Keyboard Macro                                                                                                                         |
+| C-x (                                 |                                     | start-kbd-macro                        | Start Keyboard Macro                                                                                                                             |
+| C-x )                                 |                                     | end-kbd-macro                          | End Keyboard Macro                                                                                                                               |
+| C-]                                   |                                     | character-search                       | Character Search                                                                                                                                 |
+| C-M-]                                 |                                     | character-search-backward              | Character Search Backward                                                                                                                        |
+| C-l                                   | clear-screen                        |                                        |                                                                                                                                                  |
+| C-M-l                                 |                                     | clear-display                          | Clear Display                                                                                                                                    |
+| C-M-i                                 |                                     | dynamic-complete-history               | Dynamic Complete History                                                                                                                         |
+| M-^                                   |                                     | history-expand-line                    | History Expand Line                                                                                                                              |
+| C-x C-e                               |                                     | edit-and-execute-command               | Edit and Execute Command                                                                                                                         |
+| C-x C-x                               | exchange-point-and-mark             | exchange-point-and-mark                | Exchange Point and Mark                                                                                                                          |
+| C-M-r, M-r                            |                                     | revert-line                            | Revert Line                                                                                                                                      |
+| C-u                                   | kill-whole-line XXX                 | unix-line-discard                      | Unix Line Discard                                                                                                                                |
+| M-g                                   |                                     | glob-complete-word                     | Glob Complete Word                                                                                                                               |
+| C-x *                                 | expand-word                         | glob-expand-word                       | Glob Expand Word                                                                                                                                 |
+| C-x g                                 | list-expand                         | glob-list-expansions                   | Glob List Expansions                                                                                                                             |
+| M-*                                   |                                     | insert-completions                     | Insert Completions                                                                                                                               |
+| C-x !                                 |                                     | possible-command-completions           | Possible Command Completions                                                                                                                     |
+| C-o                                   |                                     | operate-and-get-next                   | Operate and Get Next                                                                                                                             |
+| M-&                                   |                                     | tilde-expand                           | Tilde Expand                                                                                                                                     |
+| C-M-y                                 |                                     | yank-nth-arg                           | Yank Nth Argument                                                                                                                                |
+| C-g                                   | send-break                          | abort                                  | Abort                                                                                                                                            |
+| C-a                                   | beginning-of-line                   | beginning-of-line                      | Move to Beginning of Line                                                                                                                        |
+| C-e                                   | end-of-line                         | end-of-line                            | Move to End of Line                                                                                                                              |
+| C-b                                   | backward-char                       | backward-char                          | Backward Character                                                                                                                               |
+| C-f                                   | forward-char                        | forward-char                           | Forward Character                                                                                                                                |
+| M-b                                   | backward-word                       | backward-word, shell-backward-word     | Backward Word                                                                                                                                    |
+| M-f                                   | forward-word                        | forward-word, shell-forward-word       | Forward Word                                                                                                                                     |
+| M-<                                   | beginning-of-buffer-or-history      | beginning-of-history                   | Beginning of History                                                                                                                             |
+| M->                                   | end-of-buffer-or-history            | end-of-history                         | End of History                                                                                                                                   |
+| C-p                                   | up-line-or-history                  | previous-history                       | Previous History                                                                                                                                 |
+| <up>                                  | up-line-or-history                  |                                        | Previous History                                                                                                                                 |
+| C-n                                   | down-line-or-history                | next-history                           | Next History                                                                                                                                     |
+| <down>                                | down-line-or-history                |                                        | Next History                                                                                                                                     |
+| C-r                                   | history-incremental-search-backward | reverse-search-history                 | Reverse Search History                                                                                                                           |
+| C-s                                   | history-incremental-search-forward  | forward-search-history                 | Forward Search History                                                                                                                           |
+| M-p                                   | history-search-backward             | non-incremental-reverse-search-history | Non-Incremental Reverse Search                                                                                                                   |
+| M-n                                   | history-search-forward              | non-incremental-forward-search-history | Non-Incremental Forward Search                                                                                                                   |
+| M-[A                                  |                                     | history-search-backward                | History Search Backward                                                                                                                          |
+| M-[B                                  |                                     | history-search-forward                 | History Search Forward                                                                                                                           |
+| C-d                                   | delete-char-or-list                 | delete-char                            | Delete Character Under Cursor                                                                                                                    |
+| C-k                                   | kill-line                           | kill-line                              | Kill Line                                                                                                                                        |
+| M-d                                   | kill-word                           | kill-word                              | Kill Word                                                                                                                                        |
+| C-M-h, C-M-<backspace>, M-<backspace> | backward-kill-word                  | backward-kill-word                     | Backward Kill Word                                                                                                                               |
+| C-w                                   | backward-kill-word                  | unix-word-rubout                       | Unix Word Rubout                                                                                                                                 |
+| C-t                                   | transpose-chars                     | transpose-chars                        | Transpose Characters                                                                                                                             |
+| M-t                                   | transpose-words                     | transpose-words                        | Transpose Words                                                                                                                                  |
+| C-_ (or C-x C-u)                      | undo                                | undo                                   | Undo                                                                                                                                             |
+| C-y                                   | yank                                | yank                                   | Yank (Paste)                                                                                                                                     |
+| M-., M-_                              | insert-last-word                    | yank-last-arg, insert-last-argument    | Yank (Insert) Last Argument                                                                                                                      |
+| M-y                                   | yank-pop                            | yank-pop                               | Yank Pop                                                                                                                                         |
+| M-c                                   | capitalize-word                     | capitalize-word                        | Capitalize Word                                                                                                                                  |
+| M-u                                   | up-case-word                        | upcase-word                            | Uppercase Word                                                                                                                                   |
+| M-l                                   | down-case-word                      | downcase-word                          | Lowercase Word                                                                                                                                   |
+| C-i                                   | complete-word                       | complete                               | Complete `external command', `builtin command', `shell function', `alias', `suffix alias', `reserved word', `job', `parameter', or `corrections' |
+| M-!                                   |                                     | complete-command                       | Complete Command                                                                                                                                 |
+| M-! (after typing !!)                 | expand-history                      |                                        |                                                                                                                                                  |
+| M-/                                   |                                     | complete-filename                      | Complete Filename                                                                                                                                |
+| M-@                                   |                                     | complete-hostname                      | Complete Hostname                                                                                                                                |
+| M-$                                   |                                     | complete-variable                      | Complete Variable                                                                                                                                |
+| M-{                                   |                                     | complete-into-braces                   | Complete into Braces                                                                                                                             |
+| M-?                                   | which-command XXX                   | possible-completions                   | Possible Completions                                                                                                                             |
+| C-x /                                 |                                     | possible-filename-completions          | Possible Filename Completions                                                                                                                    |
+| C-x @                                 |                                     | possible-hostname-completions          | Possible Hostname Completions                                                                                                                    |
+| C-x ~                                 |                                     | possible-username-completions          | Possible Username Completions                                                                                                                    |
+| C-x $                                 |                                     | possible-variable-completions          | Possible Variable Completions                                                                                                                    |
+| M-#                                   |                                     | insert-comment                         | Insert Comment                                                                                                                                   |
+| C-q                                   | quoted-insert                       | quoted-insert                          | Quoted Insert                                                                                                                                    |
+| C-x C-v                               |                                     | display-shell-version                  | Display Shell Version                                                                                                                            |
+| C-M-e                                 |                                     | shell-expand-line                      | Shell Expand Line                                                                                                                                |
+| C-@                                   | set-mark-command                    | set-mark                               | Set Mark                                                                                                                                         |
+
+: bindkey
 
 * 6. Prompt configuration
 
@@ -260,7 +513,8 @@ ${debian_chroot:+($debian_chroot)}\
 \[\033[01;30m\]:\[\033[00m\]\
 \[\033[01;34m\]\w\[\033[00m\]\
 \[\033[01;33m\]$(__git_ps1)\
-\[\033[0m\]\n\$ '
+\[\033[0m\]\n\
+\[\033[1m\]\$ \[\033[0m\]'
 
 __git_ps1() {
     local git_info
