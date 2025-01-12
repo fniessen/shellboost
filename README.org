@@ -79,58 +79,6 @@ alias lsd='ls -d */'
 alias l='ls -CF'
 #+end_src
 
-** Command history search
-
-Search the command history for a specified term, ignoring case sensitivity.
-
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
-# Alias 'hgrep' to search command history with case-insensitive grep.
-alias hgrep='history | grep -i'
-#+end_src
-
-** Ripgrep enhancements
-
-If the ~rg~ (Ripgrep) command is available, several customizations and aliases are
-provided to enhance its functionality:
-
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
-# Check if 'rg' command is available.
-if command -v rg > /dev/null 2>&1; then
-#+end_src
-
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
-    # Define a function 'rgc' to always include the '-C 1' option for context
-    # lines.
-    rgc() {
-        rg -C 1 "$@" | sed '/'"$@"'/! s/^.*$/\x1b[90m&\x1b[0m/; s/\('"$@"'\)/\x1b[1;31m\1\x1b[0m/g'
-    }
-#+end_src
-
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
-    alias rg='rg --hidden'
-#+end_src
-
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
-    # Alias 'rgno' to 'rg -l' for listing filenames with matches.
-    alias rgno='rg -l'
-#+end_src
-
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
-    # Define a function 'rgext' for a case-insensitive search within files
-    # matching a specific extension.
-    rgext() {
-        if [[ $# -ne 2 ]]; then
-            printf "Usage: rgext EXTENSION PATTERN\n"
-            return 2
-        fi
-        rg --glob "*.$1" -i -C 1 "$2"
-    }
-#+end_src
-
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
-fi
-#+end_src
-
 ** Changing working directory
 
 *** Navigating up levels
@@ -195,6 +143,58 @@ if [[ "$WSL_DISTRO_NAME" ]]; then
     # Aliases for opening files or URLs with Windows default applications.
     alias open='explorer.exe'
     alias xdg-open='explorer.exe'
+fi
+#+end_src
+
+** Command history search
+
+Search the command history for a specified term, ignoring case sensitivity.
+
+#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+# Alias 'hgrep' to search command history with case-insensitive grep.
+alias hgrep='history | grep -i'
+#+end_src
+
+** Ripgrep enhancements
+
+If the ~rg~ (Ripgrep) command is available, several customizations and aliases are
+provided to enhance its functionality:
+
+#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+# Check if 'rg' command is available.
+if command -v rg > /dev/null 2>&1; then
+#+end_src
+
+#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+    # Define a function 'rgc' to always include the '-C 1' option for context
+    # lines.
+    rgc() {
+        rg -C 1 "$@" | sed '/'"$@"'/! s/^.*$/\x1b[90m&\x1b[0m/; s/\('"$@"'\)/\x1b[1;31m\1\x1b[0m/g'
+    }
+#+end_src
+
+#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+    alias rg='rg --hidden'
+#+end_src
+
+#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+    # Alias 'rgno' to 'rg -l' for listing filenames with matches.
+    alias rgno='rg -l'
+#+end_src
+
+#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+    # Define a function 'rgext' for a case-insensitive search within files
+    # matching a specific extension.
+    rgext() {
+        if [[ $# -ne 2 ]]; then
+            printf "Usage: rgext EXTENSION PATTERN\n"
+            return 2
+        fi
+        rg --glob "*.$1" -i -C 1 "$2"
+    }
+#+end_src
+
+#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
 fi
 #+end_src
 
