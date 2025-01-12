@@ -101,13 +101,31 @@ fi
 #+begin_src shell
 alias lsd='ls -d */'
 alias l='ls -CF'
+#+end_src
+
+** Changing working directory
+
+#+begin_src shell
+# Define aliases for changing directory up levels.
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 
+# Define an alias for changing to the previous directory.
 alias -- -='cd -'
+#+end_src
 
-alias d='dirs -v'
+#+begin_src shell
+# Print the current directory stack (list directory history).
+alias d='dirs -v | head -n 10'
+#+end_src
+
+Normally, you can use ~cd -1~ to go to the *previous directory* in the stack, and so
+on. Here, this even more straightforward; you can use just the number of the
+entry in the *directory history* you want to visit: ~1~.
+
+#+begin_src shell
+# Define aliases for changing to recently used directories.
 alias 1='cd -1'
 alias 2='cd -2'
 alias 3='cd -3'
@@ -117,6 +135,27 @@ alias 6='cd -6'
 alias 7='cd -7'
 alias 8='cd -8'
 alias 9='cd -9'
+#+end_src
+
+#+begin_src shell
+# Check if the script is running in WSL (Windows Subsystem for Linux).
+if [[ "$WSL_DISTRO_NAME" ]]; then
+    # Aliases for quick access to Windows drives.
+    alias c:='cd /mnt/c'
+    alias d:='cd /mnt/d'
+fi
+#+end_src
+
+#+begin_src shell
+# Check if the script is running in WSL (Windows Subsystem for Linux).
+if [[ "$WSL_DISTRO_NAME" ]]; then
+    # Alias for opening the Windows File Explorer.
+    alias explorer='explorer.exe'
+
+    # Aliases for opening files or URLs using Windows default applications.
+    alias open='explorer.exe'
+    alias xdg-open='explorer.exe'
+fi
 #+end_src
 
 * 4. Functions
@@ -257,8 +296,7 @@ For Zsh:
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
 # C-M-u: Move to parent directory.
 up-directory() {
-  cd ..
-  zle reset-prompt
+  cd .. && zle reset-prompt
 }
 zle -N up-directory
 bindkey '\e\C-u' up-directory
