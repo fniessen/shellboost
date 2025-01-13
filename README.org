@@ -51,20 +51,20 @@ commands in your shell:
 
   #+begin_src shell :tangle no
   # Load common settings.
-  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-common-settings-shell-leuven-new | bash -
+  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/refs/heads/master/bin/rc-common-settings-shell-leuven-new | bash -
 
   # Load Bash-specific settings.
-  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-bash-specific-settings-shell-leuven-new | bash -
+  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/refs/heads/master/bin/rc-bash-specific-settings-shell-leuven-new | bash -
   #+end_src
 
 - *For Zsh users*
 
   #+begin_src shell :tangle no
   # Load common settings.
-  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-common-settings-shell-leuven-new | zsh -
+  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/refs/heads/master/bin/rc-common-settings-shell-leuven-new | zsh -
 
   # Load Zsh-specific settings.
-  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-zsh-specific-settings-shell-leuven-new | zsh -
+  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/refs/heads/master/bin/rc-zsh-specific-settings-shell-leuven-new | zsh -
   #+end_src
 
 These commands will download and execute the configuration files directly in
@@ -78,7 +78,7 @@ following:
 
 1. Clone the repository:
 
-   #+begin_src shell
+   #+begin_src shell :tangle no
    git clone git@github.com:fniessen/shell-leuven-new.git
    #+end_src
 
@@ -88,7 +88,7 @@ following:
 
      Add the following lines to your =.bashrc=:
 
-     #+begin_src shell
+     #+begin_src shell :tangle no
      source /PATH/TO/shell-leuven-new/bin/rc-common-settings-shell-leuven-new
      source /PATH/TO/shell-leuven-new/bin/rc-bash-specific-settings-shell-leuven-new  # For Bash.
      #+end_src
@@ -97,14 +97,14 @@ following:
 
      Add the following lines to your =.zshrc=:
 
-     #+begin_src shell
+     #+begin_src shell :tangle no
      source /PATH/TO/shell-leuven-new/bin/rc-common-settings-shell-leuven-new
      source /PATH/TO/shell-leuven-new/bin/rc-zsh-specific-settings-shell-leuven-new   # For Zsh.
      #+end_src
 
 3. Reload your shell:
 
-   #+begin_src shell
+   #+begin_src shell :tangle no
    source ~/.bashrc  # For Bash.
    # OR
    source ~/.zshrc  # For Zsh.
@@ -413,10 +413,8 @@ bind '"\eL": "ls\n"'
 For Zsh:
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
-# M-S-l: Execute the ls command directly.
-bindkey -x '"\eL": ls'
-# # M-S-l: Send the string 'ls' followed by a newline.
-# bindkey -s '\eL' 'ls\n'
+# M-S-l: Send the string 'ls' followed by a newline.
+bindkey -s '\eL' 'ls\n'
 #+end_src
 
 *** C-M-u: Move to parent directory

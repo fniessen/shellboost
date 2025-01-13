@@ -1,7 +1,5 @@
-# M-S-l: Execute the ls command directly.
-bindkey -x '"\eL": ls'
-# # M-S-l: Send the string 'ls' followed by a newline.
-# bindkey -s '\eL' 'ls\n'
+# M-S-l: Send the string 'ls' followed by a newline.
+bindkey -s '\eL' 'ls\n'
 
 # C-M-u: Move to parent directory.
 up-directory() {
