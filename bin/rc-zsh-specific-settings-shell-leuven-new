@@ -18,3 +18,27 @@ bindkey "\es" prepend-sudo
 
 bindkey '^X^D' copy-prev-word
 # Instead of C-M-_.
+
+# Set a common history file.
+HISTFILE=$HOME/.zsh_history
+
+# Set the number of history entries to save to the (on-disk history)
+# file.
+SAVEHIST=20000
+
+# Share history between all running sessions.
+setopt SHARE_HISTORY
+
+# Append commands to the history file incrementally, instead of
+# overwriting the history file when the shell exits.
+setopt INC_APPEND_HISTORY
+
+# Append to the history file instead of overwriting it.
+setopt APPEND_HISTORY
+
+setopt HIST_IGNORE_SPACE
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_EXPIRE_DUPS_FIRST
+
+# Show full command history without line numbers.
+alias history="history 0"

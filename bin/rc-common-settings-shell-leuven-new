@@ -1,7 +1,69 @@
 #!/usr/bin/env bash
 
+if [ -r ~/.dircolors ]; then
+    eval "$(dircolors ~/.dircolors)"
+fi
+
 # Configure the time format for `ls` to display dates as "YYYY-MM-DD Day HH:MM".
 export TIME_STYLE=+"%Y-%m-%d %a %H:%M"
+
+# Add ~/bin to PATH if not already present.
+if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
+    export PATH="$HOME/bin:$PATH"
+fi
+
+# Add ~/winbin to PATH if not already present.
+if [[ ":$PATH:" != *":$HOME/winbin:"* ]]; then
+    export PATH="$HOME/winbin:$PATH"
+fi
+
+# Run ll to view detailed information about the contents of the current directory.
+alias ll='ls -l'
+
+# List only directories in the current directory.
+alias lsd='ls -d */'
+
+# List files and directories in a columnar format with type indicators.
+alias l='ls -CF'
+
+# Define aliases for changing directory up levels.
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Define an alias for changing to the previous directory.
+alias -- -='cd -'
+
+# Display the current directory stack with indices.
+alias d='dirs -v | head -n 10'  # Show the top 10 entries in the stack.
+
+# Define aliases for switching to specific stack entries.
+alias 1='cd -1'  # Move to the most recent directory.
+alias 2='cd -2'  # Move to the second most recent directory.
+alias 3='cd -3'
+alias 4='cd -4'
+alias 5='cd -5'
+alias 6='cd -6'
+alias 7='cd -7'
+alias 8='cd -8'
+alias 9='cd -9'
+
+# Check if the script is running in WSL.
+if [[ "$WSL_DISTRO_NAME" ]]; then
+    # Aliases for quick access to Windows drives.
+    alias c:='cd /mnt/c'
+    alias d:='cd /mnt/d'
+fi
+
+# Check if the script is running in WSL.
+if [[ "$WSL_DISTRO_NAME" ]]; then
+    # Alias for opening Windows File Explorer.
+    alias explorer='explorer.exe'
+
+    # Aliases for opening files or URLs with Windows default applications.
+    alias open='explorer.exe'
+    alias xdg-open='explorer.exe'
+fi
 
 # Alias 'hgrep' to search command history with case-insensitive grep.
 alias hgrep='history | grep -i'
@@ -31,3 +93,18 @@ if command -v rg > /dev/null 2>&1; then
     }
 
 fi
+
+# Configure HISTCONTROL to ignore both leading space and consecutive duplicates.
+export HISTCONTROL=ignoreboth
+# === default in Ubuntu
+
+# Set the number of commands to remember in the in-memory history.
+export HISTSIZE=10000
+
+# Set the history timestamp format to ISO8601 (yyyy-mm-dd hh:mm).
+export HISTTIMEFORMAT="%Y-%m-%d %H:%M  "
+
+# Exclude common navigation and administrative commands from history.
+export HISTIGNORE="ls:cd:pwd:clear:history:exit:top:df"
+
+export GREP_COLORS='ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32'

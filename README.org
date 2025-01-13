@@ -1,6 +1,6 @@
 #+TITLE: Leuven shell configuration files
 
-#+PROPERTY:  header-args :tangle bin/rc-bash-specific-settings-shell-leuven-new
+#+PROPERTY:  header-args :tangle bin/rc-common-settings-shell-leuven-new
 
 #+begin_src shell
 #!/usr/bin/env bash
@@ -134,9 +134,7 @@ color mappings and assigns the output to the ~LS_COLORS~ variable.
 The ~TIME_STYLE~ environment variable customizes the display of dates and times in
 the output of the ~ls~ command. For instance:
 
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
-#!/usr/bin/env bash
-
+#+begin_src shell
 # Configure the time format for `ls` to display dates as "YYYY-MM-DD Day HH:MM".
 export TIME_STYLE=+"%Y-%m-%d %a %H:%M"
 #+end_src
@@ -154,12 +152,12 @@ executable files.
 #+begin_src shell
 # Add ~/bin to PATH if not already present.
 if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
-    export PATH="$HOME/bin:$PATH";
+    export PATH="$HOME/bin:$PATH"
 fi
 
 # Add ~/winbin to PATH if not already present.
 if [[ ":$PATH:" != *":$HOME/winbin:"* ]]; then
-    export PATH="$HOME/winbin:$PATH";
+    export PATH="$HOME/winbin:$PATH"
 fi
 #+end_src
 
@@ -256,7 +254,7 @@ fi
 
 Search the command history for a specified term, ignoring case sensitivity.
 
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+#+begin_src shell
 # Alias 'hgrep' to search command history with case-insensitive grep.
 alias hgrep='history | grep -i'
 #+end_src
@@ -266,12 +264,12 @@ alias hgrep='history | grep -i'
 If the ~rg~ (Ripgrep) command is available, several customizations and aliases are
 provided to enhance its functionality:
 
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+#+begin_src shell
 # Check if 'rg' command is available.
 if command -v rg > /dev/null 2>&1; then
 #+end_src
 
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+#+begin_src shell
     # Define a function 'rgc' to always include the '-C 1' option for context
     # lines.
     rgc() {
@@ -279,16 +277,16 @@ if command -v rg > /dev/null 2>&1; then
     }
 #+end_src
 
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+#+begin_src shell
     alias rg='rg --hidden'
 #+end_src
 
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+#+begin_src shell
     # Alias 'rgno' to 'rg -l' for listing filenames with matches.
     alias rgno='rg -l'
 #+end_src
 
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+#+begin_src shell
     # Define a function 'rgext' for a case-insensitive search within files
     # matching a specific extension.
     rgext() {
@@ -300,7 +298,7 @@ if command -v rg > /dev/null 2>&1; then
     }
 #+end_src
 
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+#+begin_src shell
 fi
 #+end_src
 
@@ -656,7 +654,7 @@ From Zsh, in table:
 This is the configuration of the terminal prompt. This includes things like the
 colors, the text that is displayed, and the layout of the prompt.
 
-#+begin_src shell
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
 # Customize PS1 prompt.
 
 # Define a custom function to display the exit code in red if it's non-zero.
@@ -801,7 +799,7 @@ set -g fish_color_match yellow
 
 ** Common settings
 
-#+begin_src shell
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
 # Check if history search bindings are already set.
 if ! bind -q history-search-backward &>/dev/null; then
     # If not set, configure Up and Down arrow keys for history search.
@@ -812,20 +810,26 @@ if ! bind -q history-search-backward &>/dev/null; then
                                         # Down arrow: Search forward in command
                                         # history.
 fi
+#+end_src
 
+#+begin_src shell
 # Configure HISTCONTROL to ignore both leading space and consecutive duplicates.
 export HISTCONTROL=ignoreboth
 # === default in Ubuntu
+#+end_src
 
 
 
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
 # Enable case-insensitive directory completion.
 bind "set completion-ignore-case on"
 bind "set show-all-if-ambiguous on"
+#+end_src
 
 
 
 
+#+begin_src shell
 # Set the number of commands to remember in the in-memory history.
 export HISTSIZE=10000
 
@@ -834,59 +838,57 @@ export HISTTIMEFORMAT="%Y-%m-%d %H:%M  "
 
 # Exclude common navigation and administrative commands from history.
 export HISTIGNORE="ls:cd:pwd:clear:history:exit:top:df"
+#+end_src
 
-# Detect the current shell.
-case "$SHELL" in
-    */bash)
-        # Set a common history file.
-        HISTFILE=$HOME/.bash_history
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+# Set a common history file.
+HISTFILE=$HOME/.bash_history
 
-        # Set the number of history entries to save to the (on-disk history)
-        # file.
-        export HISTFILESIZE=20000
+# Set the number of history entries to save to the (on-disk history)
+# file.
+export HISTFILESIZE=20000
 
-        # Append to the history file instead of overwriting it.
-        shopt -s histappend
+# Append to the history file instead of overwriting it.
+shopt -s histappend
 
-        # Add history management to the existing PROMPT_COMMAND: after each
-        # command, append to the history file and reload it.
-        if [ -n "$PROMPT_COMMAND" ]; then
-            PROMPT_COMMAND="$PROMPT_COMMAND; history -a; history -n"
-        else
-            PROMPT_COMMAND="history -a; history -n"
-        fi
-        ;;
-    */zsh)
-        # Set a common history file.
-        HISTFILE=$HOME/.zsh_history
+# Add history management to the existing PROMPT_COMMAND: after each
+# command, append to the history file and reload it.
+if [ -n "$PROMPT_COMMAND" ]; then
+    PROMPT_COMMAND="$PROMPT_COMMAND; history -a; history -n"
+else
+    PROMPT_COMMAND="history -a; history -n"
+fi
+#+end_src
 
-        # Set the number of history entries to save to the (on-disk history)
-        # file.
-        SAVEHIST=20000
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+# Set a common history file.
+HISTFILE=$HOME/.zsh_history
 
-        # Share history between all running sessions.
-        setopt SHARE_HISTORY
+# Set the number of history entries to save to the (on-disk history)
+# file.
+SAVEHIST=20000
 
-        # Append commands to the history file incrementally, instead of
-        # overwriting the history file when the shell exits.
-        setopt INC_APPEND_HISTORY
+# Share history between all running sessions.
+setopt SHARE_HISTORY
 
-        # Append to the history file instead of overwriting it.
-        setopt APPEND_HISTORY
+# Append commands to the history file incrementally, instead of
+# overwriting the history file when the shell exits.
+setopt INC_APPEND_HISTORY
 
-        setopt HIST_IGNORE_SPACE
-        setopt HIST_SAVE_NO_DUPS
-        setopt HIST_EXPIRE_DUPS_FIRST
+# Append to the history file instead of overwriting it.
+setopt APPEND_HISTORY
 
-        # Show full command history without line numbers.
-        alias history="history 0"
-        ;;
-esac
+setopt HIST_IGNORE_SPACE
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_EXPIRE_DUPS_FIRST
+
+# Show full command history without line numbers.
+alias history="history 0"
 #+end_src
 
 
 
-#+begin_src shell
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
 # autopushd() {
 #     if [[ -n "$BASH_VERSION" ]]; then
 #         # For Bash.
