@@ -47,25 +47,25 @@ you'll find:
 You can try Shell-leuven-new without installing it by running the following
 commands in your shell:
 
-*** For Bash users
+- *For Bash users*
 
-#+begin_src shell :tangle no
-# Load common settings.
-curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-common-settings-shell-leuven-new | bash
+  #+begin_src shell :tangle no
+  # Load common settings.
+  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-common-settings-shell-leuven-new | bash -
 
-# Load Bash-specific settings.
-curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-bash-specific-settings-shell-leuven-new | bash
-#+end_src
+  # Load Bash-specific settings.
+  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-bash-specific-settings-shell-leuven-new | bash -
+  #+end_src
 
-*** For Zsh users
+- *For Zsh users*
 
-#+begin_src shell :tangle no
-# Load common settings.
-curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-common-settings-shell-leuven-new | zsh
+  #+begin_src shell :tangle no
+  # Load common settings.
+  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-common-settings-shell-leuven-new | zsh -
 
-# Load Zsh-specific settings.
-curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-zsh-specific-settings-shell-leuven-new | zsh
-#+end_src
+  # Load Zsh-specific settings.
+  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-zsh-specific-settings-shell-leuven-new | zsh -
+  #+end_src
 
 These commands will download and execute the configuration files directly in
 your current shell session, enabling you to explore Shell-leuven-new's features
