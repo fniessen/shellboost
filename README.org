@@ -2,8 +2,15 @@
 
 #+PROPERTY:  header-args :tangle bin/rc-common-settings-shell-leuven-new
 
-#+begin_src shell
-#!/usr/bin/env bash
+#+name: current-time
+#+begin_src emacs-lisp :eval yes :results silent :tangle no
+(format-time-string "<%Y%m%d.%H%M>")
+#+end_src
+
+#+begin_src shell :noweb yes
+#!/usr/bin/env sh
+
+# Last modified on: <<current-time()>>.
 #+end_src
 
 Welcome to the *Leuven shell configuration files* project!  This repository is
@@ -114,6 +121,18 @@ following:
 
 These are variables that are accessible to all parts of the shell
 environment.
+
+#+begin_src shell :noweb yes :tangle bin/rc-bash-specific-settings-shell-leuven-new
+#!/usr/bin/env bash
+
+# Last modified on: <<current-time()>>.
+#+end_src
+
+#+begin_src shell :noweb yes :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#!/usr/bin/env zsh
+
+# Last modified on: <<current-time()>>.
+#+end_src
 
 ** Configuring colors for 'ls'
 
@@ -788,10 +807,8 @@ presses and file system changes.
 This is a catch-all category for settings that don't fit into any of the other
 categories.
 
-set -g fish_color_autosuggestion brblack
-set -g fish_color_match yellow
-
-* Additional custom configurations or settings
+# set -g fish_color_autosuggestion brblack
+# set -g fish_color_match yellow
 
 ** Common settings
 

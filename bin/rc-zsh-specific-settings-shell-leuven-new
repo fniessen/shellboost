@@ -1,3 +1,7 @@
+#!/usr/bin/env zsh
+
+# Last modified on: <20250113.1130>.
+
 # M-S-l: Send the string 'ls' followed by a newline.
 bindkey -s '\eL' 'ls\n'
 
