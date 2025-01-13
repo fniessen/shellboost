@@ -6,6 +6,110 @@
 #!/usr/bin/env bash
 #+end_src
 
+Welcome to the *Leuven shell configuration files* project!  This repository is
+your go-to solution for streamlining and enhancing your terminal
+experience. Whether you're a developer, sysadmin, or enthusiast, this
+configuration provides a well-organized, modular, and efficient way to customize
+your shell environment.
+
+* What's inside?
+
+This project includes a comprehensive set of configuration files and scripts
+designed to optimize your *Bash* or *Zsh* shell. Here's a quick overview of what
+you'll find:
+
+- *Environment variables:* Define global variables for seamless shell behavior.
+- *Paths:* Configure system paths to access your tools effortlessly.
+- *Aliases:* Simplify commands with powerful shortcuts.
+- *Functions:* Extend shell functionality with reusable scripts.
+- *Key bindings:* Speed up workflows with custom key mappings.
+- *Prompt configuration:* Personalize your shell prompt with style and utility.
+- *Autosuggestions:* Type less with intelligent command predictions.
+- *Completions:* Enjoy enhanced tab completions for efficiency.
+- *Universal variables:* Set shared variables across sessions and systems.
+- *Abbreviations:* Save time with shorthand command expansions.
+- *Event handling:* Automate responses to shell events for smarter scripting.
+- *Miscellaneous settings:* Additional tweaks and optimizations.
+
+* Why use Leuven shell configurations?
+
+- *Highly modular:* Each feature is encapsulated, making it easy to modify or
+  extend.
+- *Cross-compatible:* Works seamlessly with both *Bash* and *Zsh*.
+- *Optimized for productivity:* Every setting is curated to save time and reduce
+  friction.
+- *Customizable:* Add or tweak configurations to fit your unique needs.
+
+* Getting started
+
+** Try online
+
+You can try Shell-leuven-new without installing it by running the following
+commands in your shell:
+
+*** For Bash users
+
+#+begin_src shell :tangle no
+# Load common settings.
+curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-common-settings-shell-leuven-new | bash
+
+# Load Bash-specific settings.
+curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-bash-specific-settings-shell-leuven-new | bash
+#+end_src
+
+*** For Zsh users
+
+#+begin_src shell :tangle no
+# Load common settings.
+curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-common-settings-shell-leuven-new | zsh
+
+# Load Zsh-specific settings.
+curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/master/rc-zsh-specific-settings-shell-leuven-new | zsh
+#+end_src
+
+These commands will download and execute the configuration files directly in
+your current shell session, enabling you to explore Shell-leuven-new's features
+right away.
+
+** Automating custom configuration
+
+To automatically source custom settings files on shell startup, do the
+following:
+
+1. Clone the repository:
+
+   #+begin_src shell
+   git clone git@github.com:fniessen/shell-leuven-new.git
+   #+end_src
+
+2. Integrate configurations with your shell:
+
+   - *For Bash users*
+
+     Add the following lines to your =.bashrc=:
+
+     #+begin_src shell
+     source /PATH/TO/shell-leuven-new/bin/rc-common-settings-shell-leuven-new
+     source /PATH/TO/shell-leuven-new/bin/rc-bash-specific-settings-shell-leuven-new  # For Bash.
+     #+end_src
+
+   - *For Zsh users*
+
+     Add the following lines to your =.zshrc=:
+
+     #+begin_src shell
+     source /PATH/TO/shell-leuven-new/bin/rc-common-settings-shell-leuven-new
+     source /PATH/TO/shell-leuven-new/bin/rc-zsh-specific-settings-shell-leuven-new   # For Zsh.
+     #+end_src
+
+3. Reload your shell:
+
+   #+begin_src shell
+   source ~/.bashrc  # For Bash.
+   # OR
+   source ~/.zshrc  # For Zsh.
+   #+end_src
+
 * 1. Environment variables
 
 These are variables that are accessible to all parts of the shell
@@ -816,35 +920,62 @@ esac
 export GREP_COLORS='ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32'
 #+end_src
 
-* Adding custom configuration to .bashrc or .zshrc
+* Contribute to Shell-leuven-new
 
-To automatically source custom settings files every time you start a new
-terminal session, you can add the following code snippet to your =.bashrc= or
-=.zshrc= file. This script will look for files matching specific patterns in your
-=~/bin/= directory and source them if they exist.
+Your support and contributions help make *Shell-leuven-new* even better!  Whether
+it's reporting issues, submitting patches, or simply showing your appreciation,
+every bit counts. Here's how you can get involved:
 
-** For Bash users
+** 🚩 Report issues
 
-#+begin_src shell :tangle no
-# Source custom settings files (beginning with 'rc-bash' or 'rc-common') from
-# ~/bin.
-for file in ~/bin/rc-bash-specific-settings-* ~/bin/rc-common-settings-*; do
-    if [[ -f "$file" ]]; then
-        printf "Sourcing %s...\n" "$file"
-        source "$file"
-    fi
-done
-#+end_src
+Found a bug?  [[https://github.com/fniessen/shell-leuven-new/issues/new][Let us know!]]
 
-** For Zsh users
+** 🛠️ Submit patches
 
-#+begin_src shell :tangle no
-# Source custom settings files (beginning with 'rc-zsh' or 'rc-common') from
-# ~/bin.
-for file in ~/bin/rc-zsh-specific-settings-* ~/bin/rc-common-settings-*; do
-    if [[ -f "$file" ]]; then
-        printf "Sourcing %s...\n" "$file"
-        source "$file"
-    fi
-done
-#+end_src
+Have ideas for improvement?  We'd love to see them!
+
+Contributions are always welcome, and patches -- big or small -- are highly
+appreciated.
+
+- Fork the repository
+- Make your changes
+- Submit a pull request
+
+We can't wait to see your contributions! 💡
+
+** ❤️ Support with donations
+
+If *Shell-leuven-new* has made your life easier or more enjoyable, consider
+supporting its development:
+
+👉 [[https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VCVAS6KPDQ4JC&lc=BE&item_number=shell%2dleuven%2dnew&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted][Donate via PayPal]]
+
+Your donation helps keep this project alive and growing!
+
+Thank you for your support! 🙌
+
+* License
+
+Copyright (C) 2013-2025 Fabrice Niessen. All rights reserved.
+
+Author: Fabrice Niessen \\
+Keywords: shell bash zsh
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program. If not, see http://www.gnu.org/licenses/.
+
+#+html: <a href="http://opensource.org/licenses/GPL-3.0">
+#+html:   <img src="http://img.shields.io/:license-gpl-blue.svg" alt=":license-gpl-blue.svg" />
+#+html: </a>
+#+html: <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VCVAS6KPDQ4JC&lc=BE&item_number=shell%2dleuven%2dnew&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted">
+#+html:   <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" alt="btn_donate_LG.gif" />
+#+html: </a>
