@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Last modified on: <20250113.1130>.
+# Last modified: <20250120.1108>
 
 if [ -r ~/.dircolors ]; then
     eval "$(dircolors ~/.dircolors)"
