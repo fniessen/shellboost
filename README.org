@@ -182,7 +182,10 @@ fi
 
 * 3. Aliases
 
-These are shortened names for commands.
+These are abbreviated commands designed for quicker execution.
+
+This setup aims to enhance efficiency by offering intuitive shortcuts for
+frequently used shell operations.
 
 ** Listing directories and files
 
@@ -319,6 +322,130 @@ if command -v rg > /dev/null 2>&1; then
 
 #+begin_src shell
 fi
+#+end_src
+
+** Global aliases for Zsh
+
+Below is a collection of global aliases designed for Zsh. These aliases expand
+regardless of their position in a command, streamlining command-line workflows.
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+alias -g 21="2>&1"                      # Redirect stderr to stdout.
+alias -g A='| awk'                      # Pipe output to awk.
+alias -g BG='& exit'                    # Send process to background and exit shell.
+alias -g CA="| cat -A"                  # Display line endings and tab characters (cat -A).
+alias -g F='| fmt -'                    # Format output to fit within a specific width.
+alias -g G='| grep --color=auto -E'     # Grep with color highlighting and extended regex.
+alias -g H='| head'                     # Pipe to head.
+alias -g J='| jq -C .'                  # Pretty-print JSON with jq, maintaining colors.
+alias -g L="| less"                     # Pipe to less for paginated viewing.
+alias -g N='> /dev/null'                # Redirect output to null (discard).
+alias -g NN='> /dev/null 2>&1'          # Redirect both stdout and stderr to null.
+alias -g S='| sort'                     # Sort output.
+alias -g T='| tail'                     # Pipe to tail.
+alias -g U='| uniq'                     # Filter unique lines from output.
+alias -g W='| wc -l'                    # Count lines in output.
+alias -g X='| xargs'                    # Convert input into arguments for another command.
+alias -g XL='| tr "\n" "\0" | xargs -0' # Handle null-separated input with xargs.
+alias -g X1='| xargs -n 1'              # Process input one argument per line.
+
+# Count and sort unique items with frequencies.
+alias -g CS='sort | uniq -c | sort -k1,1nr'
+#+end_src
+
+*** Intuitive map function for list processing
+
+The ~Map~ alias allows processing a list of newline-separated items seamlessly.
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+alias -g Map="| tr '\n' '\0' | xargs -0 -n 1"
+#+end_src
+
+#+begin_note
+*Robustness:* The extra ~| tr '\n' '\0' | xargs -0~ construct ensures that the alias
+can handle inputs with spaces or special characters effectively, preventing
+unexpected behavior in such cases.
+#+end_note
+
+*Example use case:*
+
+List all directories containing a specific file, such as .git:
+
+: find . -name .git Map dirname
+
+*** Delimiter-separated outputs
+
+These aliases allow quick extraction of specific columns from various
+delimiter-separated outputs.
+
+**** Space-separated (A)
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+alias -g A1="| awk '{print \$1}'"
+alias -g A2="| awk '{print \$2}'"
+alias -g A3="| awk '{print \$3}'"
+alias -g A4="| awk '{print \$4}'"
+alias -g A5="| awk '{print \$5}'"
+alias -g A6="| awk '{print \$6}'"
+alias -g A7="| awk '{print \$7}'"
+alias -g A8="| awk '{print \$8}'"
+alias -g A9="| awk '{print \$9}'"
+#+end_src
+
+**** Comma-separated (,)
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+alias -g ,1="| awk -F, '{print \$1}'"
+alias -g ,2="| awk -F, '{print \$2}'"
+alias -g ,3="| awk -F, '{print \$3}'"
+alias -g ,4="| awk -F, '{print \$4}'"
+alias -g ,5="| awk -F, '{print \$5}'"
+alias -g ,6="| awk -F, '{print \$6}'"
+alias -g ,7="| awk -F, '{print \$7}'"
+alias -g ,8="| awk -F, '{print \$8}'"
+alias -g ,9="| awk -F, '{print \$9}'"
+#+end_src
+
+**** Semicolon-separated (S)
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+alias -g S1="| awk -F';' '{print \$1}'"
+alias -g S2="| awk -F';' '{print \$2}'"
+alias -g S3="| awk -F';' '{print \$3}'"
+alias -g S4="| awk -F';' '{print \$4}'"
+alias -g S5="| awk -F';' '{print \$5}'"
+alias -g S6="| awk -F';' '{print \$6}'"
+alias -g S7="| awk -F';' '{print \$7}'"
+alias -g S8="| awk -F';' '{print \$8}'"
+alias -g S9="| awk -F';' '{print \$9}'"
+#+end_src
+
+**** Colon-separated (:)
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+alias -g :1="| awk -F: '{print \$1}'"
+alias -g :2="| awk -F: '{print \$2}'"
+alias -g :3="| awk -F: '{print \$3}'"
+alias -g :4="| awk -F: '{print \$4}'"
+alias -g :5="| awk -F: '{print \$5}'"
+alias -g :6="| awk -F: '{print \$6}'"
+alias -g :7="| awk -F: '{print \$7}'"
+alias -g :8="| awk -F: '{print \$8}'"
+alias -g :9="| awk -F: '{print \$9}'"
+#+end_src
+
+**** Tab-separated (T)
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+alias -g T1="| awk -F $'\t' '{print \$1}'"
+alias -g T2="| awk -F $'\t' '{print \$2}'"
+alias -g T3="| awk -F $'\t' '{print \$3}'"
+alias -g T4="| awk -F $'\t' '{print \$4}'"
+alias -g T5="| awk -F $'\t' '{print \$5}'"
+alias -g T6="| awk -F $'\t' '{print \$6}'"
+alias -g T7="| awk -F $'\t' '{print \$7}'"
+alias -g T8="| awk -F $'\t' '{print \$8}'"
+alias -g T9="| awk -F $'\t' '{print \$9}'"
 #+end_src
 
 * 4. Functions
