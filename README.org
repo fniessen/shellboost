@@ -10,7 +10,7 @@
 #+begin_src shell :noweb yes
 #!/usr/bin/env sh
 
-# Last modified on: <<current-time()>>.
+# Last modified: <<current-time()>>
 #+end_src
 
 Welcome to the *Leuven shell configuration files* project!  This repository is
@@ -125,13 +125,13 @@ environment.
 #+begin_src shell :noweb yes :tangle bin/rc-bash-specific-settings-shell-leuven-new
 #!/usr/bin/env bash
 
-# Last modified on: <<current-time()>>.
+# Last modified: <<current-time()>>
 #+end_src
 
 #+begin_src shell :noweb yes :tangle bin/rc-zsh-specific-settings-shell-leuven-new
 #!/usr/bin/env zsh
 
-# Last modified on: <<current-time()>>.
+# Last modified: <<current-time()>>
 #+end_src
 
 ** Configuring colors for 'ls'
