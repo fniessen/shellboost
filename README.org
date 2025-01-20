@@ -326,31 +326,69 @@ fi
 
 ** Global aliases for Zsh
 
-Below is a collection of global aliases designed for Zsh. These aliases expand
-regardless of their position in a command, streamlining command-line workflows.
+This collection of global aliases is designed to streamline command-line
+workflows in Zsh. These aliases expand automatically, regardless of their
+position in a command, making frequently-used operations faster and more
+intuitive.
+
+*** Basic redirections
+
+These aliases are used to handle output redirections, making common redirections
+more concise and easy to use:
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
 alias -g 21="2>&1"                      # Redirect stderr to stdout.
-alias -g A='| awk'                      # Pipe output to awk.
-alias -g BG='& exit'                    # Send process to background and exit shell.
-alias -g CA="| cat -A"                  # Display line endings and tab characters (cat -A).
-alias -g F='| fmt -'                    # Format output to fit within a specific width.
-alias -g G='| grep --color=auto -E'     # Grep with color highlighting and extended regex.
-alias -g H='| head'                     # Pipe to head.
-alias -g J='| jq -C .'                  # Pretty-print JSON with jq, maintaining colors.
-alias -g L="| less"                     # Pipe to less for paginated viewing.
 alias -g N='> /dev/null'                # Redirect output to null (discard).
 alias -g NN='> /dev/null 2>&1'          # Redirect both stdout and stderr to null.
+#+end_src
+
+*** Data processing
+
+These aliases simplify common data processing tasks by chaining tools like ~awk~,
+~grep~, ~jq~, and others for quick filtering and transformation:
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+alias -g A='| awk'                      # Pipe output to awk.
+alias -g G='| grep --color=auto -E'     # Grep with color highlighting and extended regex.
+alias -g J='| jq -C .'                  # Pretty-print JSON with jq, maintaining colors.
 alias -g S='| sort'                     # Sort output.
-alias -g T='| tail'                     # Pipe to tail.
 alias -g U='| uniq'                     # Filter unique lines from output.
 alias -g W='| wc -l'                    # Count lines in output.
+alias -g T='| tail'                     # Pipe to tail.
+alias -g H='| head'                     # Pipe to head.
+#+end_src
+
+*** Counting and sorting unique items
+
+For counting and sorting unique items along with their frequencies, use the
+following alias:
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+# Count and sort unique items with frequencies.
+alias -g CS='sort | uniq -c | sort -k1,1nr'
+#+end_src
+
+*** Viewing and formatting output
+
+These aliases are designed for better presentation of output, enabling paginated
+views and formatting:
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+alias -g CA="| cat -A"                  # Display line endings and tab characters (cat -A).
+alias -g F='| fmt -'                    # Format output to fit within a specific width.
+alias -g L="| less"                     # Pipe to less for paginated viewing.
+#+end_src
+
+*** Utility commands
+
+These aliases are for handling tasks that support efficient command execution or
+preparation:
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+alias -g BG='& exit'                    # Send process to background and exit shell.
 alias -g X='| xargs'                    # Convert input into arguments for another command.
 alias -g XL='| tr "\n" "\0" | xargs -0' # Handle null-separated input with xargs.
 alias -g X1='| xargs -n 1'              # Process input one argument per line.
-
-# Count and sort unique items with frequencies.
-alias -g CS='sort | uniq -c | sort -k1,1nr'
 #+end_src
 
 *** Intuitive map function for list processing

@@ -1,28 +1,31 @@
 #!/usr/bin/env zsh
 
-# Last modified: <20250120.1129>
+# Last modified: <20250120.1142>
 
 alias -g 21="2>&1"                      # Redirect stderr to stdout.
-alias -g A='| awk'                      # Pipe output to awk.
-alias -g BG='& exit'                    # Send process to background and exit shell.
-alias -g CA="| cat -A"                  # Display line endings and tab characters (cat -A).
-alias -g F='| fmt -'                    # Format output to fit within a specific width.
-alias -g G='| grep --color=auto -E'     # Grep with color highlighting and extended regex.
-alias -g H='| head'                     # Pipe to head.
-alias -g J='| jq -C .'                  # Pretty-print JSON with jq, maintaining colors.
-alias -g L="| less"                     # Pipe to less for paginated viewing.
 alias -g N='> /dev/null'                # Redirect output to null (discard).
 alias -g NN='> /dev/null 2>&1'          # Redirect both stdout and stderr to null.
+
+alias -g A='| awk'                      # Pipe output to awk.
+alias -g G='| grep --color=auto -E'     # Grep with color highlighting and extended regex.
+alias -g J='| jq -C .'                  # Pretty-print JSON with jq, maintaining colors.
 alias -g S='| sort'                     # Sort output.
-alias -g T='| tail'                     # Pipe to tail.
 alias -g U='| uniq'                     # Filter unique lines from output.
 alias -g W='| wc -l'                    # Count lines in output.
-alias -g X='| xargs'                    # Convert input into arguments for another command.
-alias -g XL='| tr "\n" "\0" | xargs -0' # Handle null-separated input with xargs.
-alias -g X1='| xargs -n 1'              # Process input one argument per line.
+alias -g T='| tail'                     # Pipe to tail.
+alias -g H='| head'                     # Pipe to head.
 
 # Count and sort unique items with frequencies.
 alias -g CS='sort | uniq -c | sort -k1,1nr'
+
+alias -g CA="| cat -A"                  # Display line endings and tab characters (cat -A).
+alias -g F='| fmt -'                    # Format output to fit within a specific width.
+alias -g L="| less"                     # Pipe to less for paginated viewing.
+
+alias -g BG='& exit'                    # Send process to background and exit shell.
+alias -g X='| xargs'                    # Convert input into arguments for another command.
+alias -g XL='| tr "\n" "\0" | xargs -0' # Handle null-separated input with xargs.
+alias -g X1='| xargs -n 1'              # Process input one argument per line.
 
 alias -g Map="| tr '\n' '\0' | xargs -0 -n 1"
 
