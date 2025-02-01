@@ -163,22 +163,61 @@ of the week included.
 
 * 2. Paths
 
-These are specific paths to files and directories.
+This section covers essential paths for files and directories, including how to
+configure the ~PATH~ environment variable. The ~PATH~ variable tells the shell where
+to look for executable files, ensuring that commands and scripts can be run from
+any location without specifying their full path.
 
-For example, the ~PATH~ environment variable tells the shell where to look for
-executable files.
+** Modifying PATH
+
+To dynamically add directories to ~PATH~, we define a helper function that checks
+if a directory is already present before appending it. This prevents duplicate
+entries and maintains an organized environment.
 
 #+begin_src shell
-# Add ~/bin to PATH if not already present.
-if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
-    export PATH="$HOME/bin:$PATH"
-fi
+# Function to add a directory to PATH if it's not already included.
+lvn_add_to_path() {
+    local dir="$1"
+    if [[ ":$PATH:" != *":$dir:"* ]]; then
+        export PATH="$dir:$PATH"
+    fi
+}
 
-# Add ~/winbin to PATH if not already present.
-if [[ ":$PATH:" != *":$HOME/winbin:"* ]]; then
-    export PATH="$HOME/winbin:$PATH"
+# Add custom directories to PATH for user-specific binaries.
+lvn_add_to_path "$HOME/bin"
+lvn_add_to_path "$HOME/winbin"
+#+end_src
+
+This setup ensures that executables stored in =~/bin= and =~/winbin= are accessible
+from the command line.
+
+** TeX Live 2024 Configuration
+
+The following script configures TeX Live 2024 by updating ~MANPATH~, ~INFOPATH~, and
+~PATH~ to include the relevant directories if TeX Live is installed.
+
+#+begin_src shell
+# TeX Live 2024 configuration.
+TEXLIVE_DIR="/usr/local/texlive/2024"
+
+if [[ -d "$TEXLIVE_DIR" ]]; then
+    # Ensure MANPATH and INFOPATH are initialized before appending (for Zsh
+    # compatibility).
+    export MANPATH="${MANPATH:-}"
+    export INFOPATH="${INFOPATH:-}"
+
+    # Add TeX Live documentation paths.
+    export MANPATH="$MANPATH:$TEXLIVE_DIR/texmf-dist/doc/man"
+    export INFOPATH="$INFOPATH:$TEXLIVE_DIR/texmf-dist/doc/info"
+
+    # Add TeX Live binaries to PATH.
+    lvn_add_to_path "$TEXLIVE_DIR/bin/x86_64-linux"
 fi
 #+end_src
+
+This ensures that TeX Live executables, such as ~pdflatex~ and ~xelatex~, are
+available in the shell, and that manual and info pages for TeX Live can be
+accessed using ~man~ and ~info~ commands.
 
 * 3. Aliases
 

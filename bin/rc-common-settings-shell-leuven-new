@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Last modified: <20250120.1108>
+# Last modified: <20250201.2116>
 
 if [ -r ~/.dircolors ]; then
     eval "$(dircolors ~/.dircolors)"
@@ -9,14 +9,33 @@ fi
 # Configure the time format for `ls` to display dates as "YYYY-MM-DD Day HH:MM".
 export TIME_STYLE=+"%Y-%m-%d %a %H:%M"
 
-# Add ~/bin to PATH if not already present.
-if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
-    export PATH="$HOME/bin:$PATH"
-fi
+# Function to add a directory to PATH if it's not already included.
+lvn_add_to_path() {
+    local dir="$1"
+    if [[ ":$PATH:" != *":$dir:"* ]]; then
+        export PATH="$dir:$PATH"
+    fi
+}
 
-# Add ~/winbin to PATH if not already present.
-if [[ ":$PATH:" != *":$HOME/winbin:"* ]]; then
-    export PATH="$HOME/winbin:$PATH"
+# Add custom directories to PATH for user-specific binaries.
+lvn_add_to_path "$HOME/bin"
+lvn_add_to_path "$HOME/winbin"
+
+# TeX Live 2024 configuration.
+TEXLIVE_DIR="/usr/local/texlive/2024"
+
+if [[ -d "$TEXLIVE_DIR" ]]; then
+    # Ensure MANPATH and INFOPATH are initialized before appending (for Zsh
+    # compatibility).
+    export MANPATH="${MANPATH:-}"
+    export INFOPATH="${INFOPATH:-}"
+
+    # Add TeX Live documentation paths.
+    export MANPATH="$MANPATH:$TEXLIVE_DIR/texmf-dist/doc/man"
+    export INFOPATH="$INFOPATH:$TEXLIVE_DIR/texmf-dist/doc/info"
+
+    # Add TeX Live binaries to PATH.
+    lvn_add_to_path "$TEXLIVE_DIR/bin/x86_64-linux"
 fi
 
 # Run ll to view detailed information about the contents of the current directory.
