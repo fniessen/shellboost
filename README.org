@@ -134,6 +134,24 @@ environment.
 # Last modified: <<current-time()>>
 #+end_src
 
+** Editor configuration
+
+This configuration sets the default text editor used by your shell. The editor
+specified here will be used by commands like ~git~, ~crontab~, and
+~EDITOR~ / ~VISUAL~-based commands for editing files.
+
+#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+# Set the default editor (change 'emacs' to your preferred editor).
+export VISUAL=emacs
+export EDITOR="$VISUAL"
+#+end_src
+
+- ~VISUAL~: Defines the preferred editor for applications that require
+  a full-screen editor (like ~emacs~, etc.).
+
+- ~EDITOR~: Specifies the default editor for command-line tools that invoke an
+  editor without needing full-screen interaction.
+
 ** Configuring colors for 'ls'
 
 The following example sets up ~LS_COLORS~ to define color schemes for ~ls~ based
@@ -567,6 +585,28 @@ These are mappings of keys to commands.
 
 - ~C-l~: clear the terminal screen.
 
+** Enable Emacs-style keybindings for command line editing
+
+These commands enable Emacs-style keybindings, allowing you to use Emacs editing
+commands (like ~C-a~ to move to the beginning of the line) for command line
+editing.
+
+They are the default.
+
+*** Configuration for Bash
+
+#+begin_src shell :tangle no
+# Ensure Bash is in Emacs editing mode (required for key bindings).
+set -o emacs
+#+end_src
+
+*** Configuration for Zsh
+
+#+begin_src shell :tangle no
+# Ensure Zsh is in Emacs editing mode (required for key bindings).
+bindkey -e
+#+end_src
+
 ** Cursor movement
 
 - ~C-a~: Move cursor to the beginning of the line.
@@ -616,22 +656,23 @@ For example:
 
 Refresh command line
 
-| Key binding | Meaning                                |
-|-------------+----------------------------------------|
-| C-M-u       | Move to parent directory               |
-| M-s         | Prepend 'sudo ' to the current command |
-| M-S-l       | List directory contents                |
+| Key binding | Meaning                                                                                               |
+|-------------+-------------------------------------------------------------------------------------------------------|
+| C-M-u       | Move to parent directory                                                                              |
+| M-s         | Prepend 'sudo ' to the current command                                                                |
+| M-S-l       | List directory contents                                                                               |
+| C-x C-e     | Edit the current command line in an external editor; similar to the ~fc~ ("fix command") shell built-in |
 
 *** ls
 
-For Bash:
+**** Configuration for Bash
 
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
 # M-S-l: Send the string 'ls' followed by a newline.
 bind '"\eL": "ls\n"'
 #+end_src
 
-For Zsh:
+**** Configuration for Zsh
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
 # M-S-l: Send the string 'ls' followed by a newline.
@@ -644,14 +685,14 @@ This configuration binds the ~C-M-u~ key combination to the ~up-directory~ funct
 in both Bash and Zsh shells. The function changes the current directory to its
 parent (~cd ..~).
 
-For Bash:
+**** Configuration for Bash
 
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
 # C-M-u: Move to parent directory.
 bind '"\e\C-u": "cd ..\n"'
 #+end_src
 
-For Zsh:
+**** Configuration for Zsh
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
 # C-M-u: Move to parent directory.
@@ -670,14 +711,14 @@ change.
 This configuration binds the ~M-s~ key combination to prepend ~sudo~ to the current
 command in both Bash and Zsh shells.
 
-For Bash:
+**** Configuration for Bash
 
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
 # M-s: Prepend sudo.
 bind '"\es": "\C-asudo \C-e"'
 #+end_src
 
-For Zsh:
+**** Configuration for Zsh
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
 # M-s: Prepend sudo.
@@ -691,7 +732,7 @@ bindkey "\es" prepend-sudo
 
 *** Copy the previous word
 
-For Bash:
+**** Configuration for Bash
 
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
 # Function to copy the previous word.
@@ -720,16 +761,16 @@ copy-prev-word() {
 bind -x '"\C-x\C-d":copy-prev-word'
 #+end_src
 
-For Zsh:
+**** Configuration for Zsh
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
-bindkey '^X^D' copy-prev-word
+bindkey '^x^d' copy-prev-word
 # Instead of C-M-_.
 #+end_src
 
 *** Run help
 
-For Bash:
+**** Configuration for Bash
 
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
 # Function to run help on the current command
@@ -755,7 +796,36 @@ run-help() {
 bind -x '"\eh": run-help'
 #+end_src
 
-For Zsh, use 'M-h'.
+**** Configuration for Zsh
+
+For Zsh, use ~M-h~.
+
+*** Editing the current command line in an external editor
+
+These configurations allow you to use ~C-x C-e~ to open the current command line
+in your preferred text editor. The editor used is determined by the ~$VISUAL~ or
+~$EDITOR~ environment variable.
+
+**** Configuration for Bash
+
+In Bash, the ~edit-and-execute-command~ function allows you to open the current
+command line in an external editor.
+
+To use it, press ~C-x C-e~.
+
+**** Configuration for Zsh
+
+In Zsh, ~edit-command-line~ provides similar functionality. It must be *autoloaded*
+and registered with ~zle~ before assigning a key binding.
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+# Load the edit-command-line function.
+autoload -U edit-command-line
+zle -N edit-command-line
+
+# Bind C-x C-e to open the command line in an external editor.
+bindkey '^x^e' edit-command-line
+#+end_src
 
 ** See all current key bindings
 
@@ -807,7 +877,6 @@ From Zsh, in table:
 | C-M-l                                 |                                     | clear-display                          | Clear Display                                                                                                                                    |
 | C-M-i                                 |                                     | dynamic-complete-history               | Dynamic Complete History                                                                                                                         |
 | M-^                                   |                                     | history-expand-line                    | History Expand Line                                                                                                                              |
-| C-x C-e                               |                                     | edit-and-execute-command               | Edit and Execute Command                                                                                                                         |
 | C-x C-x                               | exchange-point-and-mark             | exchange-point-and-mark                | Exchange Point and Mark                                                                                                                          |
 | C-M-r, M-r                            |                                     | revert-line                            | Revert Line                                                                                                                                      |
 | C-u                                   | kill-whole-line XXX                 | unix-line-discard                      | Unix Line Discard                                                                                                                                |

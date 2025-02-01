@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 
-# Last modified: <20250201.2116>
+# Last modified: <20250201.2338>
+
+# Set the default editor (change 'emacs' to your preferred editor).
+export VISUAL=emacs
+export EDITOR="$VISUAL"
 
 if [ -r ~/.dircolors ]; then
     eval "$(dircolors ~/.dircolors)"
