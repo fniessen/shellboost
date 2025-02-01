@@ -1,0 +1,14 @@
+# Hey Emacs, this is a -*- org -*- file ...
+#+TITLE:     Enhancements TODOs
+
+* Tasks
+
+** MAYB Use ^[ instead of \e for Zsh key bindings?
+
+** TODO [#A] Use '[[' over '[' in Bash scripts (use Bashisms)
+
+Advantages of '[[':
+- Improved functionality: You can use logical operators like '&&' and '||'
+  directly within the test
+- Better handling of strings: does not require escaping and quoting
+- No word-splitting or filename expansion
