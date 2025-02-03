@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Last modified: <20250201.2338>
+# Last modified: <20250203.2228>
 
 # Set the default editor (change 'emacs' to your preferred editor).
 export VISUAL=emacs
@@ -117,6 +117,32 @@ if command -v rg > /dev/null 2>&1; then
         rg --glob "*.$1" -i -C 1 "$2"
     }
 
+fi
+
+# Check if bat is installed before aliasing cat.
+if command -v bat >/dev/null 2>&1; then
+    alias cat='bat'
+fi
+
+# Check if most is installed before aliasing less.
+if command -v most >/dev/null 2>&1; then
+    alias less='most'
+fi
+
+# Check if htop is installed before aliasing top.
+if command -v htop >/dev/null 2>&1; then
+    alias top='htop'
+fi
+
+# Check if duf is installed before aliasing df.
+if command -v duf >/dev/null 2>&1; then
+    alias df='duf'
+fi
+
+# Check if mtr is installed before aliasing traceroute.
+if command -v mtr >/dev/null 2>&1; then
+    alias traceroute='mtr -t'
+    alias tracepath='mtr -t'
 fi
 
 # Configure HISTCONTROL to ignore both leading space and consecutive duplicates.

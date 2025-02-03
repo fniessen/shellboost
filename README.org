@@ -211,6 +211,28 @@ from the command line.
 
 ** TeX Live 2024 Configuration
 
+: update-dotfiles
+: tlmgr install gillius
+: tlmgr update --self
+: tlmgr install gillius
+: sudo apt remove texlive*
+: sudo apt install texlive
+: tlmgr install gillius
+: sudo apt remove texlive*
+: wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
+: tar -xvzf install-tl-unx.tar.gz
+: cd install-tl-*
+: sudo ./install-tl
+: cd install-tl-20250130/
+: sudo ./install-tl
+: tlmgr update --self
+: tlmgr install gillius
+: tlmgr update --self
+: sudo tlmgr update --self
+: sudo /usr/local/texlive/2024/bin/x86_64-linux/tlmgr update --self
+: sudo /usr/local/texlive/2024/bin/x86_64-linux/tlmgr  install gillius
+: export PATH=$PATH:/usr/local/texlive/2024/bin/x86_64-linux
+
 The following script configures TeX Live 2024 by updating ~MANPATH~, ~INFOPATH~, and
 ~PATH~ to include the relevant directories if TeX Live is installed.
 
@@ -541,6 +563,75 @@ alias -g T6="| awk -F $'\t' '{print \$6}'"
 alias -g T7="| awk -F $'\t' '{print \$7}'"
 alias -g T8="| awk -F $'\t' '{print \$8}'"
 alias -g T9="| awk -F $'\t' '{print \$9}'"
+#+end_src
+
+** Better alternative to cat
+
+The ~cat~ command is commonly used to display file contents, but ~bat~ is a more
+feature-rich alternative. It adds syntax highlighting, line numbers, and
+a better user interface for viewing files.
+
+#+begin_src shell
+# Check if bat is installed before aliasing cat.
+if command -v bat >/dev/null 2>&1; then
+    alias cat='bat'
+fi
+#+end_src
+
+** Better alternative to less
+
+The ~less~ command is widely used for paging through long outputs. However, ~most~
+offers additional features such as the ability to scroll backward and improved
+performance, making it a better alternative.
+
+#+begin_src shell
+# Check if most is installed before aliasing less.
+if command -v most >/dev/null 2>&1; then
+    alias less='most'
+fi
+#+end_src
+
+** Better alternative to top
+
+The ~top~ command is commonly used to monitor system processes and resource
+usage. However, ~htop~ is a more advanced and user-friendly alternative that
+provides an interactive, colorized interface with better process management and
+detailed metrics.
+
+#+begin_src shell
+# Check if htop is installed before aliasing top.
+if command -v htop >/dev/null 2>&1; then
+    alias top='htop'
+fi
+#+end_src
+
+** Better alternative to df
+
+The ~df~ command is used to display disk space usage, but ~duf~ (Disk Usage Free)
+provides a more *user-friendly, colorful, and interactive* alternative. It offers
+better readability, column sorting, and a clearer presentation of storage
+information.
+
+#+begin_src shell
+# Check if duf is installed before aliasing df.
+if command -v duf >/dev/null 2>&1; then
+    alias df='duf'
+fi
+#+end_src
+
+** Better alternative to traceroute
+
+The ~traceroute~ command is used to trace the route packets take to
+a destination. However, ~mtr~ (My Traceroute) is a more *powerful, real-time, and
+interactive* alternative. It combines traceroute and ping, providing continuous
+network diagnostics with a clearer and more dynamic interface.
+
+#+begin_src shell
+# Check if mtr is installed before aliasing traceroute.
+if command -v mtr >/dev/null 2>&1; then
+    alias traceroute='mtr -t'
+    alias tracepath='mtr -t'
+fi
 #+end_src
 
 * 4. Functions
