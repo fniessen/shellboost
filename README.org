@@ -152,6 +152,31 @@ export EDITOR="$VISUAL"
 - ~EDITOR~: Specifies the default editor for command-line tools that invoke an
   editor without needing full-screen interaction.
 
+** Localization and character encoding settings
+
+The code snippet sets environment variables related to localization and
+character encoding:
+
+#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+# Check if en_US.utf8 locale is available.
+if locale -a | grep -q 'en_US.utf8'; then
+    # export LC_ALL=en_US.utf8
+    export LANG=en_US.utf8
+    export LC_ALL=en_US.utf8            # Ensure proper character handling.
+else
+    printf "Warning: en_US.utf8 locale is not available. "
+    printf "Falling back to default locale.\n"
+fi
+#+end_src
+
+- ~LC_ALL=en_US.utf8~: Forces all locale settings (including ~LANG~) to use
+  U.S. English with UTF-8 encoding.
+- ~LANG=en_US.utf8~: Sets the default locale for the system, influencing language
+  and encoding preferences for programs.
+
+This ensures consistent text encoding across applications, preventing issues
+with character display and input.
+
 ** Configuring colors for 'ls'
 
 The following example sets up ~LS_COLORS~ to define color schemes for ~ls~ based
@@ -332,7 +357,7 @@ with Windows drives and applications:
 
 #+begin_src shell
 # Check if the script is running in WSL.
-if [[ "$WSL_DISTRO_NAME" ]]; then
+if [[ -n "$WSL_DISTRO_NAME" ]]; then
     # Aliases for quick access to Windows drives.
     alias c:='cd /mnt/c'
     alias d:='cd /mnt/d'
@@ -341,7 +366,7 @@ fi
 
 #+begin_src shell
 # Check if the script is running in WSL.
-if [[ "$WSL_DISTRO_NAME" ]]; then
+if [[ -n "$WSL_DISTRO_NAME" ]]; then
     # Alias for opening Windows File Explorer.
     alias explorer='explorer.exe'
 
@@ -573,7 +598,7 @@ a better user interface for viewing files.
 
 #+begin_src shell
 # Check if bat is installed before aliasing cat.
-if command -v bat >/dev/null 2>&1; then
+if command -v bat > /dev/null 2>&1; then
     alias cat='bat'
 fi
 #+end_src
@@ -584,10 +609,12 @@ The ~less~ command is widely used for paging through long outputs. However, ~mos
 offers additional features such as the ability to scroll backward and improved
 performance, making it a better alternative.
 
+~moar~ is a pager tool designed to be "nice to use for humans".
+
 #+begin_src shell
-# Check if most is installed before aliasing less.
-if command -v most >/dev/null 2>&1; then
-    alias less='most'
+# Check if moar is installed before aliasing less.
+if command -v moar > /dev/null 2>&1; then
+    alias less='moar'
 fi
 #+end_src
 
@@ -600,7 +627,7 @@ detailed metrics.
 
 #+begin_src shell
 # Check if htop is installed before aliasing top.
-if command -v htop >/dev/null 2>&1; then
+if command -v htop > /dev/null 2>&1; then
     alias top='htop'
 fi
 #+end_src
@@ -614,7 +641,7 @@ information.
 
 #+begin_src shell
 # Check if duf is installed before aliasing df.
-if command -v duf >/dev/null 2>&1; then
+if command -v duf > /dev/null 2>&1; then
     alias df='duf'
 fi
 #+end_src
@@ -628,7 +655,7 @@ network diagnostics with a clearer and more dynamic interface.
 
 #+begin_src shell
 # Check if mtr is installed before aliasing traceroute.
-if command -v mtr >/dev/null 2>&1; then
+if command -v mtr > /dev/null 2>&1; then
     alias traceroute='mtr -t'
     alias tracepath='mtr -t'
 fi
@@ -873,7 +900,7 @@ run-help() {
     # Check if there's a command to process.
     if [[ -n "$cmd" ]]; then
         # Show the man page for the command (if it exists).
-        man "$cmd" 2>/dev/null || {
+        man "$cmd" 2> /dev/null || {
             # If no man page, use the `whatis` command for a brief description.
             whatis "$cmd" || printf "No help available for '%s'.\n" "$cmd"
         }
@@ -1061,7 +1088,7 @@ ${debian_chroot:+($debian_chroot)}\
 \[\033[01;32m\]\u@\h\[\033[00m\]\
 \[\033[01;30m\]:\[\033[00m\]\
 \[\033[01;34m\]\w\[\033[00m\] \
-\[\033[01;33m\]($(git branch 2>/dev/null | grep '^*' | colrm 1 2))\
+\[\033[01;33m\]($(git branch 2> /dev/null | grep '^*' | colrm 1 2))\
 \[\033[0m\]\n\$ '
 
 PS1='\n\
@@ -1076,17 +1103,17 @@ ${debian_chroot:+($debian_chroot)}\
 
 __git_ps1() {
     local git_info
-    git_info="$(git rev-parse --is-inside-work-tree 2>/dev/null)"
+    git_info="$(git rev-parse --is-inside-work-tree 2> /dev/null)"
 
     if [[ -z "$git_info" ]]; then
         return $?
     fi
 
     local branch
-    if branch="$(git symbolic-ref --short -q HEAD 2>/dev/null)"; then
+    if branch="$(git symbolic-ref --short -q HEAD 2> /dev/null)"; then
         : # We are on a branch, nothing to do here.
     else
-        branch="$(git rev-parse --short HEAD 2>/dev/null)"
+        branch="$(git rev-parse --short HEAD 2> /dev/null)"
     fi
 
     local dirty=""                      # should be in red
@@ -1104,11 +1131,11 @@ __git_ps1() {
         staged=" +staged"
     fi
 
-    if git rev-parse --verify --quiet refs/stash >/dev/null; then
+    if git rev-parse --verify --quiet refs/stash > /dev/null; then
         stash=" \$stash"
     fi
 
-    if git ls-files --others --exclude-standard --directory --no-empty-directory --error-unmatch -- ':/*' >/dev/null 2>/dev/null; then
+    if git ls-files --others --exclude-standard --error-unmatch -- ':/*' > /dev/null 2>&1; then
         untracked=" ?untracked"
     fi
 
@@ -1116,9 +1143,9 @@ __git_ps1() {
     local count_incoming=0
     local upstream_branch
 
-    if upstream_branch="$(git rev-parse --abbrev-ref @{u} 2>/dev/null)"; then
-        count_outgoing=$(git rev-list --count --left-right @{u}...HEAD 2>/dev/null | awk '{print $2}')
-        count_incoming=$(git rev-list --count --left-right @{u}...HEAD 2>/dev/null | awk '{print $1}')
+    if upstream_branch="$(git rev-parse --abbrev-ref @{u} 2> /dev/null)"; then
+        count_outgoing=$(git rev-list --count --left-right @{u}...HEAD 2> /dev/null | awk '{print $2}')
+        count_incoming=$(git rev-list --count --left-right @{u}...HEAD 2> /dev/null | awk '{print $1}')
     fi
 
     if (( count_outgoing > 0 )); then
@@ -1178,14 +1205,10 @@ categories.
 
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
 # Check if history search bindings are already set.
-if ! bind -q history-search-backward &>/dev/null; then
+if ! bind -q history-search-backward > /dev/null 2>&1; then
     # If not set, configure Up and Down arrow keys for history search.
-    bind '"\e[A": history-search-backward'
-                                        # Up arrow: Search backward in command
-                                        # history.
-    bind '"\e[B": history-search-forward'
-                                        # Down arrow: Search forward in command
-                                        # history.
+    bind '"\e[A": history-search-backward'  # Up arrow: Search backward in command history.
+    bind '"\e[B": history-search-forward'   # Down arrow: Search forward in command history.
 fi
 #+end_src
 

@@ -1,10 +1,20 @@
 #!/usr/bin/env sh
 
-# Last modified: <20250203.2228>
+# Last modified: <20250217.0921>
 
 # Set the default editor (change 'emacs' to your preferred editor).
 export VISUAL=emacs
 export EDITOR="$VISUAL"
+
+# Check if en_US.utf8 locale is available.
+if locale -a | grep -q 'en_US.utf8'; then
+    # export LC_ALL=en_US.utf8
+    export LANG=en_US.utf8
+    export LC_ALL=en_US.utf8            # Ensure proper character handling.
+else
+    printf "Warning: en_US.utf8 locale is not available. "
+    printf "Falling back to default locale.\n"
+fi
 
 if [ -r ~/.dircolors ]; then
     eval "$(dircolors ~/.dircolors)"
@@ -74,14 +84,14 @@ alias 8='cd -8'
 alias 9='cd -9'
 
 # Check if the script is running in WSL.
-if [[ "$WSL_DISTRO_NAME" ]]; then
+if [[ -n "$WSL_DISTRO_NAME" ]]; then
     # Aliases for quick access to Windows drives.
     alias c:='cd /mnt/c'
     alias d:='cd /mnt/d'
 fi
 
 # Check if the script is running in WSL.
-if [[ "$WSL_DISTRO_NAME" ]]; then
+if [[ -n "$WSL_DISTRO_NAME" ]]; then
     # Alias for opening Windows File Explorer.
     alias explorer='explorer.exe'
 
@@ -120,27 +130,27 @@ if command -v rg > /dev/null 2>&1; then
 fi
 
 # Check if bat is installed before aliasing cat.
-if command -v bat >/dev/null 2>&1; then
+if command -v bat > /dev/null 2>&1; then
     alias cat='bat'
 fi
 
-# Check if most is installed before aliasing less.
-if command -v most >/dev/null 2>&1; then
-    alias less='most'
+# Check if moar is installed before aliasing less.
+if command -v moar > /dev/null 2>&1; then
+    alias less='moar'
 fi
 
 # Check if htop is installed before aliasing top.
-if command -v htop >/dev/null 2>&1; then
+if command -v htop > /dev/null 2>&1; then
     alias top='htop'
 fi
 
 # Check if duf is installed before aliasing df.
-if command -v duf >/dev/null 2>&1; then
+if command -v duf > /dev/null 2>&1; then
     alias df='duf'
 fi
 
 # Check if mtr is installed before aliasing traceroute.
-if command -v mtr >/dev/null 2>&1; then
+if command -v mtr > /dev/null 2>&1; then
     alias traceroute='mtr -t'
     alias tracepath='mtr -t'
 fi
