@@ -344,6 +344,21 @@ simply type the number of the stack entry you want to visit, like ~1~.
 Automatically track directories when using ~cd~:
 
 #+begin_src shell :tangle no
+autopushd() {
+    old_dir="$(pwd)"
+    builtin cd "$@"
+    if [[ ":$DIRSTACK:" != *":$old_dir:"* ]]; then
+        printf "Bash - Pushing $old_dir onto the stack:\n"
+        pushd "$old_dir"
+    else
+        printf "Bash - Directory already in stack, not pushing.\n"
+    fi
+}
+
+alias cd='autopushd'
+#+end_src
+
+#+begin_src shell :tangle no
 # Change directory and push it onto the directory stack if it's not already
 # there.
 cd() {
@@ -385,11 +400,9 @@ cd() {
                 popd -n +$DIRSTACKSIZE > /dev/null
             fi
             pushd . > /dev/null
-            echo "Directory stack updated:"
+            printf "Directory stack updated:\n"
             dirs -v
         fi
-    else
-        echo "cd: No such file or directory: $@"
     fi
 }
 #+end_src
@@ -854,11 +867,11 @@ For example:
 
 Refresh command line
 
-| Key binding | Meaning                                                                                                 |
-|-------------+---------------------------------------------------------------------------------------------------------|
-| C-M-u       | Move to parent directory                                                                                |
-| M-s         | Prepend 'sudo ' to the current command                                                                  |
-| M-S-l       | List directory contents                                                                                 |
+| Key binding | Meaning                                                                                               |
+|-------------+-------------------------------------------------------------------------------------------------------|
+| C-M-u       | Move to parent directory                                                                              |
+| M-s         | Prepend 'sudo ' to the current command                                                                |
+| M-S-l       | List directory contents                                                                               |
 | C-x C-e     | Edit the current command line in an external editor; similar to the ~fc~ ("fix command") shell built-in |
 
 *** ls
@@ -1315,40 +1328,6 @@ export HISTIGNORE="ls:cd:pwd:clear:history:exit:top:df"
 # Enable case-insensitive directory completion.
 bind "set completion-ignore-case on"
 bind "set show-all-if-ambiguous on"
-#+end_src
-
-
-
-
-
-
-
-#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
-# autopushd() {
-#     if [[ -n "$BASH_VERSION" ]]; then
-#         # For Bash.
-#         old_dir="$(pwd)"
-#         builtin cd "$@"
-#         if [[ ":$DIRSTACK:" != *":$old_dir:"* ]]; then
-#             echo "Bash - Pushing $old_dir onto the stack:"
-#             pushd "$old_dir"
-#         else
-#             echo "Bash - Directory already in stack, not pushing."
-#         fi
-#     elif [[ -n "$ZSH_VERSION" ]]; then
-#         # For Zsh.
-#         old_dir="$(pwd)"
-#         cd "$@"
-#         if [[ ! -v dirstack || ":$DIRSTACK:" != *":$old_dir:"* ]]; then
-#             echo "Zsh - Pushing $old_dir onto the stack:"
-#             pushd "$old_dir"
-#         else
-#             echo "Zsh - Directory already in stack, not pushing."
-#         fi
-#     fi
-# }
-#
-# alias cd='autopushd'
 #+end_src
 
 ** Grep colors

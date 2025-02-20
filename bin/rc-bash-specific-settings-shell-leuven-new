@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Last modified: <20250220.1043>
+# Last modified: <20250220.1259>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
@@ -13,11 +13,9 @@ cd() {
                 popd -n +$DIRSTACKSIZE > /dev/null
             fi
             pushd . > /dev/null
-            echo "Directory stack updated:"
+            printf "Directory stack updated:\n"
             dirs -v
         fi
-    else
-        echo "cd: No such file or directory: $@"
     fi
 }
 
@@ -202,32 +200,6 @@ fi
 # Enable case-insensitive directory completion.
 bind "set completion-ignore-case on"
 bind "set show-all-if-ambiguous on"
-
-# autopushd() {
-#     if [[ -n "$BASH_VERSION" ]]; then
-#         # For Bash.
-#         old_dir="$(pwd)"
-#         builtin cd "$@"
-#         if [[ ":$DIRSTACK:" != *":$old_dir:"* ]]; then
-#             echo "Bash - Pushing $old_dir onto the stack:"
-#             pushd "$old_dir"
-#         else
-#             echo "Bash - Directory already in stack, not pushing."
-#         fi
-#     elif [[ -n "$ZSH_VERSION" ]]; then
-#         # For Zsh.
-#         old_dir="$(pwd)"
-#         cd "$@"
-#         if [[ ! -v dirstack || ":$DIRSTACK:" != *":$old_dir:"* ]]; then
-#             echo "Zsh - Pushing $old_dir onto the stack:"
-#             pushd "$old_dir"
-#         else
-#             echo "Zsh - Directory already in stack, not pushing."
-#         fi
-#     fi
-# }
-#
-# alias cd='autopushd'
 
 # Set a common history file.
 HISTFILE=$HOME/.bash_history
