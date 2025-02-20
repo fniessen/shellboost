@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 
-# Last modified: <20250217.0921>
+# Last modified: <20250220.1043>
+
+# Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 
 # Set the default editor (change 'emacs' to your preferred editor).
 export VISUAL=emacs
@@ -10,14 +12,14 @@ export EDITOR="$VISUAL"
 if locale -a | grep -q 'en_US.utf8'; then
     # export LC_ALL=en_US.utf8
     export LANG=en_US.utf8
-    export LC_ALL=en_US.utf8            # Ensure proper character handling.
+    export LC_ALL="$LANG"               # Consistent character encoding.
 else
-    printf "Warning: en_US.utf8 locale is not available. "
-    printf "Falling back to default locale.\n"
+    printf "Warning: 'en_US.utf8' locale unavailable. Using system default.\n"
+    printf "Hint: Install it with 'sudo locale-gen en_US.utf8'.\n"
 fi
 
 if [ -r ~/.dircolors ]; then
-    eval "$(dircolors ~/.dircolors)"
+    eval "$(dircolors ~/.dircolors)" || eval "$(dircolors)"  # Fallback to default.
 fi
 
 # Configure the time format for `ls` to display dates as "YYYY-MM-DD Day HH:MM".
@@ -26,23 +28,23 @@ export TIME_STYLE=+"%Y-%m-%d %a %H:%M"
 # Function to add a directory to PATH if it's not already included.
 lvn_add_to_path() {
     local dir="$1"
-    if [[ ":$PATH:" != *":$dir:"* ]]; then
+    if [ -d "$dir" ] && [[ ":$PATH:" != *":$dir:"* ]]; then
         export PATH="$dir:$PATH"
     fi
 }
 
-# Add custom directories to PATH for user-specific binaries.
+# Add user-specific binary directories.
 lvn_add_to_path "$HOME/bin"
 lvn_add_to_path "$HOME/winbin"
 
 # TeX Live 2024 configuration.
-TEXLIVE_DIR="/usr/local/texlive/2024"
+TEXLIVE_DIR="${TEXLIVE_HOME:-/usr/local/texlive/2024}"  # Override with TEXLIVE_HOME.
 
 if [[ -d "$TEXLIVE_DIR" ]]; then
     # Ensure MANPATH and INFOPATH are initialized before appending (for Zsh
     # compatibility).
-    export MANPATH="${MANPATH:-}"
-    export INFOPATH="${INFOPATH:-}"
+    MANPATH="${MANPATH:-}"
+    INFOPATH="${INFOPATH:-}"
 
     # Add TeX Live documentation paths.
     export MANPATH="$MANPATH:$TEXLIVE_DIR/texmf-dist/doc/man"
@@ -52,13 +54,13 @@ if [[ -d "$TEXLIVE_DIR" ]]; then
     lvn_add_to_path "$TEXLIVE_DIR/bin/x86_64-linux"
 fi
 
-# Run ll to view detailed information about the contents of the current directory.
+# Detailed directory listing.
 alias ll='ls -l'
 
-# List only directories in the current directory.
+# List directories only.
 alias lsd='ls -d */'
 
-# List files and directories in a columnar format with type indicators.
+# Columnar format with type indicators.
 alias l='ls -CF'
 
 # Define aliases for changing directory up levels.
@@ -66,62 +68,36 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 
-# Define an alias for changing to the previous directory.
+# Switch to previous directory.
 alias -- -='cd -'
 
-# Display the current directory stack with indices.
-alias d='dirs -v | head -n 10'  # Show the top 10 entries in the stack.
+# Show dir stack (1-9), skip current.
+alias d='dirs -v | tail -n +2 | head -n 9'
 
-# Define aliases for switching to specific stack entries.
-alias 1='cd -1'  # Move to the most recent directory.
-alias 2='cd -2'  # Move to the second most recent directory.
-alias 3='cd -3'
-alias 4='cd -4'
-alias 5='cd -5'
-alias 6='cd -6'
-alias 7='cd -7'
-alias 8='cd -8'
-alias 9='cd -9'
-
-# Check if the script is running in WSL.
-if [[ -n "$WSL_DISTRO_NAME" ]]; then
-    # Aliases for quick access to Windows drives.
-    alias c:='cd /mnt/c'
-    alias d:='cd /mnt/d'
-fi
-
-# Check if the script is running in WSL.
-if [[ -n "$WSL_DISTRO_NAME" ]]; then
-    # Alias for opening Windows File Explorer.
-    alias explorer='explorer.exe'
-
-    # Aliases for opening files or URLs with Windows default applications.
-    alias open='explorer.exe'
-    alias xdg-open='explorer.exe'
-fi
-
-# Alias 'hgrep' to search command history with case-insensitive grep.
+# Search history case-insensitively.
 alias hgrep='history | grep -i'
 
 # Check if 'rg' command is available.
 if command -v rg > /dev/null 2>&1; then
+    # Note: Install ripgrep with 'sudo apt install ripgrep' if missing.
 
-    # Define a function 'rgc' to always include the '-C 1' option for context
-    # lines.
+    # Ripgrep with context and colorized output.
     rgc() {
-        rg -C 1 "$@" | sed '/'"$@"'/! s/^.*$/\x1b[90m&\x1b[0m/; s/\('"$@"'\)/\x1b[1;31m\1\x1b[0m/g'
+        local pattern=$(printf %q "$*")  # Escape special chars.
+        rg -C 1 "$@" | sed "/$pattern/! s/^.*$/\x1b[90m&\x1b[0m/; s/\($pattern\)/\x1b[1;31m\1\x1b[0m/g"
     }
 
+    # Include hidden files by default.
     alias rg='rg --hidden'
 
-    # Alias 'rgno' to 'rg -l' for listing filenames with matches.
+    # List matching filenames only.
     alias rgno='rg -l'
 
-    # Define a function 'rgext' for a case-insensitive search within files
-    # matching a specific extension.
+    # Search by file extension (case-insensitive).
     rgext() {
         if [[ $# -ne 2 ]]; then
             printf "Usage: rgext EXTENSION PATTERN\n"
+            printf "Example: rgext txt 'hello world'\n"
             return 2
         fi
         rg --glob "*.$1" -i -C 1 "$2"
@@ -131,41 +107,48 @@ fi
 
 # Check if bat is installed before aliasing cat.
 if command -v bat > /dev/null 2>&1; then
+    # Better cat.
     alias cat='bat'
 fi
 
 # Check if moar is installed before aliasing less.
 if command -v moar > /dev/null 2>&1; then
+    # Better less.
     alias less='moar'
 fi
 
 # Check if htop is installed before aliasing top.
 if command -v htop > /dev/null 2>&1; then
+    # Better top.
     alias top='htop'
 fi
 
 # Check if duf is installed before aliasing df.
 if command -v duf > /dev/null 2>&1; then
+    # Better df.
     alias df='duf'
 fi
 
 # Check if mtr is installed before aliasing traceroute.
 if command -v mtr > /dev/null 2>&1; then
+    # Better traceroute.
     alias traceroute='mtr -t'
+    # Better tracepath.
     alias tracepath='mtr -t'
 fi
 
-# Configure HISTCONTROL to ignore both leading space and consecutive duplicates.
+# Ignore spaces and duplicates.
 export HISTCONTROL=ignoreboth
 # === default in Ubuntu
 
-# Set the number of commands to remember in the in-memory history.
+# Store 10,000 commands in memory.
 export HISTSIZE=10000
 
-# Set the history timestamp format to ISO8601 (yyyy-mm-dd hh:mm).
+# ISO8601 timestamp (yyyy-mm-dd hh:mm).
 export HISTTIMEFORMAT="%Y-%m-%d %H:%M  "
 
-# Exclude common navigation and administrative commands from history.
+# Exclude common commands.
 export HISTIGNORE="ls:cd:pwd:clear:history:exit:top:df"
 
+# Highlight matches.
 export GREP_COLORS='ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32'

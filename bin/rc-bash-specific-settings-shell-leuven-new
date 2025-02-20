@@ -1,6 +1,41 @@
 #!/usr/bin/env bash
 
-# Last modified: <20250217.0921>
+# Last modified: <20250220.1043>
+
+# Set the maximum directory stack size to 10.
+DIRSTACKSIZE=10
+export DIRSTACKSIZE
+
+cd() {
+    if builtin cd "$@"; then
+        if ! dirs -v | grep -q "$PWD"; then
+            if [ $(dirs -v | wc -l) -ge $DIRSTACKSIZE ]; then
+                popd -n +$DIRSTACKSIZE > /dev/null
+            fi
+            pushd . > /dev/null
+            echo "Directory stack updated:"
+            dirs -v
+        fi
+    else
+        echo "cd: No such file or directory: $@"
+    fi
+}
+
+# Jump to a directory by index.
+jumpd() {
+    cd "$(dirs +$1 2> /dev/null)" || printf "Invalid index: %s\n" "$1"
+}
+
+# Define aliases for switching to specific stack entries.
+cd1() { jumpd 1; }  # Move to the most recent directory.
+cd2() { jumpd 2; }  # Move to the second most recent directory.
+cd3() { jumpd 3; }
+cd4() { jumpd 4; }
+cd5() { jumpd 5; }
+cd6() { jumpd 6; }
+cd7() { jumpd 7; }
+cd8() { jumpd 8; }
+cd9() { jumpd 9; }
 
 # M-S-l: Send the string 'ls' followed by a newline.
 bind '"\eL": "ls\n"'

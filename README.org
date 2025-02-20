@@ -11,6 +11,8 @@
 #!/usr/bin/env sh
 
 # Last modified: <<current-time()>>
+
+# Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 #+end_src
 
 Welcome to the *Leuven shell configuration files* project!  This repository is
@@ -162,10 +164,10 @@ character encoding:
 if locale -a | grep -q 'en_US.utf8'; then
     # export LC_ALL=en_US.utf8
     export LANG=en_US.utf8
-    export LC_ALL=en_US.utf8            # Ensure proper character handling.
+    export LC_ALL="$LANG"               # Consistent character encoding.
 else
-    printf "Warning: en_US.utf8 locale is not available. "
-    printf "Falling back to default locale.\n"
+    printf "Warning: 'en_US.utf8' locale unavailable. Using system default.\n"
+    printf "Hint: Install it with 'sudo locale-gen en_US.utf8'.\n"
 fi
 #+end_src
 
@@ -184,7 +186,7 @@ on file types.
 
 #+begin_src shell
 if [ -r ~/.dircolors ]; then
-    eval "$(dircolors ~/.dircolors)"
+    eval "$(dircolors ~/.dircolors)" || eval "$(dircolors)"  # Fallback to default.
 fi
 #+end_src
 
@@ -221,12 +223,12 @@ entries and maintains an organized environment.
 # Function to add a directory to PATH if it's not already included.
 lvn_add_to_path() {
     local dir="$1"
-    if [[ ":$PATH:" != *":$dir:"* ]]; then
+    if [ -d "$dir" ] && [[ ":$PATH:" != *":$dir:"* ]]; then
         export PATH="$dir:$PATH"
     fi
 }
 
-# Add custom directories to PATH for user-specific binaries.
+# Add user-specific binary directories.
 lvn_add_to_path "$HOME/bin"
 lvn_add_to_path "$HOME/winbin"
 #+end_src
@@ -263,13 +265,13 @@ The following script configures TeX Live 2024 by updating ~MANPATH~, ~INFOPATH~,
 
 #+begin_src shell
 # TeX Live 2024 configuration.
-TEXLIVE_DIR="/usr/local/texlive/2024"
+TEXLIVE_DIR="${TEXLIVE_HOME:-/usr/local/texlive/2024}"  # Override with TEXLIVE_HOME.
 
 if [[ -d "$TEXLIVE_DIR" ]]; then
     # Ensure MANPATH and INFOPATH are initialized before appending (for Zsh
     # compatibility).
-    export MANPATH="${MANPATH:-}"
-    export INFOPATH="${INFOPATH:-}"
+    MANPATH="${MANPATH:-}"
+    INFOPATH="${INFOPATH:-}"
 
     # Add TeX Live documentation paths.
     export MANPATH="$MANPATH:$TEXLIVE_DIR/texmf-dist/doc/man"
@@ -297,13 +299,13 @@ The following aliases enhance the functionality of the ~ls~ command, making it
 easier to navigate and view directory contents:
 
 #+begin_src shell
-# Run ll to view detailed information about the contents of the current directory.
+# Detailed directory listing.
 alias ll='ls -l'
 
-# List only directories in the current directory.
+# List directories only.
 alias lsd='ls -d */'
 
-# List files and directories in a columnar format with type indicators.
+# Columnar format with type indicators.
 alias l='ls -CF'
 #+end_src
 
@@ -319,15 +321,17 @@ alias ....='cd ../../..'
 #+end_src
 
 #+begin_src shell
-# Define an alias for changing to the previous directory.
+# Switch to previous directory.
 alias -- -='cd -'
 #+end_src
 
-*** Viewing the directory stack
+*** Directory stack (for easy navigation)
+
+**** Viewing the directory stack
 
 #+begin_src shell
-# Display the current directory stack with indices.
-alias d='dirs -v | head -n 10'  # Show the top 10 entries in the stack.
+# Show dir stack (1-9), skip current.
+alias d='dirs -v | tail -n +2 | head -n 9'
 #+end_src
 
 You can use the directory stack to quickly navigate to previously visited
@@ -335,53 +339,119 @@ directories. Normally, ~cd -1~ moves to the *previous directory* in the stack, ~
 to the one before that, and so on. However, with the following aliases, you can
 simply type the number of the stack entry you want to visit, like ~1~.
 
-*** Quick access to recently used directories
+**** Auto-adding directories to stack on 'cd'
 
-#+begin_src shell
+Automatically track directories when using ~cd~:
+
+#+begin_src shell :tangle no
+# Change directory and push it onto the directory stack if it's not already
+# there.
+cd() {
+    if ! dirs -v | grep -q "$PWD"; then
+        builtin cd "$@" && pushd . > /dev/null
+    else
+        builtin cd "$@"  # Just change directory without pushing if it's already
+                         # in the stack.
+    fi
+}
+#+end_src
+
+#+begin_src shell :tangle no
+# Set the maximum directory stack size to 10.
+DIRSTACKSIZE=10
+export DIRSTACKSIZE
+
+cd() {
+    if [ "$#" -eq 0 ]; then
+        builtin pushd "$HOME" > /dev/null
+    else
+        builtin pushd "$@" > /dev/null
+    fi
+    while [ ${#DIRSTACK[@]} -gt $DIRSTACKSIZE ]; do
+        popd -n +1 > /dev/null
+    done
+}
+#+end_src
+
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+# Set the maximum directory stack size to 10.
+DIRSTACKSIZE=10
+export DIRSTACKSIZE
+
+cd() {
+    if builtin cd "$@"; then
+        if ! dirs -v | grep -q "$PWD"; then
+            if [ $(dirs -v | wc -l) -ge $DIRSTACKSIZE ]; then
+                popd -n +$DIRSTACKSIZE > /dev/null
+            fi
+            pushd . > /dev/null
+            echo "Directory stack updated:"
+            dirs -v
+        fi
+    else
+        echo "cd: No such file or directory: $@"
+    fi
+}
+#+end_src
+
+This ensures every ~cd~ command saves the directory in the stack.
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+# Set the maximum directory stack size to 10.
+DIRSTACKSIZE=10
+export DIRSTACKSIZE
+
+setopt AUTO_PUSHD
+setopt PUSHD_IGNORE_DUPS
+#+end_src
+
+**** Quick access to recently used directories
+
+***** Configuration for Bash
+
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+# Jump to a directory by index.
+jumpd() {
+    cd "$(dirs +$1 2> /dev/null)" || printf "Invalid index: %s\n" "$1"
+}
+
 # Define aliases for switching to specific stack entries.
-alias 1='cd -1'  # Move to the most recent directory.
-alias 2='cd -2'  # Move to the second most recent directory.
-alias 3='cd -3'
-alias 4='cd -4'
-alias 5='cd -5'
-alias 6='cd -6'
-alias 7='cd -7'
-alias 8='cd -8'
-alias 9='cd -9'
+cd1() { jumpd 1; }  # Move to the most recent directory.
+cd2() { jumpd 2; }  # Move to the second most recent directory.
+cd3() { jumpd 3; }
+cd4() { jumpd 4; }
+cd5() { jumpd 5; }
+cd6() { jumpd 6; }
+cd7() { jumpd 7; }
+cd8() { jumpd 8; }
+cd9() { jumpd 9; }
+#+end_src
+
+***** Configuration for Zsh
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+# Define aliases for switching to specific stack entries.
+alias 1='cd +1'  # Move to the most recent directory.
+alias 2='cd +2'  # Move to the second most recent directory.
+alias 3='cd +3'
+alias 4='cd +4'
+alias 5='cd +5'
+alias 6='cd +6'
+alias 7='cd +7'
+alias 8='cd +8'
+alias 9='cd +9'
 #+end_src
 
 *** Windows Subsystem For Linux (WSL) specific aliases
 
-If you are running the script in WSL, these aliases provide seamless interaction
-with Windows drives and applications:
-
-#+begin_src shell
-# Check if the script is running in WSL.
-if [[ -n "$WSL_DISTRO_NAME" ]]; then
-    # Aliases for quick access to Windows drives.
-    alias c:='cd /mnt/c'
-    alias d:='cd /mnt/d'
-fi
-#+end_src
-
-#+begin_src shell
-# Check if the script is running in WSL.
-if [[ -n "$WSL_DISTRO_NAME" ]]; then
-    # Alias for opening Windows File Explorer.
-    alias explorer='explorer.exe'
-
-    # Aliases for opening files or URLs with Windows default applications.
-    alias open='explorer.exe'
-    alias xdg-open='explorer.exe'
-fi
-#+end_src
+See also [[file:~/.dotfiles/wsl/bin/rc-common-settings-wsl][wsl Git repository]].
 
 ** Command history search
 
 Search the command history for a specified term, ignoring case sensitivity.
 
 #+begin_src shell
-# Alias 'hgrep' to search command history with case-insensitive grep.
+# Search history case-insensitively.
 alias hgrep='history | grep -i'
 #+end_src
 
@@ -393,31 +463,33 @@ provided to enhance its functionality:
 #+begin_src shell
 # Check if 'rg' command is available.
 if command -v rg > /dev/null 2>&1; then
+    # Note: Install ripgrep with 'sudo apt install ripgrep' if missing.
 #+end_src
 
 #+begin_src shell
-    # Define a function 'rgc' to always include the '-C 1' option for context
-    # lines.
+    # Ripgrep with context and colorized output.
     rgc() {
-        rg -C 1 "$@" | sed '/'"$@"'/! s/^.*$/\x1b[90m&\x1b[0m/; s/\('"$@"'\)/\x1b[1;31m\1\x1b[0m/g'
+        local pattern=$(printf %q "$*")  # Escape special chars.
+        rg -C 1 "$@" | sed "/$pattern/! s/^.*$/\x1b[90m&\x1b[0m/; s/\($pattern\)/\x1b[1;31m\1\x1b[0m/g"
     }
 #+end_src
 
 #+begin_src shell
+    # Include hidden files by default.
     alias rg='rg --hidden'
 #+end_src
 
 #+begin_src shell
-    # Alias 'rgno' to 'rg -l' for listing filenames with matches.
+    # List matching filenames only.
     alias rgno='rg -l'
 #+end_src
 
 #+begin_src shell
-    # Define a function 'rgext' for a case-insensitive search within files
-    # matching a specific extension.
+    # Search by file extension (case-insensitive).
     rgext() {
         if [[ $# -ne 2 ]]; then
             printf "Usage: rgext EXTENSION PATTERN\n"
+            printf "Example: rgext txt 'hello world'\n"
             return 2
         fi
         rg --glob "*.$1" -i -C 1 "$2"
@@ -590,7 +662,9 @@ alias -g T8="| awk -F $'\t' '{print \$8}'"
 alias -g T9="| awk -F $'\t' '{print \$9}'"
 #+end_src
 
-** Better alternative to cat
+** Tool upgrades
+
+*** Better alternative to cat
 
 The ~cat~ command is commonly used to display file contents, but ~bat~ is a more
 feature-rich alternative. It adds syntax highlighting, line numbers, and
@@ -599,11 +673,12 @@ a better user interface for viewing files.
 #+begin_src shell
 # Check if bat is installed before aliasing cat.
 if command -v bat > /dev/null 2>&1; then
+    # Better cat.
     alias cat='bat'
 fi
 #+end_src
 
-** Better alternative to less
+*** Better alternative to less
 
 The ~less~ command is widely used for paging through long outputs. However, ~most~
 offers additional features such as the ability to scroll backward and improved
@@ -614,11 +689,12 @@ performance, making it a better alternative.
 #+begin_src shell
 # Check if moar is installed before aliasing less.
 if command -v moar > /dev/null 2>&1; then
+    # Better less.
     alias less='moar'
 fi
 #+end_src
 
-** Better alternative to top
+*** Better alternative to top
 
 The ~top~ command is commonly used to monitor system processes and resource
 usage. However, ~htop~ is a more advanced and user-friendly alternative that
@@ -628,11 +704,12 @@ detailed metrics.
 #+begin_src shell
 # Check if htop is installed before aliasing top.
 if command -v htop > /dev/null 2>&1; then
+    # Better top.
     alias top='htop'
 fi
 #+end_src
 
-** Better alternative to df
+*** Better alternative to df
 
 The ~df~ command is used to display disk space usage, but ~duf~ (Disk Usage Free)
 provides a more *user-friendly, colorful, and interactive* alternative. It offers
@@ -642,11 +719,12 @@ information.
 #+begin_src shell
 # Check if duf is installed before aliasing df.
 if command -v duf > /dev/null 2>&1; then
+    # Better df.
     alias df='duf'
 fi
 #+end_src
 
-** Better alternative to traceroute
+*** Better alternative to traceroute
 
 The ~traceroute~ command is used to trace the route packets take to
 a destination. However, ~mtr~ (My Traceroute) is a more *powerful, real-time, and
@@ -656,7 +734,9 @@ network diagnostics with a clearer and more dynamic interface.
 #+begin_src shell
 # Check if mtr is installed before aliasing traceroute.
 if command -v mtr > /dev/null 2>&1; then
+    # Better traceroute.
     alias traceroute='mtr -t'
+    # Better tracepath.
     alias tracepath='mtr -t'
 fi
 #+end_src
@@ -774,11 +854,11 @@ For example:
 
 Refresh command line
 
-| Key binding | Meaning                                                                                               |
-|-------------+-------------------------------------------------------------------------------------------------------|
-| C-M-u       | Move to parent directory                                                                              |
-| M-s         | Prepend 'sudo ' to the current command                                                                |
-| M-S-l       | List directory contents                                                                               |
+| Key binding | Meaning                                                                                                 |
+|-------------+---------------------------------------------------------------------------------------------------------|
+| C-M-u       | Move to parent directory                                                                                |
+| M-s         | Prepend 'sudo ' to the current command                                                                  |
+| M-S-l       | List directory contents                                                                                 |
 | C-x C-e     | Edit the current command line in an external editor; similar to the ~fc~ ("fix command") shell built-in |
 
 *** ls
@@ -1201,7 +1281,7 @@ categories.
 # set -g fish_color_autosuggestion brblack
 # set -g fish_color_match yellow
 
-** Common settings
+** History management
 
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
 # Check if history search bindings are already set.
@@ -1213,12 +1293,23 @@ fi
 #+end_src
 
 #+begin_src shell
-# Configure HISTCONTROL to ignore both leading space and consecutive duplicates.
+# Ignore spaces and duplicates.
 export HISTCONTROL=ignoreboth
 # === default in Ubuntu
 #+end_src
 
+#+begin_src shell
+# Store 10,000 commands in memory.
+export HISTSIZE=10000
 
+# ISO8601 timestamp (yyyy-mm-dd hh:mm).
+export HISTTIMEFORMAT="%Y-%m-%d %H:%M  "
+
+# Exclude common commands.
+export HISTIGNORE="ls:cd:pwd:clear:history:exit:top:df"
+#+end_src
+
+** Common settings
 
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
 # Enable case-insensitive directory completion.
@@ -1229,16 +1320,6 @@ bind "set show-all-if-ambiguous on"
 
 
 
-#+begin_src shell
-# Set the number of commands to remember in the in-memory history.
-export HISTSIZE=10000
-
-# Set the history timestamp format to ISO8601 (yyyy-mm-dd hh:mm).
-export HISTTIMEFORMAT="%Y-%m-%d %H:%M  "
-
-# Exclude common navigation and administrative commands from history.
-export HISTIGNORE="ls:cd:pwd:clear:history:exit:top:df"
-#+end_src
 
 
 
@@ -1270,7 +1351,10 @@ export HISTIGNORE="ls:cd:pwd:clear:history:exit:top:df"
 # alias cd='autopushd'
 #+end_src
 
+** Grep colors
+
 #+begin_src shell
+# Highlight matches.
 export GREP_COLORS='ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32'
 #+end_src
 
