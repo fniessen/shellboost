@@ -1,30 +1,69 @@
 #!/usr/bin/env bash
 
-# Last modified: <20250220.1259>
+# Last modified: <20250307.1023>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
 export DIRSTACKSIZE
 
+# Custom cd function that maintains a directory stack.
 cd() {
-    if builtin cd "$@"; then
-        if ! dirs -v | grep -q "$PWD"; then
-            if [ $(dirs -v | wc -l) -ge $DIRSTACKSIZE ]; then
-                popd -n +$DIRSTACKSIZE > /dev/null
+    # Attempt to change directory using built-in cd.
+    if builtin cd "$@" 2>/dev/null; then
+        # Check if current directory is already in the stack.
+        if ! dirs -v | grep -q "^[0-9]\+[[:space:]]\+${PWD}$"; then
+            # Ensure stack doesn't exceed DIRSTACKSIZE.
+            local stack_size=$(dirs -v | wc -l)
+            if [ "$stack_size" -ge "${DIRSTACKSIZE:-10}" ]; then
+                popd -n +"$DIRSTACKSIZE" >/dev/null 2>&1
             fi
-            pushd . > /dev/null
-            printf "Directory stack updated:\n"
-            dirs -v
+
+            # Add current directory to stack silently.
+            pushd -n "$PWD" >/dev/null 2>&1
+
+            # Provide feedback.
+            printf "Directory stack (%d entries):\n" "$((stack_size - 1))"
+            dirs -v | tail -n +2 | head -n 9 | \
+                awk '{printf "  %d: %s\n", NR, $2}'
+        else
+            printf "Current directory already in stack\n"
         fi
+    else
+        printf >&2 "cd: Failed to change directory to: %s\n" "$*"
+        return 1
     fi
 }
 
-# Jump to a directory by index.
+# Jump to a directory by visible stack index (as shown in 'dirs -v').
 jumpd() {
-    cd "$(dirs +$1 2> /dev/null)" || printf "Invalid index: %s\n" "$1"
+    local index="$1"
+
+    if ! [[ "$index" =~ ^[0-9]+$ ]]; then
+        printf >&2 "jumpd: Index must be a non-negative number\n"
+        return 1
+    fi
+
+    local line
+    line=$(dirs -v | awk -v idx="$index" '$1 == idx { $1=""; sub(/^ +/, ""); print }')
+
+    if [ -z "$line" ]; then
+        printf >&2 "jumpd: Invalid index: %s\n" "$index"
+        return 1
+    fi
+
+    # Expand ~ using realpath.
+    local target_dir
+    target_dir=$(eval echo "$line")
+
+    if builtin cd "$target_dir" 2>/dev/null; then
+        printf "Moved to: %s\n" "$PWD"
+    else
+        printf >&2 "jumpd: Failed to cd to: %s\n" "$target_dir"
+        return 1
+    fi
 }
 
-# Define aliases for switching to specific stack entries.
+# Define cd aliases for switching to specific stack entries.
 cd1() { jumpd 1; }  # Move to the most recent directory.
 cd2() { jumpd 2; }  # Move to the second most recent directory.
 cd3() { jumpd 3; }
