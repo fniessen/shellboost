@@ -334,11 +334,6 @@ alias -- -='cd -'
 alias d='dirs -v | tail -n +2 | head -n 9'
 #+end_src
 
-You can use the directory stack to quickly navigate to previously visited
-directories. Normally, ~cd -1~ moves to the *previous directory* in the stack, ~cd -2~
-to the one before that, and so on. However, with the following aliases, you can
-simply type the number of the stack entry you want to visit, like ~1~.
-
 **** Auto-adding directories to stack on 'cd'
 
 Automatically track directories when using ~cd~:
@@ -442,17 +437,21 @@ cd9() { jumpd 9; }
 
 ***** Configuration for Zsh
 
+Normally, ~cd -1~ moves to the *previous directory* in the stack, ~cd -2~ to the one
+before that, and so on. However, with the following aliases, you can simply type
+the number of the stack entry you want to visit, like ~1~.
+
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
 # Define aliases for switching to specific stack entries.
-alias 1='cd +1'  # Move to the most recent directory.
-alias 2='cd +2'  # Move to the second most recent directory.
-alias 3='cd +3'
-alias 4='cd +4'
-alias 5='cd +5'
-alias 6='cd +6'
-alias 7='cd +7'
-alias 8='cd +8'
-alias 9='cd +9'
+alias 1='cd -1'  # Move to the most recent directory.
+alias 2='cd -2'  # Move to the second most recent directory.
+alias 3='cd -3'
+alias 4='cd -4'
+alias 5='cd -5'
+alias 6='cd -6'
+alias 7='cd -7'
+alias 8='cd -8'
+alias 9='cd -9'
 #+end_src
 
 *** Windows Subsystem For Linux (WSL) specific aliases
