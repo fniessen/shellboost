@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Last modified: <20250307.1023>
+# Last modified: <20250408.1154>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
@@ -22,7 +22,6 @@ cd() {
             pushd -n "$PWD" >/dev/null 2>&1
 
             # Provide feedback.
-            printf "Directory stack (%d entries):\n" "$((stack_size - 1))"
             dirs -v | tail -n +2 | head -n 9 | \
                 awk '{printf "  %d: %s\n", NR, $2}'
         else
@@ -30,7 +29,7 @@ cd() {
         fi
     else
         printf >&2 "cd: Failed to change directory to: %s\n" "$*"
-        return 1
+        return 2
     fi
 }
 
@@ -40,7 +39,7 @@ jumpd() {
 
     if ! [[ "$index" =~ ^[0-9]+$ ]]; then
         printf >&2 "jumpd: Index must be a non-negative number\n"
-        return 1
+        return 2
     fi
 
     local line
@@ -48,7 +47,7 @@ jumpd() {
 
     if [ -z "$line" ]; then
         printf >&2 "jumpd: Invalid index: %s\n" "$index"
-        return 1
+        return 2
     fi
 
     # Expand ~ using realpath.
@@ -59,7 +58,7 @@ jumpd() {
         printf "Moved to: %s\n" "$PWD"
     else
         printf >&2 "jumpd: Failed to cd to: %s\n" "$target_dir"
-        return 1
+        return 2
     fi
 }
 
