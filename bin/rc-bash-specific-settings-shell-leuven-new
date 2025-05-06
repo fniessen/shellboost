@@ -1,32 +1,49 @@
 #!/usr/bin/env bash
 
-# Last modified: <20250408.1154>
+# Last modified: <20250506.1253>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
 export DIRSTACKSIZE
 
-# Custom cd function that maintains a directory stack.
+# Custom cd function that maintains a directory stack with unique entries.
 cd() {
     # Attempt to change directory using built-in cd.
-    if builtin cd "$@" 2>/dev/null; then
-        # Check if current directory is already in the stack.
-        if ! dirs -v | grep -q "^[0-9]\+[[:space:]]\+${PWD}$"; then
-            # Ensure stack doesn't exceed DIRSTACKSIZE.
-            local stack_size=$(dirs -v | wc -l)
-            if [ "$stack_size" -ge "${DIRSTACKSIZE:-10}" ]; then
-                popd -n +"$DIRSTACKSIZE" >/dev/null 2>&1
+    if builtin cd "$@" 2> /dev/null; then
+        # Normalize the current directory path for comparison.
+        local current_dir
+        current_dir=$(realpath "$PWD" 2> /dev/null || echo "$PWD")
+
+        # Get the current directory stack without the top entry (current dir).
+        local stack
+        stack=$(dirs -p -l | tail -n +2)
+
+        # Clear the existing stack to rebuild it without duplicates.
+        while popd -n > /dev/null 2>&1; do :; done
+
+        # Rebuild the stack, excluding the current directory.
+        local temp_stack=()
+        while IFS= read -r dir; do
+            # Normalize directory path for comparison.
+            local normalized_dir
+            normalized_dir=$(realpath "$dir" 2> /dev/null || echo "$dir")
+            if [[ "$normalized_dir" != "$current_dir" ]]; then
+                temp_stack+=("$dir")
             fi
+        done <<< "$stack"
 
-            # Add current directory to stack silently.
-            pushd -n "$PWD" >/dev/null 2>&1
+        # Push unique directories back to the stack, respecting DIRSTACKSIZE.
+        local stack_size=${#temp_stack[@]}
+        for ((i=$stack_size-1; i>=0 && stack_size<${DIRSTACKSIZE:-10}-1; i--)); do
+            pushd -n "${temp_stack[$i]}" > /dev/null 2>&1
+            ((stack_size++))
+        done
 
-            # Provide feedback.
-            dirs -v | tail -n +2 | head -n 9 | \
-                awk '{printf "  %d: %s\n", NR, $2}'
-        else
-            printf "Current directory already in stack\n"
-        fi
+        # Add the current directory to the stack.
+        pushd -n "$PWD" > /dev/null 2>&1
+
+        # Provide feedback (show stack excluding the current directory at index 0).
+        dirs -v | tail -n +2 | head -n 9 | sed 's/^ //'
     else
         printf >&2 "cd: Failed to change directory to: %s\n" "$*"
         return 2
@@ -54,7 +71,7 @@ jumpd() {
     local target_dir
     target_dir=$(eval echo "$line")
 
-    if builtin cd "$target_dir" 2>/dev/null; then
+    if builtin cd "$target_dir" 2> /dev/null; then
         printf "Moved to: %s\n" "$PWD"
     else
         printf >&2 "jumpd: Failed to cd to: %s\n" "$target_dir"
