@@ -474,7 +474,8 @@ jumpd() {
     target_dir=$(eval echo "$line")
 
     if builtin cd "$target_dir" 2> /dev/null; then
-        printf "Moved to: %s\n" "$PWD"
+        # Successfully changed directory, do nothing.
+        :
     else
         printf >&2 "jumpd: Failed to cd to: %s\n" "$target_dir"
         return 2
