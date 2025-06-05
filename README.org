@@ -3,7 +3,7 @@
 #+PROPERTY:  header-args :tangle bin/rc-common-settings-shell-leuven-new
 
 #+name: current-time
-#+begin_src emacs-lisp :eval yes :results silent :tangle no
+#+begin_src emacs-lisp :eval yes :results value :tangle no
 (format-time-string "<%Y%m%d.%H%M>")
 #+end_src
 
@@ -387,6 +387,11 @@ cd() {
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
 export DIRSTACKSIZE
+
+# Check if realpath is available; if not, warn about potential issues.
+if ! command -v realpath > /dev/null 2>&1; then
+    printf >&2 "Warning: 'realpath' not found. Directory stack normalization may not work correctly.\n"
+fi
 
 # Custom cd function that maintains a directory stack with unique entries.
 cd() {
@@ -927,11 +932,11 @@ For example:
 
 Refresh command line
 
-| Key binding | Meaning                                                                                               |
-|-------------+-------------------------------------------------------------------------------------------------------|
-| C-M-u       | Move to parent directory                                                                              |
-| M-s         | Prepend 'sudo ' to the current command                                                                |
-| M-S-l       | List directory contents                                                                               |
+| Key binding | Meaning                                                                                                 |
+|-------------+---------------------------------------------------------------------------------------------------------|
+| C-M-u       | Move to parent directory                                                                                |
+| M-s         | Prepend 'sudo ' to the current command                                                                  |
+| M-S-l       | List directory contents                                                                                 |
 | C-x C-e     | Edit the current command line in an external editor; similar to the ~fc~ ("fix command") shell built-in |
 
 *** ls
@@ -1234,15 +1239,6 @@ show_exit_code() {
 PROMPT_COMMAND='show_exit_code'
 
 
-
-PS1='\n\
-\[\e]0;\u@\h: \w\a\]\
-${debian_chroot:+($debian_chroot)}\
-\[\033[01;32m\]\u@\h\[\033[00m\]\
-\[\033[01;30m\]:\[\033[00m\]\
-\[\033[01;34m\]\w\[\033[00m\] \
-\[\033[01;33m\]($(git branch 2> /dev/null | grep '^*' | colrm 1 2))\
-\[\033[0m\]\n\$ '
 
 PS1='\n\
 \[\e]0;\u@\h: \w\a\]\

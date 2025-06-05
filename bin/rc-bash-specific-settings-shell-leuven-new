@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 
-# Last modified: <20250506.1310>
+# Last modified: <20250605.1519>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
 export DIRSTACKSIZE
+
+# Check if realpath is available; if not, warn about potential issues.
+if ! command -v realpath > /dev/null 2>&1; then
+    printf >&2 "Warning: 'realpath' not found. Directory stack normalization may not work correctly.\n"
+fi
 
 # Custom cd function that maintains a directory stack with unique entries.
 cd() {
@@ -163,15 +168,6 @@ show_exit_code() {
 PROMPT_COMMAND='show_exit_code'
 
 
-
-PS1='\n\
-\[\e]0;\u@\h: \w\a\]\
-${debian_chroot:+($debian_chroot)}\
-\[\033[01;32m\]\u@\h\[\033[00m\]\
-\[\033[01;30m\]:\[\033[00m\]\
-\[\033[01;34m\]\w\[\033[00m\] \
-\[\033[01;33m\]($(git branch 2> /dev/null | grep '^*' | colrm 1 2))\
-\[\033[0m\]\n\$ '
 
 PS1='\n\
 \[\e]0;\u@\h: \w\a\]\
