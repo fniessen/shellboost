@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Last modified: <20250220.1043>
+# Last modified: <20250605.1535>
 
 # Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 
@@ -41,8 +41,8 @@ lvn_add_to_path "$HOME/winbin"
 TEXLIVE_DIR="${TEXLIVE_HOME:-/usr/local/texlive/2024}"  # Override with TEXLIVE_HOME.
 
 if [[ -d "$TEXLIVE_DIR" ]]; then
-    # Ensure MANPATH and INFOPATH are initialized before appending (for Zsh
-    # compatibility).
+    # Ensure MANPATH and INFOPATH are initialized before appending (to ensure
+    # compatibility with Zsh).
     MANPATH="${MANPATH:-}"
     INFOPATH="${INFOPATH:-}"
 
@@ -71,7 +71,7 @@ alias ....='cd ../../..'
 # Switch to previous directory.
 alias -- -='cd -'
 
-# Show dir stack (1-9), skip current.
+# Show the directory stack (entries 1-9), excluding the current directory.
 alias d='dirs -v | tail -n +2 | head -n 9'
 
 # Search history case-insensitively.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Last modified: <20250605.1519>
+# Last modified: <20250605.1535>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
@@ -201,7 +201,7 @@ __git_ps1() {
     local outgoing=""                   # should be in yellow
     local incoming=""                   # should be in cyan
 
-    if [[ -n "$(git diff --no-ext-diff --quiet || echo '*')" ]]; then
+    if ! git diff --quiet --no-ext-diff; then
         dirty=" *dirty"
     fi
 

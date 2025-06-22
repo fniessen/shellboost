@@ -15,11 +15,11 @@
 # Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 #+end_src
 
-Welcome to the *Leuven shell configuration files* project!  This repository is
-your go-to solution for streamlining and enhancing your terminal
-experience. Whether you're a developer, sysadmin, or enthusiast, this
-configuration provides a well-organized, modular, and efficient way to customize
-your shell environment.
+Welcome to the *Leuven shell configuration files* project!  This repository is a
+go-to solution for streamlining and enhancing your terminal experience. Whether
+you're developer, sysadmin, or an enthusiast, this configuration provides
+a well-organized, modular, and efficient way to customize your shell
+environment.
 
 * What's inside?
 
@@ -30,10 +30,10 @@ you'll find:
 - *Environment variables:* Define global variables for seamless shell behavior.
 - *Paths:* Configure system paths to access your tools effortlessly.
 - *Aliases:* Simplify commands with powerful shortcuts.
-- *Functions:* Extend shell functionality with reusable scripts.
+- *Functions:* Extend shell functionality with custom functions.
 - *Key bindings:* Speed up workflows with custom key mappings.
 - *Prompt configuration:* Personalize your shell prompt with style and utility.
-- *Autosuggestions:* Type less with intelligent command predictions.
+- *Autosuggestions:* Type fewer keystrokes with intelligent command predictions.
 - *Completions:* Enjoy enhanced tab completions for efficiency.
 - *Universal variables:* Set shared variables across sessions and systems.
 - *Abbreviations:* Save time with shorthand command expansions.
@@ -82,8 +82,8 @@ right away.
 
 ** Automating custom configuration
 
-To automatically source custom settings files on shell startup, do the
-following:
+To load custom settings automatically when your shell starts, follow these
+steps:
 
 1. Clone the repository:
 
@@ -241,10 +241,8 @@ from the command line.
 : update-dotfiles
 : tlmgr install gillius
 : tlmgr update --self
-: tlmgr install gillius
 : sudo apt remove texlive*
 : sudo apt install texlive
-: tlmgr install gillius
 : sudo apt remove texlive*
 : wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 : tar -xvzf install-tl-unx.tar.gz
@@ -252,9 +250,6 @@ from the command line.
 : sudo ./install-tl
 : cd install-tl-20250130/
 : sudo ./install-tl
-: tlmgr update --self
-: tlmgr install gillius
-: tlmgr update --self
 : sudo tlmgr update --self
 : sudo /usr/local/texlive/2024/bin/x86_64-linux/tlmgr update --self
 : sudo /usr/local/texlive/2024/bin/x86_64-linux/tlmgr  install gillius
@@ -268,8 +263,8 @@ The following script configures TeX Live 2024 by updating ~MANPATH~, ~INFOPATH~,
 TEXLIVE_DIR="${TEXLIVE_HOME:-/usr/local/texlive/2024}"  # Override with TEXLIVE_HOME.
 
 if [[ -d "$TEXLIVE_DIR" ]]; then
-    # Ensure MANPATH and INFOPATH are initialized before appending (for Zsh
-    # compatibility).
+    # Ensure MANPATH and INFOPATH are initialized before appending (to ensure
+    # compatibility with Zsh).
     MANPATH="${MANPATH:-}"
     INFOPATH="${INFOPATH:-}"
 
@@ -330,58 +325,13 @@ alias -- -='cd -'
 **** Viewing the directory stack
 
 #+begin_src shell
-# Show dir stack (1-9), skip current.
+# Show the directory stack (entries 1-9), excluding the current directory.
 alias d='dirs -v | tail -n +2 | head -n 9'
 #+end_src
 
 **** Auto-adding directories to stack on 'cd'
 
 Automatically track directories when using ~cd~:
-
-#+begin_src shell :tangle no
-autopushd() {
-    old_dir="$(pwd)"
-    builtin cd "$@"
-    if [[ ":$DIRSTACK:" != *":$old_dir:"* ]]; then
-        printf "Pushing $old_dir onto the stack:\n"
-        pushd "$old_dir"
-    else
-        printf "Directory already in stack, not pushing.\n"
-    fi
-}
-
-alias cd='autopushd'
-#+end_src
-
-#+begin_src shell :tangle no
-# Change directory and push it onto the directory stack if it's not already
-# there.
-cd() {
-    if ! dirs -v | grep -q "$PWD"; then
-        builtin cd "$@" && pushd . > /dev/null
-    else
-        builtin cd "$@"  # Just change directory without pushing if it's already
-                         # in the stack.
-    fi
-}
-#+end_src
-
-#+begin_src shell :tangle no
-# Set the maximum directory stack size to 10.
-DIRSTACKSIZE=10
-export DIRSTACKSIZE
-
-cd() {
-    if [ "$#" -eq 0 ]; then
-        builtin pushd "$HOME" > /dev/null
-    else
-        builtin pushd "$@" > /dev/null
-    fi
-    while [ ${#DIRSTACK[@]} -gt $DIRSTACKSIZE ]; do
-        popd -n +1 > /dev/null
-    done
-}
-#+end_src
 
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
 # Set the maximum directory stack size to 10.
@@ -932,11 +882,11 @@ For example:
 
 Refresh command line
 
-| Key binding | Meaning                                                                                                 |
-|-------------+---------------------------------------------------------------------------------------------------------|
-| C-M-u       | Move to parent directory                                                                                |
-| M-s         | Prepend 'sudo ' to the current command                                                                  |
-| M-S-l       | List directory contents                                                                                 |
+| Key binding | Meaning                                                                                               |
+|-------------+-------------------------------------------------------------------------------------------------------|
+| C-M-u       | Move to parent directory                                                                              |
+| M-s         | Prepend 'sudo ' to the current command                                                                |
+| M-S-l       | List directory contents                                                                               |
 | C-x C-e     | Edit the current command line in an external editor; similar to the ~fc~ ("fix command") shell built-in |
 
 *** ls
@@ -1272,7 +1222,7 @@ __git_ps1() {
     local outgoing=""                   # should be in yellow
     local incoming=""                   # should be in cyan
 
-    if [[ -n "$(git diff --no-ext-diff --quiet || echo '*')" ]]; then
+    if ! git diff --quiet --no-ext-diff; then
         dirty=" *dirty"
     fi
 
