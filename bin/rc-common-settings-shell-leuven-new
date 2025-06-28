@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Last modified: <20250605.1535>
+# Last modified: <20250627.2028>
 
 # Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 
@@ -8,14 +8,16 @@
 export VISUAL=emacs
 export EDITOR="$VISUAL"
 
-# Check if en_US.utf8 locale is available.
-if locale -a | grep -q 'en_US.utf8'; then
-    # export LC_ALL=en_US.utf8
-    export LANG=en_US.utf8
+# Check and configure locale settings.
+locale="en_US.utf8"
+
+if locale -a | grep -q "$locale"; then
+    export LANG="$locale"
     export LC_ALL="$LANG"               # Consistent character encoding.
+    printf "Locale '%s' is set.\n" "$locale"
 else
-    printf "Warning: 'en_US.utf8' locale unavailable. Using system default.\n"
-    printf "Hint: Install it with 'sudo locale-gen en_US.utf8'.\n"
+    printf "Warning: '%s' locale unavailable.\n" "$locale"
+    printf "Hint: You may need to manually install it with 'sudo locale-gen %s'.\n" "$locale"
 fi
 
 if [ -r ~/.dircolors ]; then
