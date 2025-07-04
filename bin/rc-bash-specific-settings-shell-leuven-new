@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Last modified: <20250702.1414>
+# Last modified: <20250704.1118>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
@@ -166,42 +166,29 @@ PROMPT_COMMAND='show_exit_code'
 
 
 
+# ───────────────────────────────────────────────────────────────
+# Powerline-style Git-enhanced Bash prompt
+# ───────────────────────────────────────────────────────────────
+
 # Check if 'git' command is available.
 if ! command -v git > /dev/null 2>&1; then
     printf >&2 "ERROR: 'git' command not found.\n"
 fi
 
 # Custom colors
-GIT_DIRTY_COLOR="\033[0;31m"           # Red (attention needed).
+# GIT_DIRTY_COLOR="\033[0;31m"           # Red (attention needed).
 GIT_DIRTY_COLOR="\033[1;37;41m"
-
 GIT_STAGED_COLOR="\033[0;32m"          # Green (good to go / ready).
 GIT_STASH_COLOR="\033[0;36m"           # Cyan (info).
 GIT_UNTRACKED_COLOR="\033[0;33m"       # Yellow (warning light).
 GIT_OUTGOING_COLOR="\033[1;35m"        # Purple for contrast.
 GIT_INCOMING_COLOR="\033[0;36m"        # Cyan (info).
-GIT_BRANCH_COLOR="\033[0;35m"          # Magenta.
+# GIT_BRANCH_COLOR="\033[0;35m"          # Magenta.
 GIT_BRANCH_COLOR="\033[37;45m"
-
 GIT_RESET_COLOR="\033[0m"              # Reset to default color.
 
-PS1='\n\
-\[\e]0;\u@\h: \w\a\]\
-${debian_chroot:+($debian_chroot)}\
-\[\033[01;32m\]\u@\h\[\033[00m\]\
-\[\033[01;30m\]:\[\033[00m\]\
-\[\033[01;34m\]\w\[\033[00m\]\
-$(__git_ps1)\
-\n\
-\[\033[1m\]\$ \[\033[0m\]'
-
 __git_ps1() {
-    local git_info
-    git_info="$(git rev-parse --is-inside-work-tree 2> /dev/null)"
-
-    if [[ -z "$git_info" ]]; then
-        return $?
-    fi
+    git rev-parse --is-inside-work-tree &> /dev/null || return
 
     local branch
     if branch="$(git symbolic-ref --short -q HEAD 2> /dev/null)"; then
@@ -217,44 +204,76 @@ __git_ps1() {
     local outgoing="" # should be in yellow
     local incoming="" # should be in cyan
 
+    # Dirty (unstaged).
     if ! git diff --quiet --no-ext-diff; then
-        dirty="${GIT_RESET_COLOR} ${GIT_DIRTY_COLOR}*dirty${GIT_RESET_COLOR}"
+        dirty="*"
     fi
 
-    if [[ -n "$(git diff --no-ext-diff --cached --quiet || echo '+')" ]]; then
-        staged="${GIT_RESET_COLOR} ${GIT_STAGED_COLOR}+staged${GIT_RESET_COLOR}"
+    # Staged.
+    if ! git diff --cached --quiet; then
+        staged="+"
     fi
 
+    # Stash.
     if git rev-parse --verify --quiet refs/stash > /dev/null; then
-        stash="${GIT_RESET_COLOR} ${GIT_STASH_COLOR}\$stash${GIT_RESET_COLOR}"
+        stash="\$"
     fi
 
-    if git ls-files --others --exclude-standard --error-unmatch -- ':/*' > /dev/null 2>&1; then
-        untracked="${GIT_RESET_COLOR} ${GIT_UNTRACKED_COLOR}?untracked${GIT_RESET_COLOR}"
+    # Untracked.
+    if git ls-files --others --exclude-standard | grep -q .; then
+        untracked="?"
     fi
 
-    local count_outgoing=0
-    local count_incoming=0
-    local upstream_branch
-
-    if upstream_branch="$(git rev-parse --abbrev-ref @{u} 2> /dev/null)"; then
-        count_outgoing=$(git rev-list --count --left-right @{u}...HEAD 2> /dev/null | awk '{print $2}')
-        count_incoming=$(git rev-list --count --left-right @{u}...HEAD 2> /dev/null | awk '{print $1}')
+    # Ahead / Behind.
+    if git rev-parse --abbrev-ref @{u} &> /dev/null; then
+        local counts
+        counts="$(git rev-list --left-right --count HEAD...@{u} 2> /dev/null)"
+        local count_outgoing=$(echo "$counts" | awk '{print $2}')
+        local count_incoming=$(echo "$counts" | awk '{print $1}')
+        (( count_outgoing > 0 )) && outgoing="↑$count_outgoing"
+        (( count_incoming > 0 )) && incoming="↓$count_incoming"
     fi
 
-    if (( count_outgoing > 0 )); then
-        outgoing="${GIT_RESET_COLOR} ${GIT_OUTGOING_COLOR}↑$count_outgoing${GIT_RESET_COLOR}"
-    fi
-
-    if (( count_incoming > 0 )); then
-        incoming="${GIT_RESET_COLOR} ${GIT_INCOMING_COLOR}↓$count_incoming${GIT_RESET_COLOR}"
-    fi
-
-    local status_info="$dirty$staged$stash$untracked$outgoing$incoming"
-
-    branch="${branch##refs/heads/}"
-    printf -- " (${GIT_BRANCH_COLOR}${branch}${status_info}${GIT_RESET_COLOR})"
+    local status="$dirty$staged$stash$untracked$outgoing$incoming"
+    echo "$branch${status:+ $status}"
 }
+
+function set_prompt() {
+    # Powerline separators.
+    local SEPARATOR_RIGHT=""
+
+    # Colors (with proper Bash escapes).
+    local RESET="\[\033[0m\]"
+
+    local USER_BG="\[\033[48;5;240m\]"
+    local USER_FG="\[\033[38;5;15m\]"
+
+    local DIR_BG="\[\033[48;5;25m\]"
+    local DIR_FG="\[\033[38;5;15m\]"
+
+    local GIT_BG="\[\033[48;5;238m\]"
+    local GIT_FG="\[\033[38;5;15m\]"
+
+    # Prompt assembly.
+    PS1="\n"
+
+    # User@Host.
+    PS1+="${USER_BG}${USER_FG}\u@\h ${RESET}${DIR_BG}\[\033[38;5;240m\]${SEPARATOR_RIGHT}${RESET}"
+
+    # Working directory.
+    PS1+="${DIR_BG}${DIR_FG} \w ${RESET}"
+
+    # Git status, only if inside repo.
+    if git rev-parse --is-inside-work-tree &> /dev/null; then
+        PS1+="${GIT_BG}\[\033[38;5;25m\]${SEPARATOR_RIGHT}${RESET}"
+        PS1+="${GIT_BG}${GIT_FG} \$(__git_ps1) ${RESET}"
+    fi
+
+    # Final line and prompt symbol.
+    PS1+="\n\[\033[1m\]\$ \[\033[0m\]"
+}
+
+PROMPT_COMMAND='set_prompt'
 
 # XXX Make use of color_prompt variable?
 
@@ -272,15 +291,14 @@ bind "set show-all-if-ambiguous on"
 # Set a common history file.
 HISTFILE=$HOME/.bash_history
 
-# Set the number of history entries to save to the (on-disk history)
-# file.
+# Set the number of history entries to save to the (on-disk history) file.
 export HISTFILESIZE=20000
 
 # Append to the history file instead of overwriting it.
 shopt -s histappend
 
-# Add history management to the existing PROMPT_COMMAND: after each
-# command, append to the history file and reload it.
+# Add history management to the existing PROMPT_COMMAND: after each command,
+# append to the history file and reload it.
 if [ -n "$PROMPT_COMMAND" ]; then
     PROMPT_COMMAND="$PROMPT_COMMAND; history -a; history -n"
 else
