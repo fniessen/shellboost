@@ -1153,23 +1153,6 @@ This is the configuration of the terminal prompt. This includes things like the
 colors, the text that is displayed, and the layout of the prompt.
 
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
-# Customize PS1 prompt.
-
-# Define a custom function to display the exit code in red if it's non-zero.
-show_exit_code() {
-    local exit_code=$?
-    if [[ $exit_code -ne 0 ]]; then
-        printf "\033[01;31m%s\033[00m\n" "$exit_code"
-    else
-        printf "%s" ""
-    fi
-}
-
-# Set the PROMPT_COMMAND to call the custom function.
-PROMPT_COMMAND='show_exit_code'
-
-
-
 # ───────────────────────────────────────────────────────────────
 # Powerline-style Git-enhanced Bash prompt
 # ───────────────────────────────────────────────────────────────
@@ -1179,7 +1162,17 @@ if ! command -v git > /dev/null 2>&1; then
     printf >&2 "ERROR: 'git' command not found.\n"
 fi
 
-# Custom colors
+# Define a custom function to display the exit code in red if it's non-zero.
+show_exit_code() {
+    local exit_code=$?
+    if [[ $exit_code -ne 0 ]]; then
+        printf "\033[1;37;41m%s\033[0m\n" "$exit_code"
+    else
+        printf "%s" ""
+    fi
+}
+
+# Custom colors.
 # GIT_DIRTY_COLOR="\033[0;31m"           # Red (attention needed).
 GIT_DIRTY_COLOR="\033[1;37;41m"
 GIT_STAGED_COLOR="\033[0;32m"          # Green (good to go / ready).
@@ -1277,7 +1270,8 @@ function set_prompt() {
     PS1+="\n\[\033[1m\]\$ \[\033[0m\]"
 }
 
-PROMPT_COMMAND='set_prompt'
+# Set PROMPT_COMMAND to first show exit code if any, then update prompt
+PROMPT_COMMAND='show_exit_code; set_prompt'
 
 # XXX Make use of color_prompt variable?
 #+end_src
