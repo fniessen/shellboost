@@ -439,16 +439,13 @@ jumpd() {
     fi
 }
 
-# Define cd aliases for switching to specific stack entries.
-cd1() { jumpd 1; }  # Move to the most recent directory.
-cd2() { jumpd 2; }  # Move to the second most recent directory.
-cd3() { jumpd 3; }
-cd4() { jumpd 4; }
-cd5() { jumpd 5; }
-cd6() { jumpd 6; }
-cd7() { jumpd 7; }
-cd8() { jumpd 8; }
-cd9() { jumpd 9; }
+# Define cdN() functions for switching to specific stack entries using jumpd.
+for i in {1..9}; do
+  eval "cd$i() { jumpd $i; }"
+done
+# 'cd1' moves to the most recent directory.
+# 'cd2' moves to the second most recent directory.
+# etc.
 #+end_src
 
 ***** Configuration for Zsh
@@ -458,16 +455,13 @@ before that, and so on. However, with the following aliases, you can simply type
 the number of the stack entry you want to visit, like ~1~.
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
-# Define aliases for switching to specific stack entries.
-alias 1='cd -1'  # Move to the most recent directory.
-alias 2='cd -2'  # Move to the second most recent directory.
-alias 3='cd -3'
-alias 4='cd -4'
-alias 5='cd -5'
-alias 6='cd -6'
-alias 7='cd -7'
-alias 8='cd -8'
-alias 9='cd -9'
+# Define aliases for switching to specific stack entries (cd -N).
+for i in {1..9}; do
+  alias $i="cd -$i"
+done
+# '1' moves to the most recent directory.
+# '2' moves to the second most recent directory.
+# etc.
 #+end_src
 
 *** Windows Subsystem For Linux (WSL) specific aliases
@@ -479,8 +473,8 @@ See also [[file:~/.dotfiles/wsl/bin/rc-common-settings-wsl][wsl Git repository]]
 Search the command history for a specified term, ignoring case sensitivity.
 
 #+begin_src shell
-# Search history case-insensitively.
-alias hgrep='history | grep -i'
+# Search through shell history with case-insensitive grep and color highlighting.
+alias hgrep='history | grep -i --color=auto'
 #+end_src
 
 ** Ripgrep enhancements
@@ -495,10 +489,10 @@ if command -v rg > /dev/null 2>&1; then
 #+end_src
 
 #+begin_src shell
-    # Ripgrep with context and colorized output.
-    rgc() {
-        local pattern=$(printf %q "$*")  # Escape special chars.
-        rg -C 1 "$@" | sed "/$pattern/! s/^.*$/\x1b[90m&\x1b[0m/; s/\($pattern\)/\x1b[1;31m\1\x1b[0m/g"
+    # Ripgrep with context, colorized output, and case-insensitive search.
+    rgci() {
+        local pattern="$*"
+        rg -i -C 1 "$@" | sed -E "/$pattern/! s/^.*$/\x1b[90m&\x1b[0m/; s/($pattern)/\x1b[1;31m\1\x1b[0m/gI"
     }
 #+end_src
 
@@ -619,12 +613,13 @@ List all directories containing a specific file, such as .git:
 
 *** Delimiter-separated outputs
 
-These aliases allow quick extraction of specific columns from various
+These aliases allow quick *extraction* of specific *fields* from various
 delimiter-separated outputs.
 
 **** Space-separated (A)
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+# Field extractors.
 for i in {1..9}; do
     alias -g "A$i"="| awk '{print \$$i}'"
 done
@@ -895,11 +890,19 @@ bind '"\e\C-u": "cd ..\n"'
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
 # C-M-u: Move to parent directory.
 up-directory() {
-  cd .. && zle reset-prompt
+  local count=${1:-1}
+  while (( count > 0 )); do
+      cd ..
+      ((count--))
+  done
+  zle reset-prompt
 }
 zle -N up-directory
 bindkey '\e\C-u' up-directory
 #+end_src
+
+~up-directory~ moves up N directories from the current directory (default is 1 if
+no argument is provided), then refreshes the zsh prompt.
 
 *Key note:* In Zsh, the *prompt* is refreshed to *reflect the new directory* after the
 change.
@@ -921,8 +924,13 @@ bind '"\es": "\C-asudo \C-e"'
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
 # M-s: Prepend sudo.
 prepend-sudo() {
+  # If the buffer is empty, recall the previous command from history.
   [[ -z $BUFFER ]] && zle up-history
-  LBUFFER="sudo $LBUFFER"
+  # Only prepend 'sudo' if it's not already at the start.
+  if [[ $LBUFFER != sudo* ]]; then
+    LBUFFER="sudo $LBUFFER"
+  fi
+  zle reset-prompt
 }
 zle -N prepend-sudo
 bindkey "\es" prepend-sudo
@@ -1162,14 +1170,33 @@ PROMPT_COMMAND='show_exit_code'
 
 
 
+# Check if 'git' command is available.
+if ! command -v git > /dev/null 2>&1; then
+    printf >&2 "ERROR: 'git' command not found.\n"
+fi
+
+# Custom colors
+GIT_DIRTY_COLOR="\033[0;31m"           # Red (attention needed).
+GIT_DIRTY_COLOR="\033[1;37;41m"
+
+GIT_STAGED_COLOR="\033[0;32m"          # Green (good to go / ready).
+GIT_STASH_COLOR="\033[0;36m"           # Cyan (info).
+GIT_UNTRACKED_COLOR="\033[0;33m"       # Yellow (warning light).
+GIT_OUTGOING_COLOR="\033[1;35m"        # Purple for contrast.
+GIT_INCOMING_COLOR="\033[0;36m"        # Cyan (info).
+GIT_BRANCH_COLOR="\033[0;35m"          # Magenta.
+GIT_BRANCH_COLOR="\033[37;45m"
+
+GIT_RESET_COLOR="\033[0m"              # Reset to default color.
+
 PS1='\n\
 \[\e]0;\u@\h: \w\a\]\
 ${debian_chroot:+($debian_chroot)}\
 \[\033[01;32m\]\u@\h\[\033[00m\]\
 \[\033[01;30m\]:\[\033[00m\]\
 \[\033[01;34m\]\w\[\033[00m\]\
-\[\033[01;33m\]$(__git_ps1)\
-\[\033[0m\]\n\
+$(__git_ps1)\
+\n\
 \[\033[1m\]\$ \[\033[0m\]'
 
 __git_ps1() {
@@ -1187,27 +1214,27 @@ __git_ps1() {
         branch="$(git rev-parse --short HEAD 2> /dev/null)"
     fi
 
-    local dirty=""                      # should be in red
-    local staged=""                     # should be in magenta
-    local stash=""                      # should be in blue
-    local untracked=""                  # should be in green
-    local outgoing=""                   # should be in yellow
-    local incoming=""                   # should be in cyan
+    local dirty=""    # should be in red
+    local staged=""   # should be in magenta
+    local stash=""    # should be in blue
+    local untracked="" # should be in green
+    local outgoing="" # should be in yellow
+    local incoming="" # should be in cyan
 
     if ! git diff --quiet --no-ext-diff; then
-        dirty=" *dirty"
+        dirty="${GIT_RESET_COLOR} ${GIT_DIRTY_COLOR}*dirty${GIT_RESET_COLOR}"
     fi
 
     if [[ -n "$(git diff --no-ext-diff --cached --quiet || echo '+')" ]]; then
-        staged=" +staged"
+        staged="${GIT_RESET_COLOR} ${GIT_STAGED_COLOR}+staged${GIT_RESET_COLOR}"
     fi
 
     if git rev-parse --verify --quiet refs/stash > /dev/null; then
-        stash=" \$stash"
+        stash="${GIT_RESET_COLOR} ${GIT_STASH_COLOR}\$stash${GIT_RESET_COLOR}"
     fi
 
     if git ls-files --others --exclude-standard --error-unmatch -- ':/*' > /dev/null 2>&1; then
-        untracked=" ?untracked"
+        untracked="${GIT_RESET_COLOR} ${GIT_UNTRACKED_COLOR}?untracked${GIT_RESET_COLOR}"
     fi
 
     local count_outgoing=0
@@ -1220,17 +1247,17 @@ __git_ps1() {
     fi
 
     if (( count_outgoing > 0 )); then
-        outgoing=" ↑$count_outgoing"
+        outgoing="${GIT_RESET_COLOR} ${GIT_OUTGOING_COLOR}↑$count_outgoing${GIT_RESET_COLOR}"
     fi
 
     if (( count_incoming > 0 )); then
-        incoming=" ↓$count_incoming"
+        incoming="${GIT_RESET_COLOR} ${GIT_INCOMING_COLOR}↓$count_incoming${GIT_RESET_COLOR}"
     fi
 
     local status_info="$dirty$staged$stash$untracked$outgoing$incoming"
 
     branch="${branch##refs/heads/}"
-    printf -- " (%s)" "$branch$(tput setaf 6)${status_info:+$status_info}$(tput setaf 3)"
+    printf -- " (${GIT_BRANCH_COLOR}${branch}${status_info}${GIT_RESET_COLOR})"
 }
 
 # XXX Make use of color_prompt variable?

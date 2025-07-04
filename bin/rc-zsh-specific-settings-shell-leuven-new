@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-# Last modified: <20250627.2028>
+# Last modified: <20250702.1414>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
@@ -9,16 +9,13 @@ export DIRSTACKSIZE
 setopt AUTO_PUSHD
 setopt PUSHD_IGNORE_DUPS
 
-# Define aliases for switching to specific stack entries.
-alias 1='cd -1'  # Move to the most recent directory.
-alias 2='cd -2'  # Move to the second most recent directory.
-alias 3='cd -3'
-alias 4='cd -4'
-alias 5='cd -5'
-alias 6='cd -6'
-alias 7='cd -7'
-alias 8='cd -8'
-alias 9='cd -9'
+# Define aliases for switching to specific stack entries (cd -N).
+for i in {1..9}; do
+  alias $i="cd -$i"
+done
+# '1' moves to the most recent directory.
+# '2' moves to the second most recent directory.
+# etc.
 
 alias -g 21="2>&1"                      # Redirect stderr to stdout.
 alias -g N='> /dev/null'                # Redirect output to null (discard).
@@ -47,6 +44,7 @@ alias -g X1='| xargs -n 1'              # Process input one argument per line.
 
 alias -g Map="| tr '\n' '\0' | xargs -0 -n 1"
 
+# Field extractors.
 for i in {1..9}; do
     alias -g "A$i"="| awk '{print \$$i}'"
 done
@@ -72,15 +70,25 @@ bindkey -s '\eL' 'ls\n'
 
 # C-M-u: Move to parent directory.
 up-directory() {
-  cd .. && zle reset-prompt
+  local count=${1:-1}
+  while (( count > 0 )); do
+      cd ..
+      ((count--))
+  done
+  zle reset-prompt
 }
 zle -N up-directory
 bindkey '\e\C-u' up-directory
 
 # M-s: Prepend sudo.
 prepend-sudo() {
+  # If the buffer is empty, recall the previous command from history.
   [[ -z $BUFFER ]] && zle up-history
-  LBUFFER="sudo $LBUFFER"
+  # Only prepend 'sudo' if it's not already at the start.
+  if [[ $LBUFFER != sudo* ]]; then
+    LBUFFER="sudo $LBUFFER"
+  fi
+  zle reset-prompt
 }
 zle -N prepend-sudo
 bindkey "\es" prepend-sudo

@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Last modified: <20250627.2028>
+# Last modified: <20250702.1414>
 
 # Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 
@@ -76,17 +76,17 @@ alias -- -='cd -'
 # Show the directory stack (entries 1-9), excluding the current directory.
 alias d='dirs -v | tail -n +2 | head -n 9'
 
-# Search history case-insensitively.
-alias hgrep='history | grep -i'
+# Search through shell history with case-insensitive grep and color highlighting.
+alias hgrep='history | grep -i --color=auto'
 
 # Check if 'rg' command is available.
 if command -v rg > /dev/null 2>&1; then
     # Note: Install ripgrep with 'sudo apt install ripgrep' if missing.
 
-    # Ripgrep with context and colorized output.
-    rgc() {
-        local pattern=$(printf %q "$*")  # Escape special chars.
-        rg -C 1 "$@" | sed "/$pattern/! s/^.*$/\x1b[90m&\x1b[0m/; s/\($pattern\)/\x1b[1;31m\1\x1b[0m/g"
+    # Ripgrep with context, colorized output, and case-insensitive search.
+    rgci() {
+        local pattern="$*"
+        rg -i -C 1 "$@" | sed -E "/$pattern/! s/^.*$/\x1b[90m&\x1b[0m/; s/($pattern)/\x1b[1;31m\1\x1b[0m/gI"
     }
 
     # Include hidden files by default.
