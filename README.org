@@ -351,7 +351,7 @@ cd() {
     if builtin cd "$@" 2> /dev/null; then
         # Normalize the current directory path for comparison.
         local current_dir
-        current_dir=$(realpath "$PWD" 2> /dev/null || echo "$PWD")
+        current_dir=$(realpath "$PWD" 2> /dev/null || printf "%s\n" "$PWD")
 
         # Get the current directory stack without the top entry (current dir).
         local stack
@@ -365,7 +365,7 @@ cd() {
         while IFS= read -r dir; do
             # Normalize directory path for comparison.
             local normalized_dir
-            normalized_dir=$(realpath "$dir" 2> /dev/null || echo "$dir")
+            normalized_dir=$(realpath "$dir" 2> /dev/null || printf "%s\n" "$dir")
             if [[ "$normalized_dir" != "$current_dir" ]]; then
                 temp_stack+=("$dir")
             fi
@@ -381,8 +381,8 @@ cd() {
         # Add the current directory to the stack.
         pushd -n "$PWD" > /dev/null 2>&1
 
-        # Provide feedback (show stack excluding the current directory at index 0).
-        dirs -v | tail -n +2 | head -n 9 | sed 's/^ //'
+        # # Provide feedback (show stack excluding the current directory at index 0).
+        # dirs -v | tail -n +2 | head -n 9 | sed 's/^ //'
     else
         printf >&2 "cd: Failed to change directory to: %s\n" "$*"
         return 2
@@ -415,7 +415,7 @@ jumpd() {
 
     if ! [[ "$index" =~ ^[0-9]+$ ]]; then
         printf >&2 "jumpd: Index must be a non-negative number\n"
-        return 2
+        return 64                       # EX_USAGE: Command line usage error.
     fi
 
     local line
@@ -423,19 +423,19 @@ jumpd() {
 
     if [ -z "$line" ]; then
         printf >&2 "jumpd: Invalid index: %s\n" "$index"
-        return 2
+        return 65                       # EX_DATAERR: Data format error.
     fi
 
-    # Expand ~ using realpath.
+    # Expand ~ using eval.
     local target_dir
-    target_dir=$(eval echo "$line")
+    target_dir=$(eval printf "%s\\\n" "$line") # With newline.
 
     if builtin cd "$target_dir" 2> /dev/null; then
         # Successfully changed directory, do nothing.
         :
     else
         printf >&2 "jumpd: Failed to cd to: %s\n" "$target_dir"
-        return 2
+        return 71                       # EX_OSERR: System error.
     fi
 }
 
