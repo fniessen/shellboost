@@ -491,38 +491,42 @@ if command -v rg > /dev/null 2>&1; then
 #+begin_src shell
     # Ripgrep with context, colorized output, and case-insensitive search.
     rgci() {
+        if [[ $# -eq 0 ]]; then
+            printf >&2 '\033[1;37;41mUsage: rgci PATTERN\033[0m\n'
+            return 64
+        fi
         local pattern="$*"
-        rg -i -C 1 "$@" | sed -E "/$pattern/! s/^.*$/\x1b[90m&\x1b[0m/; s/($pattern)/\x1b[1;31m\1\x1b[0m/gI"
+        rg -i -C 1 --hidden --no-ignore --glob '!.git' "$@" \
+            | sed -E "/$pattern/! s/^.*$/\x1b[90m&\x1b[0m/; s/($pattern)/\x1b[1;31m\1\x1b[0m/gI"
     }
 #+end_src
 
 #+begin_src shell
-    # Include hidden files by default.
-    alias rg='rg --hidden'
+    # Include hidden and ignored files by default.
+    alias rg='rg --hidden --no-ignore'
 #+end_src
 
 #+begin_src shell
-    # List matching filenames only.
-    alias rgno='rg -l'
+    # Show only filenames with matches (list mode), including hidden and ignored
+    # files.
+    alias rgno='rg --hidden --no-ignore -l'
 #+end_src
 
 #+begin_src shell
     # Search by file extension (case-insensitive).
     rgext() {
         if [[ $# -ne 2 ]]; then
-            printf "Usage: rgext EXTENSION PATTERN\n"
-            printf "Example: rgext txt 'hello world'\n"
+            printf >&2 '\033[1;37;41mUsage: rgext EXTENSION PATTERN\033[0m\n'
+            printf >&2 "Example: rgext txt 'hello world'\n"
             return 2
         fi
-        rg --glob "*.$1" -i -C 1 "$2"
+        rg --hidden --no-ignore -i -C 1 --iglob "*.$1" "$2"
     }
 #+end_src
 
 #+begin_src shell
 fi
 #+end_src
-
-*** TODO Déboguer 'rgc afm'
 
 ** Global aliases for Zsh
 
