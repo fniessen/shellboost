@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Last modified: <20250707.1309>
+# Last modified: <20250716.0928>
 
 # Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 
@@ -87,7 +87,7 @@ if command -v rg > /dev/null 2>&1; then
     rgci() {
         if [[ $# -eq 0 ]]; then
             printf >&2 '\033[1;37;41mUsage: rgci PATTERN\033[0m\n'
-            return 64
+            return 64                   # EX_USAGE: Command-line usage error.
         fi
         local pattern="$*"
         rg -i -C 1 --hidden --no-ignore --glob '!.git' "$@" \
@@ -97,16 +97,19 @@ if command -v rg > /dev/null 2>&1; then
     # Include hidden and ignored files by default.
     alias rg='rg --hidden --no-ignore'
 
-    # Show only filenames with matches (list mode), including hidden and ignored
-    # files.
-    alias rgno='rg --hidden --no-ignore -l'
+    # List matching filenames (like `rg -l`) while:
+    # - Including hidden and ignored files
+    # - Excluding any files under `.git/` directories
+    rgno() {
+        rg --hidden --no-ignore -l "$@" | grep -v '/.git/'
+    }
 
     # Search by file extension (case-insensitive).
     rgext() {
         if [[ $# -ne 2 ]]; then
             printf >&2 '\033[1;37;41mUsage: rgext EXTENSION PATTERN\033[0m\n'
             printf >&2 "Example: rgext txt 'hello world'\n"
-            return 2
+            return 64                   # EX_USAGE: Command-line usage error.
         fi
         rg --hidden --no-ignore -i -C 1 --iglob "*.$1" "$2"
     }
