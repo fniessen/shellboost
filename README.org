@@ -859,7 +859,9 @@ bindkey -e
 - ~M-w~: Show short description of a command.
 - ~M-d~: Show documentation for current command.
 - ~M-p~: Prepend 'sudo' to the current command.
-- ~M-.~: Insert the last argument of the previous command.
+- ~M-.~: Insert (yank) the *last argument* of the *previous command*. \\
+  Pressing it *again repeatedly* cycles backward through earlier commands' last
+  arguments.
 - ~C-z~: Activate complete-and-search functionality.
 
 ** Custom key bindings
@@ -870,11 +872,11 @@ For example:
 
 Refresh command line
 
-| Key binding | Meaning                                                                                                 |
-|-------------+---------------------------------------------------------------------------------------------------------|
-| C-M-u       | Move to parent directory                                                                                |
-| M-s         | Prepend 'sudo ' to the current command                                                                  |
-| M-S-l       | List directory contents                                                                                 |
+| Key binding | Meaning                                                                                               |
+|-------------+-------------------------------------------------------------------------------------------------------|
+| C-M-u       | Move to parent directory                                                                              |
+| M-s         | Prepend 'sudo ' to the current command                                                                |
+| M-S-l       | List directory contents                                                                               |
 | C-x C-e     | Edit the current command line in an external editor; similar to the ~fc~ ("fix command") shell built-in |
 
 *** ls
@@ -957,30 +959,32 @@ zle -N prepend-sudo
 bindkey "\es" prepend-sudo
 #+end_src
 
-*** Copy the previous word
+*** Copy previous word from current line
 
 **** Configuration for Bash
 
+~copy-prev-word~ inserts the word immediately before the cursor (on the current
+command line) at the cursor position. Bound to ~C-x C-d~.
+
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
-# Function to copy the previous word.
+# Function to copy the previous word before the cursor.
 copy-prev-word() {
-    local words=($READLINE_LINE)
-    local cursor_position=$READLINE_POINT
-    local word_index=${#words[@]}
+    local line="$READLINE_LINE"
+    local point=$READLINE_POINT
 
-    # Find the word before the cursor
-    for ((i=${#words[@]}-1; i>=0; i--)); do
-        if ((${#words[i]} + ${#words[i+1]} + 1 < cursor_position)); then
-            word_index=$i
-            break
-        fi
-        cursor_position=$((cursor_position - ${#words[i]} - 1))
-    done
+    # Get the part of the line before the cursor.
+    local left="${line:0:point}"
 
-    # Insert the previous word at the cursor position
-    if ((word_index > 0)); then
-        READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${words[word_index-1]}${READLINE_LINE:READLINE_POINT}"
-        READLINE_POINT=$((READLINE_POINT + ${#words[word_index-1]}))
+    # Use regex to match the last word before the cursor (including trailing
+    # spaces).
+    if [[ "$left" =~ ([^[:space:]]+)[[:space:]]*$ ]]; then
+        local word="${BASH_REMATCH[1]}"
+
+        # Insert the word at the cursor position.
+        READLINE_LINE="${line:0:point}$word${line:point}"
+
+        # Move the cursor forward past the inserted word.
+        READLINE_POINT=$((point + ${#word}))
     fi
 }
 
@@ -995,7 +999,7 @@ bindkey '^x^d' copy-prev-word
 # Instead of C-M-_.
 #+end_src
 
-*************** TODO What about ~M-.~?
+See also https://zsh.sourceforge.io/Guide/zshguide04.html.
 
 *** Run help
 

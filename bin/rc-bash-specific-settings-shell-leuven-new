@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Last modified: <20250716.0928>
+# Last modified: <20250801.1029>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
@@ -102,25 +102,24 @@ bind '"\e\C-u": "cd ..\n"'
 # M-s: Prepend sudo.
 bind '"\es": "\C-asudo \C-e"'
 
-# Function to copy the previous word.
+# Function to copy the previous word before the cursor.
 copy-prev-word() {
-    local words=($READLINE_LINE)
-    local cursor_position=$READLINE_POINT
-    local word_index=${#words[@]}
+    local line="$READLINE_LINE"
+    local point=$READLINE_POINT
 
-    # Find the word before the cursor
-    for ((i=${#words[@]}-1; i>=0; i--)); do
-        if ((${#words[i]} + ${#words[i+1]} + 1 < cursor_position)); then
-            word_index=$i
-            break
-        fi
-        cursor_position=$((cursor_position - ${#words[i]} - 1))
-    done
+    # Get the part of the line before the cursor.
+    local left="${line:0:point}"
 
-    # Insert the previous word at the cursor position
-    if ((word_index > 0)); then
-        READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${words[word_index-1]}${READLINE_LINE:READLINE_POINT}"
-        READLINE_POINT=$((READLINE_POINT + ${#words[word_index-1]}))
+    # Use regex to match the last word before the cursor (including trailing
+    # spaces).
+    if [[ "$left" =~ ([^[:space:]]+)[[:space:]]*$ ]]; then
+        local word="${BASH_REMATCH[1]}"
+
+        # Insert the word at the cursor position.
+        READLINE_LINE="${line:0:point}$word${line:point}"
+
+        # Move the cursor forward past the inserted word.
+        READLINE_POINT=$((point + ${#word}))
     fi
 }
 
