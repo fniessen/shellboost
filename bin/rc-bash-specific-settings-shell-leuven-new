@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Last modified: <20250707.1236>
+# Last modified: <20250716.0928>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
@@ -61,7 +61,7 @@ jumpd() {
 
     if ! [[ "$index" =~ ^[0-9]+$ ]]; then
         printf >&2 "jumpd: Index must be a non-negative number\n"
-        return 64                       # EX_USAGE: Command line usage error.
+        return 64                       # EX_USAGE: Command-line usage error.
     fi
 
     local line
@@ -150,126 +150,166 @@ run-help() {
 bind -x '"\eh": run-help'
 
 # ───────────────────────────────────────────────────────────────
-# Powerline-style Git-enhanced Bash prompt
+# Powerline-style Git-enhanced Bash prompt with simulated RPROMPT.
 # ───────────────────────────────────────────────────────────────
 
 # Check if 'git' command is available.
 if ! command -v git > /dev/null 2>&1; then
-    printf >&2 "ERROR: 'git' command not found.\n"
+    printf >&2 "\033[1;37;41mERROR: 'git' command not found.\033[0m\n"
 fi
 
-# Define a custom function to display the exit code in red if it's non-zero.
-show_exit_code() {
-    local exit_code=$?
-    if [[ $exit_code -ne 0 ]]; then
-        printf "\033[1;37;41m%s\033[0m\n" "$exit_code"
-    else
-        printf "%s" ""
-    fi
-}
-
-# Custom colors.
-# GIT_DIRTY_COLOR="\033[0;31m"           # Red (attention needed).
-GIT_DIRTY_COLOR="\033[1;37;41m"
-GIT_STAGED_COLOR="\033[0;32m"          # Green (good to go / ready).
-GIT_STASH_COLOR="\033[0;36m"           # Cyan (info).
-GIT_UNTRACKED_COLOR="\033[0;33m"       # Yellow (warning light).
-GIT_OUTGOING_COLOR="\033[1;35m"        # Purple for contrast.
-GIT_INCOMING_COLOR="\033[0;36m"        # Cyan (info).
-# GIT_BRANCH_COLOR="\033[0;35m"          # Magenta.
-GIT_BRANCH_COLOR="\033[37;45m"
-GIT_RESET_COLOR="\033[0m"              # Reset to default color.
-
 __git_ps1() {
-    git rev-parse --is-inside-work-tree &> /dev/null || return
+    git rev-parse --is-inside-work-tree > /dev/null 2>&1 || return
+    local branch status dirty staged stash untracked outgoing incoming
 
-    local branch
-    if branch="$(git symbolic-ref --short -q HEAD 2> /dev/null)"; then
-        : # We are on a branch, nothing to do here.
-    else
-        branch="$(git rev-parse --short HEAD 2> /dev/null)"
-    fi
+    branch="$(git symbolic-ref --short -q HEAD 2> /dev/null || git rev-parse --short HEAD 2> /dev/null)"
 
-    local dirty=""    # should be in red
-    local staged=""   # should be in magenta
-    local stash=""    # should be in blue
-    local untracked="" # should be in green
-    local outgoing="" # should be in yellow
-    local incoming="" # should be in cyan
+    # Custom colors.
+    local GIT_DIRTY_COLOR="\033[31;1m"
+    local GIT_STAGED_COLOR="\033[32;1m"     # Green (good to go / ready).
+    local GIT_STASH_COLOR="\033[36m"        # Cyan (info).
+    local GIT_UNTRACKED_COLOR="\033[33;1m"  # Yellow (warning light).
+    local GIT_OUTGOING_COLOR="\033[35;1m"   # Purple for contrast.
+    local GIT_INCOMING_COLOR="\033[36;1m"   # Cyan (info).
 
+    # Color the markers, don't reset immediately.
     # Dirty (unstaged).
     if ! git diff --quiet --no-ext-diff; then
-        dirty="*"
+        dirty="${GIT_DIRTY_COLOR}●"
     fi
 
     # Staged.
     if ! git diff --cached --quiet; then
-        staged="+"
+        staged="${GIT_STAGED_COLOR}+"
     fi
 
     # Stash.
-    if git rev-parse --verify --quiet refs/stash > /dev/null; then
-        stash="\$"
+    if git rev-parse --verify --quiet refs/stash > /dev/null 2>&1; then
+        stash="${GIT_STASH_COLOR}\$"
     fi
 
     # Untracked.
-    if git ls-files --others --exclude-standard | grep -q .; then
-        untracked="?"
+    if git ls-files --others --exclude-standard 2> /dev/null | grep -q .; then
+        untracked="${GIT_UNTRACKED_COLOR}?"
     fi
 
     # Ahead / Behind.
-    if git rev-parse --abbrev-ref @{u} &> /dev/null; then
-        local counts
+    if git rev-parse --abbrev-ref @{u} &> /dev/null 2>&1; then
+        local counts count_outgoing count_incoming
         counts="$(git rev-list --left-right --count HEAD...@{u} 2> /dev/null)"
-        local count_outgoing=$(echo "$counts" | awk '{print $2}')
-        local count_incoming=$(echo "$counts" | awk '{print $1}')
-        (( count_outgoing > 0 )) && outgoing="↑$count_outgoing"
-        (( count_incoming > 0 )) && incoming="↓$count_incoming"
+        count_outgoing=$(printf "%s\n" "$counts" | awk '{print $1}')
+        count_incoming=$(printf "%s\n" "$counts" | awk '{print $2}')
+        (( count_outgoing > 0 )) && outgoing="${GIT_OUTGOING_COLOR}▲$count_outgoing"
+        (( count_incoming > 0 )) && incoming="${GIT_INCOMING_COLOR}▼$count_incoming"
     fi
 
-    local status="$dirty$staged$stash$untracked$outgoing$incoming"
-    echo "$branch${status:+ $status}"
+    status="$dirty$staged$stash$untracked$outgoing$incoming"
+    [[ -n "$status" ]] && status=" $status"
+
+    printf "%b\n" "$branch$status"
 }
 
-function set_prompt() {
+# Display exit code at right if non-zero.
+show_exit_code_rprompt() {
+    local exit_code=$1
+    if [[ $exit_code -ne 0 ]]; then
+        local separator_left=""
+        local white_square="■"
+
+        # BSD-style symbolic names for exit codes 64-78.
+        local -A bsd_exit_codes=(
+            [64]="EX_USAGE"
+            [65]="EX_DATAERR"
+            [66]="EX_NOINPUT"
+            [67]="EX_NOUSER"
+            [68]="EX_NOHOST"
+            [69]="EX_UNAVAILABLE"
+            [70]="EX_SOFTWARE"
+            [71]="EX_OSERR"
+            [72]="EX_OSFILE"
+            [73]="EX_CANTCREAT"
+            [74]="EX_IOERR"
+            [75]="EX_TEMPFAIL"
+            [76]="EX_PROTOCOL"
+            [77]="EX_NOPERM"
+            [78]="EX_CONFIG"
+        )
+
+        local symbolic_name=""
+        if [[ ${bsd_exit_codes[$exit_code]+_} ]]; then
+            symbolic_name=" (${bsd_exit_codes[$exit_code]})"
+        fi
+
+        local msg=" Exit $exit_code$symbolic_name"
+
+        # Colors.
+        local sep_color="\033[31;40m"       # Red fg on black bg.
+        local msg_color="\033[1;37;41m"     # White fg on red bg.
+        local square_color="\033[1;37;41m"  # White on red.
+        local reset_color="\033[0m"
+
+        # Format parts (do NOT include trailing space inside color!).
+        local formatted_sep="${sep_color}${separator_left}${reset_color}"
+        local formatted_msg="${msg_color}${msg}"
+        local formatted_square="${square_color}${white_square} ${reset_color}"
+
+        # Calculate visible length.
+        local visible_len=$((${#msg} + 4))  #  + msg + ■ + 1 space.
+
+        local term_cols=$(tput cols)
+        local padding=$(( term_cols - visible_len ))
+
+        printf "\033[s"                             # Save cursor.
+        printf "\033[1G\033[%dC" "$padding"         # Move to column.
+        printf "%b%b %b" "$formatted_sep" "$formatted_msg" "$formatted_square"
+        printf "\033[u"                             # Restore cursor.
+    fi
+}
+
+set_prompt() {
     # Powerline separators.
     local SEPARATOR_RIGHT=""
+    local SEPARATOR_LEFT=""
 
     # Colors (with proper Bash escapes).
     local RESET="\[\033[0m\]"
 
-    local USER_BG="\[\033[48;5;240m\]"
-    local USER_FG="\[\033[38;5;15m\]"
+    local USER_BG="\[\033[48;5;136m\]"
+    local USER_FG="\[\033[38;5;234m\]"
 
     local DIR_BG="\[\033[48;5;25m\]"
     local DIR_FG="\[\033[38;5;15m\]"
 
-    local GIT_BG="\[\033[48;5;238m\]"
+    local GIT_BG="\[\033[48;5;240m\]"
     local GIT_FG="\[\033[38;5;15m\]"
 
+    local FINAL_BG="\[\033[48;5;0m\]"         # Final background (e.g. black).
+    local GIT_SEP_FG="\[\033[38;5;240m\]"     # Foreground same as GIT_BG for seamless look.
+    local FINAL_SEP_FG="\[\033[38;5;25m\]"    # Match DIR_BG for clean blue separator.
     # Prompt assembly.
-    PS1="\n"
+    PS1=""
 
-    # User@Host.
-    PS1+="${USER_BG}${USER_FG}\u@\h ${RESET}${DIR_BG}\[\033[38;5;240m\]${SEPARATOR_RIGHT}${RESET}"
-
-    # Working directory.
+    # First line: user@host and working directory.
+    PS1+="\n"
+    PS1+="${USER_BG}${USER_FG}\u@\h ${RESET}${DIR_BG}\[\033[38;5;136m\]${SEPARATOR_RIGHT}${RESET}"
     PS1+="${DIR_BG}${DIR_FG} \w ${RESET}"
 
     # Git status, only if inside repo.
-    if git rev-parse --is-inside-work-tree &> /dev/null; then
+    if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
         PS1+="${GIT_BG}\[\033[38;5;25m\]${SEPARATOR_RIGHT}${RESET}"
         PS1+="${GIT_BG}${GIT_FG} \$(__git_ps1) ${RESET}"
+        PS1+="${GIT_SEP_FG}${FINAL_BG}${SEPARATOR_RIGHT}${RESET}"
+    else
+        # Always add a final left separator in blue if not inside Git.
+        PS1+="${FINAL_SEP_FG}${FINAL_BG}${SEPARATOR_RIGHT}${RESET}"
     fi
 
-    # Final line and prompt symbol.
+    # Second line: prompt symbol.
     PS1+="\n\[\033[1m\]\$ \[\033[0m\]"
 }
 
-# Set PROMPT_COMMAND to first show exit code if any, then update prompt
-PROMPT_COMMAND='show_exit_code; set_prompt'
-
-# XXX Make use of color_prompt variable?
+# Preserve last exit code, show right prompt, then set PS1.
+PROMPT_COMMAND='last=$?; show_exit_code_rprompt $last; set_prompt'
 
 # Check if history search bindings are already set.
 if ! bind -q history-search-backward > /dev/null 2>&1; then
