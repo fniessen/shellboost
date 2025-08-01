@@ -403,7 +403,7 @@ This ensures every ~cd~ command saves the directory in the stack.
 # Exit if not running in Zsh.
 if [ -z "$ZSH_VERSION" ]; then
     printf >&2 "ERROR: This script requires Zsh. Aborting.\n"
-    exit 1
+    return 1
 fi
 
 # Set the maximum directory stack size to 10.

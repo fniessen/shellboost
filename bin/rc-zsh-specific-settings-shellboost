@@ -1,12 +1,12 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20250801.1133>
+# Last modified: <20250801.1655>
 
 # Exit if not running in Zsh.
 if [ -z "$ZSH_VERSION" ]; then
     printf >&2 "ERROR: This script requires Zsh. Aborting.\n"
-    exit 1
+    return 1
 fi
 
 # Set the maximum directory stack size to 10.
