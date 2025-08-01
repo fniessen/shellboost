@@ -1,6 +1,6 @@
-#+TITLE: Leuven shell configuration files
+#+TITLE: ShellBoost configuration files
 
-#+PROPERTY:  header-args :tangle bin/rc-common-settings-shell-leuven-new
+#+PROPERTY:  header-args :tangle bin/rc-common-settings-shellboost
 
 #+name: current-time
 #+begin_src emacs-lisp :eval yes :results value :tangle no
@@ -15,7 +15,7 @@
 # Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 #+end_src
 
-Welcome to the *Leuven shell configuration files* project!  This repository is a
+Welcome to the *ShellBoost configuration files* project!  This repository is a
 go-to solution for streamlining and enhancing your terminal experience. Whether
 you're developer, sysadmin, or an enthusiast, this configuration provides
 a well-organized, modular, and efficient way to customize your shell
@@ -40,7 +40,7 @@ you'll find:
 - *Event handling:* Automate responses to shell events for smarter scripting.
 - *Miscellaneous settings:* Additional tweaks and optimizations.
 
-* Why use Leuven shell configurations?
+* Why use ShellBoost configurations?
 
 - *Highly modular:* Each feature is encapsulated, making it easy to modify or
   extend.
@@ -53,31 +53,31 @@ you'll find:
 
 ** Try online
 
-You can try Shell-leuven-new without installing it by running the following
-commands in your shell:
+You can try ShellBoost without installing it by running the following commands
+in your shell:
 
 - *For Bash users*
 
   #+begin_src shell :tangle no
   # Load common settings.
-  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/refs/heads/master/bin/rc-common-settings-shell-leuven-new | bash -
+  curl -sSL https://raw.githubusercontent.com/fniessen/shellboost/refs/heads/master/bin/rc-common-settings-shellboost | bash -
 
   # Load Bash-specific settings.
-  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/refs/heads/master/bin/rc-bash-specific-settings-shell-leuven-new | bash -
+  curl -sSL https://raw.githubusercontent.com/fniessen/shellboost/refs/heads/master/bin/rc-bash-specific-settings-shellboost | bash -
   #+end_src
 
 - *For Zsh users*
 
   #+begin_src shell :tangle no
   # Load common settings.
-  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/refs/heads/master/bin/rc-common-settings-shell-leuven-new | zsh -
+  curl -sSL https://raw.githubusercontent.com/fniessen/shellboost/refs/heads/master/bin/rc-common-settings-shellboost | zsh -
 
   # Load Zsh-specific settings.
-  curl -sSL https://raw.githubusercontent.com/fniessen/shell-leuven-new/refs/heads/master/bin/rc-zsh-specific-settings-shell-leuven-new | zsh -
+  curl -sSL https://raw.githubusercontent.com/fniessen/shellboost/refs/heads/master/bin/rc-zsh-specific-settings-shellboost | zsh -
   #+end_src
 
 These commands will download and execute the configuration files directly in
-your current shell session, enabling you to explore Shell-leuven-new's features
+your current shell session, enabling you to explore ShellBoost's features
 right away.
 
 ** Automating custom configuration
@@ -88,7 +88,7 @@ steps:
 1. Clone the repository:
 
    #+begin_src shell :tangle no
-   git clone git@github.com:fniessen/shell-leuven-new.git
+   git clone git@github.com:fniessen/shellboost.git
    #+end_src
 
 2. Integrate configurations with your shell:
@@ -98,8 +98,8 @@ steps:
      Add the following lines to your =.bashrc=:
 
      #+begin_src shell :tangle no
-     source /PATH/TO/shell-leuven-new/bin/rc-common-settings-shell-leuven-new
-     source /PATH/TO/shell-leuven-new/bin/rc-bash-specific-settings-shell-leuven-new  # For Bash.
+     source /PATH/TO/shellboost/bin/rc-common-settings-shellboost
+     source /PATH/TO/shellboost/bin/rc-bash-specific-settings-shellboost  # For Bash.
      #+end_src
 
    - *For Zsh users*
@@ -107,8 +107,8 @@ steps:
      Add the following lines to your =.zshrc=:
 
      #+begin_src shell :tangle no
-     source /PATH/TO/shell-leuven-new/bin/rc-common-settings-shell-leuven-new
-     source /PATH/TO/shell-leuven-new/bin/rc-zsh-specific-settings-shell-leuven-new   # For Zsh.
+     source /PATH/TO/shellboost/bin/rc-common-settings-shellboost
+     source /PATH/TO/shellboost/bin/rc-zsh-specific-settings-shellboost   # For Zsh.
      #+end_src
 
 3. Reload your shell:
@@ -124,13 +124,13 @@ steps:
 These are variables that are accessible to all parts of the shell
 environment.
 
-#+begin_src shell :noweb yes :tangle bin/rc-bash-specific-settings-shell-leuven-new
+#+begin_src shell :noweb yes :tangle bin/rc-bash-specific-settings-shellboost
 #!/usr/bin/env bash
 
 # Last modified: <<current-time()>>
 #+end_src
 
-#+begin_src shell :noweb yes :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :noweb yes :tangle bin/rc-zsh-specific-settings-shellboost
 #!/usr/bin/env zsh
 
 # Last modified: <<current-time()>>
@@ -142,7 +142,7 @@ This configuration sets the default text editor used by your shell. The editor
 specified here will be used by commands like ~git~, ~crontab~, and
 ~EDITOR~ / ~VISUAL~-based commands for editing files.
 
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-common-settings-shellboost
 # Set the default editor (change 'emacs' to your preferred editor).
 export VISUAL=emacs
 export EDITOR="$VISUAL"
@@ -159,7 +159,7 @@ export EDITOR="$VISUAL"
 The code snippet sets environment variables related to localization and
 character encoding:
 
-#+begin_src shell :tangle bin/rc-common-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-common-settings-shellboost
 # Check and configure locale settings.
 locale="en_US.utf8"
 
@@ -337,7 +337,7 @@ alias d='dirs -v | tail -n +2 | head -n 9'
 
 Automatically track directories when using ~cd~:
 
-#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
 export DIRSTACKSIZE
@@ -396,7 +396,7 @@ This ensures every ~cd~ command saves the directory in the stack.
 
 ***** Configuration for Zsh
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 # Exit if not running in Zsh.
 if [ -z "$ZSH_VERSION" ]; then
     printf >&2 "ERROR: This script requires Zsh. Aborting.\n"
@@ -418,7 +418,7 @@ directories.
 
 ***** Configuration for Bash
 
-#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
 # Jump to a directory by visible stack index (as shown in 'dirs -v').
 jumpd() {
     local index="$1"
@@ -464,7 +464,7 @@ Normally, ~cd -1~ moves to the *previous directory* in the stack, ~cd -2~ to the
 before that, and so on. However, with the following aliases, you can simply type
 the number of the stack entry you want to visit, like ~1~.
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 # Define aliases for switching to specific stack entries (cd -N).
 for i in {1..9}; do
   alias $i="cd -$i"
@@ -557,7 +557,7 @@ intuitive.
 These aliases are used to handle output redirections, making common redirections
 more concise and easy to use:
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 alias -g 21="2>&1"                      # Redirect stderr to stdout.
 alias -g N='> /dev/null'                # Redirect output to null (discard).
 alias -g NN='> /dev/null 2>&1'          # Redirect both stdout and stderr to null.
@@ -568,7 +568,7 @@ alias -g NN='> /dev/null 2>&1'          # Redirect both stdout and stderr to nul
 These aliases simplify common data processing tasks by chaining tools like ~awk~,
 ~grep~, ~jq~, and others for quick filtering and transformation:
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 alias -g A='| awk'                      # Pipe output to awk.
 alias -g G='| grep --color=auto -E'     # Grep with color highlighting and extended regex.
 alias -g J='| jq -C .'                  # Pretty-print JSON with jq, maintaining colors.
@@ -584,7 +584,7 @@ alias -g H='| head'                     # Pipe to head.
 For counting and sorting unique items along with their frequencies, use the
 following alias:
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 # Count and sort unique items with frequencies.
 alias -g CS='sort | uniq -c | sort -k1,1nr'
 #+end_src
@@ -594,7 +594,7 @@ alias -g CS='sort | uniq -c | sort -k1,1nr'
 These aliases are designed for better presentation of output, enabling paginated
 views and formatting:
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 alias -g CA="| cat -A"                  # Display line endings and tab characters (cat -A).
 alias -g F='| fmt -'                    # Format output to fit within a specific width.
 alias -g L="| less"                     # Pipe to less for paginated viewing.
@@ -605,7 +605,7 @@ alias -g L="| less"                     # Pipe to less for paginated viewing.
 These aliases are for handling tasks that support efficient command execution or
 preparation:
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 alias -g BG='& exit'                    # Send process to background and exit shell.
 alias -g X='| xargs'                    # Convert input into arguments for another command.
 alias -g XL='| tr "\n" "\0" | xargs -0' # Handle null-separated input with xargs.
@@ -616,7 +616,7 @@ alias -g X1='| xargs -n 1'              # Process input one argument per line.
 
 The ~Map~ alias allows processing a list of newline-separated items seamlessly.
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 alias -g Map="| tr '\n' '\0' | xargs -0 -n 1"
 #+end_src
 
@@ -639,7 +639,7 @@ delimiter-separated outputs.
 
 **** Space-separated (A)
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 # Field extractors.
 for i in {1..9}; do
     alias -g "A$i"="| awk '{print \$$i}'"
@@ -648,7 +648,7 @@ done
 
 **** Comma-separated (,)
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 for i in {1..9}; do
     alias -g ",$i"="| awk -F, '{print \$$i}'"
 done
@@ -656,7 +656,7 @@ done
 
 **** Semicolon-separated (S)
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 for i in {1..9}; do
     alias -g "S$i"="| awk -F';' '{print \$$i}'"
 done
@@ -664,7 +664,7 @@ done
 
 **** Colon-separated (:)
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 for i in {1..9}; do
     alias -g ":$i"="| awk -F: '{print \$$i}'"
 done
@@ -672,7 +672,7 @@ done
 
 **** Tab-separated (T)
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 for i in {1..9}; do
     alias -g "T$i"="| awk -F \$'\\t' '{print \$$i}'"
 done
@@ -883,14 +883,14 @@ Refresh command line
 
 **** Configuration for Bash
 
-#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
 # M-S-l: Send the string 'ls' followed by a newline.
 bind '"\eL": "ls\n"'
 #+end_src
 
 **** Configuration for Zsh
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 # M-S-l: Send the string 'ls' followed by a newline.
 bindkey -s '\eL' 'ls\n'
 #+end_src
@@ -903,14 +903,14 @@ parent (~cd ..~).
 
 **** Configuration for Bash
 
-#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
 # C-M-u: Move to parent directory.
 bind '"\e\C-u": "cd ..\n"'
 #+end_src
 
 **** Configuration for Zsh
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 # C-M-u: Move to parent directory.
 up-directory() {
   local count=${1:-1}
@@ -937,14 +937,14 @@ command in both Bash and Zsh shells.
 
 **** Configuration for Bash
 
-#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
 # M-s: Prepend sudo.
 bind '"\es": "\C-asudo \C-e"'
 #+end_src
 
 **** Configuration for Zsh
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 # M-s: Prepend sudo.
 prepend-sudo() {
   # If the buffer is empty, recall the previous command from history.
@@ -966,7 +966,7 @@ bindkey "\es" prepend-sudo
 ~copy-prev-word~ inserts the word immediately before the cursor (on the current
 command line) at the cursor position. Bound to ~C-x C-d~.
 
-#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
 # Function to copy the previous word before the cursor.
 copy-prev-word() {
     local line="$READLINE_LINE"
@@ -994,7 +994,7 @@ bind -x '"\C-x\C-d":copy-prev-word'
 
 **** Configuration for Zsh
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 bindkey '^x^d' copy-prev-word
 # Instead of C-M-_.
 #+end_src
@@ -1005,7 +1005,7 @@ See also https://zsh.sourceforge.io/Guide/zshguide04.html.
 
 **** Configuration for Bash
 
-#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
 # Function to run help on the current command
 run-help() {
     # Get the first word of the last command (i.e., the last command in the
@@ -1051,7 +1051,7 @@ To use it, press ~C-x C-e~.
 In Zsh, ~edit-command-line~ provides similar functionality. It must be *autoloaded*
 and registered with ~zle~ before assigning a key binding.
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 # Load the edit-command-line function.
 autoload -U edit-command-line
 zle -N edit-command-line
@@ -1179,7 +1179,7 @@ From Zsh, in table:
 This is the configuration of the terminal prompt. This includes things like the
 colors, the text that is displayed, and the layout of the prompt.
 
-#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
 # ───────────────────────────────────────────────────────────────
 # Powerline-style Git-enhanced Bash prompt with simulated RPROMPT.
 # ───────────────────────────────────────────────────────────────
@@ -1381,7 +1381,7 @@ categories.
 
 ** History management
 
-#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
 # Check if history search bindings are already set.
 if ! bind -q history-search-backward > /dev/null 2>&1; then
     # If not set, configure Up and Down arrow keys for history search.
@@ -1409,7 +1409,7 @@ export HISTIGNORE="ls:cd:pwd:clear:history:exit:top:df"
 
 ** Common settings
 
-#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
 # Enable case-insensitive directory completion.
 bind "set completion-ignore-case on"
 bind "set show-all-if-ambiguous on"
@@ -1424,7 +1424,7 @@ export GREP_COLORS='ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32'
 
 ** Bash-specific settings
 
-#+begin_src shell :tangle bin/rc-bash-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
 # Set a common history file.
 HISTFILE=$HOME/.bash_history
 
@@ -1445,7 +1445,7 @@ fi
 
 ** Zsh-specific settings
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-shell-leuven-new
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 # Set a common history file.
 HISTFILE=$HOME/.zsh_history
 
@@ -1470,15 +1470,15 @@ setopt HIST_EXPIRE_DUPS_FIRST
 alias history="history 0"
 #+end_src
 
-* Contribute to Shell-leuven-new
+* Contribute to ShellBoost
 
-Your support and contributions help make *Shell-leuven-new* even better!  Whether
-it's reporting issues, submitting patches, or simply showing your appreciation,
-every bit counts. Here's how you can get involved:
+Your support and contributions help make *ShellBoost* even better!  Whether it's
+reporting issues, submitting patches, or simply showing your appreciation, every
+bit counts. Here's how you can get involved:
 
 ** 🚩 Report issues
 
-Found a bug?  [[https://github.com/fniessen/shell-leuven-new/issues/new][Let us know!]]
+Found a bug?  [[https://github.com/fniessen/shellboost/issues/new][Let us know!]]
 
 ** 🛠️ Submit patches
 
@@ -1495,10 +1495,10 @@ We can't wait to see your contributions! 💡
 
 ** ❤️ Support with donations
 
-If *Shell-leuven-new* has made your life easier or more enjoyable, consider
-supporting its development:
+If *ShellBoost* has made your life easier or more enjoyable, consider supporting
+its development:
 
-👉 [[https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VCVAS6KPDQ4JC&lc=BE&item_number=shell%2dleuven%2dnew&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted][Donate via PayPal]]
+👉 [[https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VCVAS6KPDQ4JC&lc=BE&item_number=shellboost&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted][Donate via PayPal]]
 
 Your donation helps keep this project alive and growing!
 
@@ -1526,6 +1526,6 @@ this program. If not, see http://www.gnu.org/licenses/.
 #+html: <a href="http://opensource.org/licenses/GPL-3.0">
 #+html:   <img src="http://img.shields.io/:license-gpl-blue.svg" alt=":license-gpl-blue.svg" />
 #+html: </a>
-#+html: <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VCVAS6KPDQ4JC&lc=BE&item_number=shell%2dleuven%2dnew&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted">
+#+html: <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VCVAS6KPDQ4JC&lc=BE&item_number=shellboost&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted">
 #+html:   <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" alt="btn_donate_LG.gif" />
 #+html: </a>

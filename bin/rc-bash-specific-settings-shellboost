@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Last modified: <20250801.1029>
+# Last modified: <20250801.1133>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
