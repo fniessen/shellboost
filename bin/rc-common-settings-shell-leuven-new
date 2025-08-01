@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Last modified: <20250716.0928>
+# Last modified: <20250801.1002>
 
 # Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 
@@ -77,7 +77,9 @@ alias -- -='cd -'
 alias d='dirs -v | tail -n +2 | head -n 9'
 
 # Search through shell history with case-insensitive grep and color highlighting.
-alias hgrep='history | grep -i --color=auto'
+hgrep() {
+    history | grep -i --color=auto "$@"
+}
 
 # Check if 'rg' command is available.
 if command -v rg > /dev/null 2>&1; then
@@ -101,7 +103,7 @@ if command -v rg > /dev/null 2>&1; then
     # - Including hidden and ignored files
     # - Excluding any files under `.git/` directories
     rgno() {
-        rg --hidden --no-ignore -l "$@" | grep -v '/.git/'
+        rg --hidden --no-ignore -l "$@" | grep -v '\.git/'
     }
 
     # Search by file extension (case-insensitive).
