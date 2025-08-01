@@ -8,7 +8,8 @@
 #+end_src
 
 #+begin_src shell :noweb yes
-#!/usr/bin/env sh
+# Hey Emacs, this is a -*- sh -*- file ...
+# NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
 # Last modified: <<current-time()>>
 
@@ -125,13 +126,15 @@ These are variables that are accessible to all parts of the shell
 environment.
 
 #+begin_src shell :noweb yes :tangle bin/rc-bash-specific-settings-shellboost
-#!/usr/bin/env bash
+# Hey Emacs, this is a -*- sh -*- file ...
+# NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
 # Last modified: <<current-time()>>
 #+end_src
 
 #+begin_src shell :noweb yes :tangle bin/rc-zsh-specific-settings-shellboost
-#!/usr/bin/env zsh
+# Hey Emacs, this is a -*- sh -*- file ...
+# NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
 # Last modified: <<current-time()>>
 #+end_src
