@@ -22,6 +22,16 @@ you're developer, sysadmin, or an enthusiast, this configuration provides
 a well-organized, modular, and efficient way to customize your shell
 environment.
 
+#+begin_quote
+[!TIP]
+
+*** Master the command line in Paris on 26 November 2025!
+Unlock the full power of your system with the exclusive "ShellBoost" course.
+
+Visit https://shellboost.fr/ for details and registration,
+and to /secure your place today/.
+#+end_quote
+
 * What's inside?
 
 This project includes a comprehensive set of configuration files and scripts
