@@ -620,9 +620,11 @@ preparation:
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 alias -g BG='& exit'                    # Send process to background and exit shell.
-alias -g X='| xargs'                    # Convert input into arguments for another command.
-alias -g XL='| tr "\n" "\0" | xargs -0' # Handle null-separated input with xargs.
-alias -g X1='| xargs -n 1'              # Process input one argument per line.
+
+alias -g X='| xargs'                    # Pipe args to a target command.
+alias -g X0='| tr "\n" "\0" | xargs -0' # Null-separated input (safe for spaces/newlines).
+alias -g X1='| xargs -n 1'              # One arg per call.
+alias -g XR='| xargs -r'                # Run only if input is non-empty.
 #+end_src
 
 *** Intuitive map function for list processing
