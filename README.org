@@ -496,11 +496,24 @@ See also [[https://github.com/fniessen/wsl][wsl Git repository]].
 Search the command history for a specified term, ignoring case sensitivity.
 
 #+begin_src shell
-# Search through shell history with case-insensitive grep and color highlighting.
+# Search shell history for a term (case-insensitive, with color highlights).
 hgrep() {
     history | grep -i --color=auto "$@"
 }
 #+end_src
+
+#+begin_src shell
+# Re-run previous commands using 'fc' (without conflicts with the R language).
+rr='fc -s'
+#+end_src
+
+Examples:
+- ~rr cc~ repeats the last command starting with ~cc~.
+- ~rr~ repeats the previous command.
+
+Alternatively, you can navigate history directly:
+- Up arrow (~history-search-backward~): searches backward through commands
+- Down arrow (~history-search-forward~): searches forward through commands
 
 ** Ripgrep enhancements
 
