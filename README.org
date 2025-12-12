@@ -113,6 +113,20 @@ steps:
      source /PATH/TO/shellboost/bin/rc-bash-specific-settings-shellboost  # For Bash.
      #+end_src
 
+     or, more generally (and if the files are symlinked into =~/bin=)
+
+     #+begin_src shell :tangle no
+     # Source custom settings files (beginning with 'rc-bash' or 'rc-common') from
+     # ~/bin.
+     for file in ~/bin/rc-bash-specific-settings-* \
+                 ~/bin/rc-common-settings-*; do
+         if [ -f "$file" ]; then
+             printf "Sourcing %s...\n" "$file"
+             . "$file"
+         fi
+     done
+     #+end_src
+
    - *For Zsh users*
 
      Add the following lines to your =.zshrc=:
@@ -120,6 +134,20 @@ steps:
      #+begin_src shell :tangle no
      source /PATH/TO/shellboost/bin/rc-common-settings-shellboost
      source /PATH/TO/shellboost/bin/rc-zsh-specific-settings-shellboost   # For Zsh.
+     #+end_src
+
+     or, more generally (and if the files are symlinked into =~/bin=)
+
+     #+begin_src shell :tangle no
+     # Source custom settings files (beginning with 'rc-zsh' or 'rc-common') from
+     # ~/bin.
+     for file in ~/bin/rc-zsh-specific-settings-* \
+                 ~/bin/rc-common-settings-*; do
+         if [ -f "$file" ]; then
+             printf "Sourcing %s...\n" "$file"
+             . "$file"
+         fi
+     done
      #+end_src
 
 3. Reload your shell:
@@ -179,10 +207,10 @@ locale="en_US.utf8"
 if locale -a | grep -q "$locale"; then
     export LANG="$locale"
     export LC_ALL="$LANG"               # Consistent character encoding.
-    printf "Locale '%s' is set.\n" "$locale"
+    printf >&2 "Locale '%s' is set.\n" "$locale"
 else
-    printf "Warning: '%s' locale unavailable.\n" "$locale"
-    printf "Hint: You may need to manually install it with 'sudo locale-gen %s'.\n" "$locale"
+    printf >&2 "Warning: '%s' locale unavailable.\n" "$locale"
+    printf >&2 "Hint: You may need to manually install it with 'sudo locale-gen %s'.\n" "$locale"
 fi
 #+end_src
 
@@ -251,7 +279,7 @@ lvn_add_to_path "$HOME/winbin"
 This setup ensures that executables stored in =~/bin= and =~/winbin= are accessible
 from the command line.
 
-** TeX Live 2024 Configuration
+** TeX Live configuration
 
 : update-dotfiles
 : tlmgr install gillius
@@ -270,29 +298,46 @@ from the command line.
 : sudo /usr/local/texlive/2024/bin/x86_64-linux/tlmgr  install gillius
 : export PATH=$PATH:/usr/local/texlive/2024/bin/x86_64-linux
 
-The following script configures TeX Live 2024 by updating ~MANPATH~, ~INFOPATH~, and
-~PATH~ to include the relevant directories if TeX Live is installed.
+# export PATH=/usr/local/texlive/2024/bin/x86_64-linux:$PATH
+# export MANPATH=/usr/local/texlive/2024/texmf-dist/doc/man:$MANPATH
+# export INFOPATH=/usr/local/texlive/2024/texmf-dist/doc/info:$INFOPATH
+
+The following script configures TeX Live by updating ~PATH~, ~MANPATH~, and ~INFOPATH~
+to include the relevant directories if TeX Live is installed.
 
 #+begin_src shell
-# TeX Live 2024 configuration.
-TEXLIVE_DIR="${TEXLIVE_HOME:-/usr/local/texlive/2024}"  # Override with TEXLIVE_HOME.
+TEXLIVE_BASE="/usr/local/texlive"
+TL_PLATFORM="$(uname -m)-linux"
 
-if [[ -d "$TEXLIVE_DIR" ]]; then
-    # Ensure MANPATH and INFOPATH are initialized before appending (to ensure
-    # compatibility with Zsh).
+# Pick newest installed /usr/local/texlive/YYYY.
+TEXLIVE_DIR="$(
+  find "$TEXLIVE_BASE" -mindepth 1 -maxdepth 1 -type d -name '20[0-9][0-9]' 2> /dev/null \
+      | sort -r \
+      | head -n 1
+)"
+
+if [ -n "$TEXLIVE_DIR" ] && [ -d "$TEXLIVE_DIR" ]; then
+    # Compute bin path.
+    TEXLIVE_BIN="${TEXLIVE_DIR}/bin/${TL_PLATFORM}"
+
+    # Add TeX Live binaries to PATH.
+    lvn_add_to_path "$TEXLIVE_BIN"
+
+    # Ensure MANPATH and INFOPATH exist.
     MANPATH="${MANPATH:-}"
     INFOPATH="${INFOPATH:-}"
 
-    # Add TeX Live documentation paths.
-    export MANPATH="$MANPATH:$TEXLIVE_DIR/texmf-dist/doc/man"
-    export INFOPATH="$INFOPATH:$TEXLIVE_DIR/texmf-dist/doc/info"
+    # Add TeX Live documentation paths (append with ':' only if non-empty).
+    export MANPATH="${MANPATH:+${MANPATH}:}${TEXLIVE_DIR}/texmf-dist/doc/man"
+    export INFOPATH="${INFOPATH:+${INFOPATH}:}${TEXLIVE_DIR}/texmf-dist/doc/info"
 
-    # Add TeX Live binaries to PATH.
-    lvn_add_to_path "$TEXLIVE_DIR/bin/x86_64-linux"
+    printf >&2 'TeX Live found: %s (%s)\n' "$TEXLIVE_DIR" "$TL_PLATFORM"
+else
+    printf >&2 'No TeX Live installation detected.\n'
 fi
 #+end_src
 
-This ensures that TeX Live executables, such as ~pdflatex~ and ~xelatex~, are
+This ensures that TeX Live executables, such as ~pdflatex~ and ~lualatex~, are
 available in the shell, and that manual and info pages for TeX Live can be
 accessed using ~man~ and ~info~ commands.
 
@@ -309,14 +354,17 @@ The following aliases enhance the functionality of the ~ls~ command, making it
 easier to navigate and view directory contents:
 
 #+begin_src shell
-# Detailed directory listing.
-alias ll='ls -l'
+# Columnar format with type indicators.
+alias l='ls -CF'
 
 # List directories only.
 alias lsd='ls -d */'
 
-# Columnar format with type indicators.
-alias l='ls -CF'
+# List files only.
+alias lsf='ls -p | grep -v /'
+
+# Detailed directory listing.
+alias ll='ls -l'
 #+end_src
 
 ** Changing working directory
@@ -429,6 +477,23 @@ setopt PUSHD_IGNORE_DUPS
 You can use the directory stack to quickly navigate to previously visited
 directories.
 
+Example of use:
+
+#+begin_src shell :tangle no
+pushd /etc
+pushd /usr
+pushd /var
+
+dirs
+# 0  /var
+# 1  /usr
+# 2  /etc
+# 3  ~
+
+cd1  # Equivalent to cd -1 -> /usr.
+cd2  # Equivalent to cd -2 -> /etc.
+#+end_src
+
 ***** Configuration for Bash
 
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
@@ -481,9 +546,10 @@ the number of the stack entry you want to visit, like ~1~.
 # Define aliases for switching to specific stack entries (cd -N).
 for i in {1..9}; do
   alias $i="cd -$i"
+  alias cd$i="cd -$i"
 done
-# '1' moves to the most recent directory.
-# '2' moves to the second most recent directory.
+# '1' or 'cd1' moves to the most recent directory.
+# '2' or 'cd2' moves to the second most recent directory.
 # etc.
 #+end_src
 
@@ -501,6 +567,11 @@ hgrep() {
     history | grep -i --color=auto "$@"
 }
 #+end_src
+
+#+begin_tip
+We can't call this alias ~hg~ as that conflicts with the Mercurial prompt of the
+Agnoster theme (checking for the presence of the ~hg~ command).
+#+end_tip
 
 #+begin_src shell
 # Re-run previous commands using 'fc' (without conflicts with the R language).
@@ -821,11 +892,46 @@ empty_trash() {
 }
 #+end_src
 
+#+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
+repeat() {
+  local count=$1
+  shift
+  if [[ -z "$count" || "$count" -le 0 ]]; then
+    printf "Usage: repeat N command [args...]\n"
+    return 1
+  fi
+  for ((i=1; i<=count; i++)); do
+    "$@"
+  done
+}
+#+end_src
+
 * 5. Key bindings
 
 These are mappings of keys to commands.
 
 - ~C-l~: clear the terminal screen.
+
+** Finding and highlighting strings with C-S-f in WSL terminal
+
+In the *Windows Subsystem for Linux (WSL)* terminal (or any Windows Terminal
+session), you can quickly *search and highlight text* in the visible terminal
+output using the shortcut ~C-S-f~.
+
+When you press this key combination:
+
+- A *search bar* appears at the top of the terminal window.
+
+- As you type, all *matching strings* in the current scrollback buffer are
+  *highlighted*.
+
+- Press *Enter* to jump to the next match, or *S-Enter* to move to the previous one.
+
+The search is *case-insensitive by default*, but you can toggle options (like case
+sensitivity or regex search) using the icons in the search bar.
+
+This search only operates within the *terminal display buffer* -- it does not
+search through files or command history.
 
 ** Enable Emacs-style keybindings for command line editing
 
@@ -845,7 +951,7 @@ set -o emacs
 *** Configuration for Zsh
 
 #+begin_src shell :tangle no
-# Ensure Zsh is in Emacs editing mode (required for key bindings).
+# Ensure Zsh is using Emacs-style bindings.
 bindkey -e
 #+end_src
 
@@ -857,6 +963,22 @@ bindkey -e
 - ~C-f~: Move cursor forward one character.
 - ~M-b~ or ~C-<left>~ or ~M-<left>~: Move cursor backward one word.
 - ~M-f~ or ~C-<right>~ or ~M-<right>~: Move cursor forward one word.
+
+~M-b~, ~M-f~, ~M-<left>~, ~M-<right>~ will move parameter by parameter, behaving like
+Zsh (each argument separated by space, not by punctuation):
+
+#+begin_src shell :tangle no
+# Remove most punctuation from word delimiters.
+bind 'set word-delimiters " \t\n"'
+#+end_src
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
+# Bind common escape sequences for arrow keys with modifiers.
+bindkey "\e[1;5D" backward-word         # Ctrl+Left.
+bindkey "\e[1;5C" forward-word          # Ctrl+Right.
+bindkey "\e[1;3D" backward-word         # Alt+Left.
+bindkey "\e[1;3C" forward-word          # Alt+Right.
+#+end_src
 
 ** Command History and Search
 
@@ -900,11 +1022,11 @@ For example:
 
 Refresh command line
 
-| Key binding | Meaning                                                                                               |
-|-------------+-------------------------------------------------------------------------------------------------------|
-| C-M-u       | Move to parent directory                                                                              |
-| M-s         | Prepend 'sudo ' to the current command                                                                |
-| M-S-l       | List directory contents                                                                               |
+| Key binding | Meaning                                                                                                 |
+|-------------+---------------------------------------------------------------------------------------------------------|
+| C-M-u       | Move to parent directory                                                                                |
+| M-s         | Prepend 'sudo ' to the current command                                                                  |
+| M-S-l       | List directory contents                                                                                 |
 | C-x C-e     | Edit the current command line in an external editor; similar to the ~fc~ ("fix command") shell built-in |
 
 *** ls
@@ -1081,7 +1203,7 @@ and registered with ~zle~ before assigning a key binding.
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 # Load the edit-command-line function.
-autoload -U edit-command-line
+autoload -Uz edit-command-line
 zle -N edit-command-line
 
 # Bind C-x C-e to open the command line in an external editor.
@@ -1217,7 +1339,7 @@ if ! command -v git > /dev/null 2>&1; then
     printf >&2 "\033[1;37;41mERROR: 'git' command not found.\033[0m\n"
 fi
 
-__git_ps1() {
+boost_git_ps1() {
     git rev-parse --is-inside-work-tree > /dev/null 2>&1 || return
     local branch status dirty staged stash untracked outgoing incoming
 
@@ -1356,7 +1478,7 @@ set_prompt() {
     # Git status, only if inside repo.
     if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
         PS1+="${GIT_BG}\[\033[38;5;25m\]${SEPARATOR_RIGHT}${RESET}"
-        PS1+="${GIT_BG}${GIT_FG} \$(__git_ps1) ${RESET}"
+        PS1+="${GIT_BG}${GIT_FG} $(boost_git_ps1) ${RESET}"
         PS1+="${GIT_SEP_FG}${FINAL_BG}${SEPARATOR_RIGHT}${RESET}"
     else
         # Always add a final left separator in blue if not inside Git.
@@ -1369,6 +1491,94 @@ set_prompt() {
 
 # Preserve last exit code, show right prompt, then set PS1.
 PROMPT_COMMAND='last=$?; show_exit_code_rprompt $last; set_prompt'
+#+end_src
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
+# -------------------------------------------------
+# Zsh Powerline Prompt - Identical to Bash
+# -------------------------------------------------
+setopt PROMPT_SUBST
+autoload -Uz add-zsh-hook
+
+# === Git Status (replaces __git_ps1) ===
+git_prompt_info() {
+    git rev-parse --is-inside-work-tree &>/dev/null || return
+
+    local branch git_status=''  # ← Renamed from 'status' to avoid conflict
+
+    branch=$(git symbolic-ref --short HEAD 2> /dev/null || git rev-parse --short HEAD 2> /dev/null)
+
+    # Unstaged changes
+    [[ -n $(git diff --no-ext-diff --shortstat 2> /dev/null) ]] && git_status+='%F{red}●%f'
+    # Staged changes
+    [[ -n $(git diff --cached --shortstat 2> /dev/null) ]] && git_status+='%F{green}+%f'
+    # Stashes
+    git rev-parse --verify refs/stash &>/dev/null && git_status+='%F{cyan}$%f'
+    # Untracked files
+    [[ -n $(git ls-files --others --exclude-standard 2> /dev/null) ]] && git_status+='%F{yellow}?%f'
+
+    # Ahead / Behind
+    if upstream=$(git rev-parse --abbrev-ref @{u} 2> /dev/null); then
+        local ahead behind
+        ahead=$(git rev-list --count "$upstream"..HEAD 2> /dev/null)
+        behind=$(git rev-list --count HEAD.."$upstream" 2> /dev/null)
+        (( ahead )) && git_status+="%F{magenta}▲$ahead%f"
+        (( behind )) && git_status+="%F{cyan}▼$behind%f"
+    fi
+
+    [[ -n $git_status ]] && git_status=" $git_status"
+    print -n "%F{15}$branch$git_status%f"
+}
+
+# === Right Prompt: Exit Code ===
+exit_code_rprompt() {
+    local code=$?
+    (( code == 0 )) && { RPROMPT=''; return; }
+
+    local -A bsd_codes=(
+        64 EX_USAGE 65 EX_DATAERR 66 EX_NOINPUT 67 EX_NOUSER 68 EX_NOHOST
+        69 EX_UNAVAILABLE 70 EX_SOFTWARE 71 EX_OSERR 72 EX_OSFILE 73 EX_CANTCREAT
+        74 EX_IOERR 75 EX_TEMPFAIL 76 EX_PROTOCOL 77 EX_NOPERM 78 EX_CONFIG
+    )
+
+    local sym=${bsd_codes[$code]}
+    local msg=" Exit $code${sym:+ ($sym)}"
+
+    local cols=${COLUMNS:-$(tput cols)}
+    local len=$(( ${#msg} + 4 ))  #  + msg + ■ + space
+    local pad=$(( cols - len ))
+
+    RPROMPT="%F{red}%K{black}%f%k%K{red}%F{white}$msg%f%k%F{white}%K{red} ■ %f%k%${pad}G"
+}
+
+# === Build Main Prompt ===
+build_prompt() {
+    local userhost="%K{136}%F{234} %n@%m %f%k"
+    local dir="%K{25}%F{15} %~ %f%k"
+    local sep1="%F{136}%K{25}%f%k"
+    local sep2="%F{25}%K{240}%f%k"
+    local sep3="%F{240}%K{black}%f%k"
+    local final_sep="%F{25}%K{black}%f%k"
+
+    PS1=$'\n'"$userhost$sep1$dir"
+
+    if git rev-parse --is-inside-work-tree &>/dev/null; then
+        PS1+="$sep2%K{240}%F{15} $(git_prompt_info) %f%k$sep3"
+    else
+        PS1+="$final_sep"
+    fi
+
+    PS1+=$'\n%B%F{white}\$%f%b '
+}
+
+# === Update on every command ===
+precmd() {
+    exit_code_rprompt
+    build_prompt
+}
+
+# Activate
+add-zsh-hook precmd precmd
 #+end_src
 
 * 7. Autosuggestions
@@ -1407,7 +1617,9 @@ categories.
 # set -g fish_color_autosuggestion brblack
 # set -g fish_color_match yellow
 
-** History management
+** Searching command history by prefix
+
+Up/Down arrow → history search (search-as-you-type)
 
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
 # Check if history search bindings are already set.
@@ -1417,6 +1629,22 @@ if ! bind -q history-search-backward > /dev/null 2>&1; then
     bind '"\e[B": history-search-forward'   # Down arrow: Search forward in command history.
 fi
 #+end_src
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
+# Search command history based on what is typed.
+autoload -Uz up-line-or-beginning-search
+autoload -Uz down-line-or-beginning-search
+
+# Create the widgets (they are built-in in recent Zsh).
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+
+# Bind the *real* escape sequences that your terminal sends
+bindkey "${terminfo[kcuu1]:-^[[A}" up-line-or-beginning-search   # Up arrow.
+bindkey "${terminfo[kcud1]:-^[[B}" down-line-or-beginning-search # Down arrow.
+#+end_src
+
+** History management
 
 #+begin_src shell
 # Ignore spaces and duplicates.
@@ -1496,6 +1724,27 @@ setopt HIST_EXPIRE_DUPS_FIRST
 
 # Show full command history without line numbers.
 alias history="history 0"
+#+end_src
+
+*** Stderr in red
+
+Wrap text that goes to file with descriptor ~2~ with proper ANSI escape codes,
+making text red.
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
+# Color stderr.
+zmodload zsh/system
+color_stderr_red() {
+    # Sysread & syswrite are part of `zsh/system'.
+    emulate -LR zsh
+    local stderr_red_esc_code=$'\e[37;1;41m'
+    while sysread; do
+        syswrite -o 2 "${stderr_red_esc_code}${REPLY}$terminfo[sgr0]"
+    done
+}
+
+# Redirect stderr to color_stderr_red function.
+exec 2> >(color_stderr_red)
 #+end_src
 
 * Contribute to ShellBoost

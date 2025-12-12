@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20251025.1855>
+# Last modified: <20251212.1911>
 
 # Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 
@@ -15,10 +15,10 @@ locale="en_US.utf8"
 if locale -a | grep -q "$locale"; then
     export LANG="$locale"
     export LC_ALL="$LANG"               # Consistent character encoding.
-    printf "Locale '%s' is set.\n" "$locale"
+    printf >&2 "Locale '%s' is set.\n" "$locale"
 else
-    printf "Warning: '%s' locale unavailable.\n" "$locale"
-    printf "Hint: You may need to manually install it with 'sudo locale-gen %s'.\n" "$locale"
+    printf >&2 "Warning: '%s' locale unavailable.\n" "$locale"
+    printf >&2 "Hint: You may need to manually install it with 'sudo locale-gen %s'.\n" "$locale"
 fi
 
 if [ -r ~/.dircolors ]; then
@@ -40,31 +40,47 @@ lvn_add_to_path() {
 lvn_add_to_path "$HOME/bin"
 lvn_add_to_path "$HOME/winbin"
 
-# TeX Live 2024 configuration.
-TEXLIVE_DIR="${TEXLIVE_HOME:-/usr/local/texlive/2024}"  # Override with TEXLIVE_HOME.
+TEXLIVE_BASE="/usr/local/texlive"
+TL_PLATFORM="$(uname -m)-linux"
 
-if [[ -d "$TEXLIVE_DIR" ]]; then
-    # Ensure MANPATH and INFOPATH are initialized before appending (to ensure
-    # compatibility with Zsh).
+# Pick newest installed /usr/local/texlive/YYYY.
+TEXLIVE_DIR="$(
+  find "$TEXLIVE_BASE" -mindepth 1 -maxdepth 1 -type d -name '20[0-9][0-9]' 2> /dev/null \
+      | sort -r \
+      | head -n 1
+)"
+
+if [ -n "$TEXLIVE_DIR" ] && [ -d "$TEXLIVE_DIR" ]; then
+    # Compute bin path.
+    TEXLIVE_BIN="${TEXLIVE_DIR}/bin/${TL_PLATFORM}"
+
+    # Add TeX Live binaries to PATH.
+    lvn_add_to_path "$TEXLIVE_BIN"
+
+    # Ensure MANPATH and INFOPATH exist.
     MANPATH="${MANPATH:-}"
     INFOPATH="${INFOPATH:-}"
 
-    # Add TeX Live documentation paths.
-    export MANPATH="$MANPATH:$TEXLIVE_DIR/texmf-dist/doc/man"
-    export INFOPATH="$INFOPATH:$TEXLIVE_DIR/texmf-dist/doc/info"
+    # Add TeX Live documentation paths (append with ':' only if non-empty).
+    export MANPATH="${MANPATH:+${MANPATH}:}${TEXLIVE_DIR}/texmf-dist/doc/man"
+    export INFOPATH="${INFOPATH:+${INFOPATH}:}${TEXLIVE_DIR}/texmf-dist/doc/info"
 
-    # Add TeX Live binaries to PATH.
-    lvn_add_to_path "$TEXLIVE_DIR/bin/x86_64-linux"
+    printf >&2 'TeX Live found: %s (%s)\n' "$TEXLIVE_DIR" "$TL_PLATFORM"
+else
+    printf >&2 'No TeX Live installation detected.\n'
 fi
 
-# Detailed directory listing.
-alias ll='ls -l'
+# Columnar format with type indicators.
+alias l='ls -CF'
 
 # List directories only.
 alias lsd='ls -d */'
 
-# Columnar format with type indicators.
-alias l='ls -CF'
+# List files only.
+alias lsf='ls -p | grep -v /'
+
+# Detailed directory listing.
+alias ll='ls -l'
 
 # Define aliases for changing directory up levels.
 alias ..='cd ..'

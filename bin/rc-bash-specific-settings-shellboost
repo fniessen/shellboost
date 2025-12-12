@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20251031.1702>
+# Last modified: <20251212.1911>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
@@ -170,7 +170,7 @@ if ! command -v git > /dev/null 2>&1; then
     printf >&2 "\033[1;37;41mERROR: 'git' command not found.\033[0m\n"
 fi
 
-sboost_git_ps1() {
+boost_git_ps1() {
     git rev-parse --is-inside-work-tree > /dev/null 2>&1 || return
     local branch status dirty staged stash untracked outgoing incoming
 
@@ -309,7 +309,7 @@ set_prompt() {
     # Git status, only if inside repo.
     if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
         PS1+="${GIT_BG}\[\033[38;5;25m\]${SEPARATOR_RIGHT}${RESET}"
-        PS1+="${GIT_BG}${GIT_FG} $(sboost_git_ps1) ${RESET}"
+        PS1+="${GIT_BG}${GIT_FG} $(boost_git_ps1) ${RESET}"
         PS1+="${GIT_SEP_FG}${FINAL_BG}${SEPARATOR_RIGHT}${RESET}"
     else
         # Always add a final left separator in blue if not inside Git.
