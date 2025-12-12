@@ -642,6 +642,14 @@ if command -v rg > /dev/null 2>&1; then
 fi
 #+end_src
 
+** PATH and environment helpers
+
+#+begin_src shell
+# Display the contents of $PATH with each directory separated by a newline
+# character.
+alias path='echo "$PATH" | tr ":" "\n"'
+#+end_src
+
 ** Global aliases for Zsh
 
 This collection of global aliases is designed to streamline command-line
@@ -1022,11 +1030,11 @@ For example:
 
 Refresh command line
 
-| Key binding | Meaning                                                                                                 |
-|-------------+---------------------------------------------------------------------------------------------------------|
-| C-M-u       | Move to parent directory                                                                                |
-| M-s         | Prepend 'sudo ' to the current command                                                                  |
-| M-S-l       | List directory contents                                                                                 |
+| Key binding | Meaning                                                                                               |
+|-------------+-------------------------------------------------------------------------------------------------------|
+| C-M-u       | Move to parent directory                                                                              |
+| M-s         | Prepend 'sudo ' to the current command                                                                |
+| M-S-l       | List directory contents                                                                               |
 | C-x C-e     | Edit the current command line in an external editor; similar to the ~fc~ ("fix command") shell built-in |
 
 *** ls

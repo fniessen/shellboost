@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20251212.1911>
+# Last modified: <20251212.1928>
 
 # Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 
@@ -137,6 +137,10 @@ if command -v rg > /dev/null 2>&1; then
     }
 
 fi
+
+# Display the contents of $PATH with each directory separated by a newline
+# character.
+alias path='echo "$PATH" | tr ":" "\n"'
 
 # Check if bat is installed before aliasing cat.
 if command -v bat > /dev/null 2>&1; then
