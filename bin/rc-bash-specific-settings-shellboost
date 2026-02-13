@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20251212.1911>
+# Last modified: <20260213.1136>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
@@ -49,7 +49,7 @@ cd() {
         pushd -n "$PWD" > /dev/null 2>&1
 
         # # Provide feedback (show stack excluding the current directory at index 0).
-        # dirs -v | tail -n +2 | head -n 9 | sed 's/^ //'
+        # dirs -v | tail -n +2 | head -n 9 | sed 's_^ __'
     else
         printf >&2 "cd: Failed to change directory to: %s\n" "$*"
         return 2

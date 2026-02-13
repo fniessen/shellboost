@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20251212.1911>
+# Last modified: <20260213.1136>
 
 # Exit if not running in Zsh.
 if [ -z "$ZSH_VERSION" ]; then
@@ -204,6 +204,9 @@ precmd() {
 
 # Activate
 add-zsh-hook precmd precmd
+
+# Enable case-insensitive tab completion
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 
 # Search command history based on what is typed.
 autoload -Uz up-line-or-beginning-search
