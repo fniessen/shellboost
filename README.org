@@ -445,7 +445,7 @@ cd() {
         pushd -n "$PWD" > /dev/null 2>&1
 
         # # Provide feedback (show stack excluding the current directory at index 0).
-        # dirs -v | tail -n +2 | head -n 9 | sed 's/^ //'
+        # dirs -v | tail -n +2 | head -n 9 | sed 's_^ __'
     else
         printf >&2 "cd: Failed to change directory to: %s\n" "$*"
         return 2
@@ -1599,6 +1599,13 @@ that start with ~ls~.
 
 These are completions for commands and file paths. For example, if you type ~cd~,
 the shell might show you a list of directories that you can change to.
+
+** Configuration for Zsh
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
+# Enable case-insensitive tab completion
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+#+end_src
 
 * 9. Universal variables
 
