@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20251212.1928>
+# Last modified: <20260713.1055>
 
 # Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 
@@ -28,7 +28,7 @@ fi
 # Configure the time format for `ls` to display dates as "YYYY-MM-DD Day HH:MM".
 export TIME_STYLE=+"%Y-%m-%d %a %H:%M"
 
-# Function to add a directory to PATH if it's not already included.
+# Add a directory to PATH if it exists and is not already included.
 lvn_add_to_path() {
     local dir="$1"
     if [ -d "$dir" ] && [[ ":$PATH:" != *":$dir:"* ]]; then
@@ -36,9 +36,10 @@ lvn_add_to_path() {
     fi
 }
 
-# Add user-specific binary directories.
-lvn_add_to_path "$HOME/bin"
+# Add user-specific binary directories, from lowest to highest precedence.
+lvn_add_to_path "$HOME/.local/bin"
 lvn_add_to_path "$HOME/winbin"
+lvn_add_to_path "$HOME/bin"
 
 TEXLIVE_BASE="/usr/local/texlive"
 TL_PLATFORM="$(uname -m)-linux"

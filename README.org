@@ -258,12 +258,12 @@ any location without specifying their full path.
 
 ** Modifying PATH
 
-To dynamically add directories to ~PATH~, we define a helper function that checks
-if a directory is already present before appending it. This prevents duplicate
-entries and maintains an organized environment.
+To dynamically extend ~PATH~, we define a helper function that adds a directory
+only if it exists and is not already present. This prevents duplicate entries
+and keeps the environment clean.
 
 #+begin_src shell
-# Function to add a directory to PATH if it's not already included.
+# Add a directory to PATH if it exists and is not already included.
 lvn_add_to_path() {
     local dir="$1"
     if [ -d "$dir" ] && [[ ":$PATH:" != *":$dir:"* ]]; then
@@ -271,13 +271,15 @@ lvn_add_to_path() {
     fi
 }
 
-# Add user-specific binary directories.
-lvn_add_to_path "$HOME/bin"
+# Add user-specific binary directories, from lowest to highest precedence.
+lvn_add_to_path "$HOME/.local/bin"
 lvn_add_to_path "$HOME/winbin"
+lvn_add_to_path "$HOME/bin"
 #+end_src
 
-This setup ensures that executables stored in =~/bin= and =~/winbin= are accessible
-from the command line.
+This ensures that executables installed in user-specific locations are available
+from the command line. In particular, ~~/.local/bin~ is the default installation
+directory for executables installed with ~pip --user~, such as ~xlsx2csv~.
 
 ** TeX Live configuration
 
@@ -919,6 +921,21 @@ repeat() {
 These are mappings of keys to commands.
 
 - ~C-l~: clear the terminal screen.
+
+XXX it's not really cleared neither in Bash nor in Zsh
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
+function zle-reset-terminal() {
+  command reset
+  zle redisplay
+}
+zle -N zle-reset-terminal
+
+# C-l.
+bindkey '^l' zle-reset-terminal
+#+end_src
+
+Does it delete command history?
 
 ** Finding and highlighting strings with C-S-f in WSL terminal
 
