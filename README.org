@@ -1783,8 +1783,10 @@ color_stderr_red() {
     done
 }
 
-# Redirect stderr to color_stderr_red function.
-exec 2> >(color_stderr_red)
+# Color stderr in interactive shells when stderr is a terminal.
+if [[ -o interactive && -t 2 ]]; then
+    exec 2> >(color_stderr_red)
+fi
 #+end_src
 
 * Contribute to ShellBoost

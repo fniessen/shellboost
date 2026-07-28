@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20260728.1031>
+# Last modified: <20260728.1035>
 
 # Exit if not running in Zsh.
 if [ -z "$ZSH_VERSION" ]; then
@@ -265,5 +265,7 @@ color_stderr_red() {
     done
 }
 
-# Redirect stderr to color_stderr_red function.
-exec 2> >(color_stderr_red)
+# Color stderr in interactive shells when stderr is a terminal.
+if [[ -o interactive && -t 2 ]]; then
+    exec 2> >(color_stderr_red)
+fi
