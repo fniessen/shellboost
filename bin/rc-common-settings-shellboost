@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20260728.1001>
+# Last modified: <20260728.1020>
 
 # Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 
@@ -129,7 +129,8 @@ if command -v rg > /dev/null 2>&1; then
     # - Including hidden and ignored files
     # - Excluding any files under `.git/` directories
     rgno() {
-        rg --hidden --no-ignore -l "$@" | grep -v '\.git/'
+        rg --hidden --no-ignore -l -- "$@" |
+            grep -v '\.git/'
     }
 
     # Search by file extension (case-insensitive).

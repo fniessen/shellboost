@@ -629,7 +629,8 @@ if command -v rg > /dev/null 2>&1; then
     # - Including hidden and ignored files
     # - Excluding any files under `.git/` directories
     rgno() {
-        rg --hidden --no-ignore -l "$@" | grep -v '\.git/'
+        rg --hidden --no-ignore -l -- "$@" |
+            grep -v '\.git/'
     }
 #+end_src
 
