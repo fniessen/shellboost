@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20260728.1001>
+# Last modified: <20260728.1018>
 
 # Exit if not running in Zsh.
 if [ -z "$ZSH_VERSION" ]; then
@@ -253,13 +253,15 @@ setopt HIST_EXPIRE_DUPS_FIRST
 alias history="history 0"
 
 # Color stderr.
-zmodload zsh/system
 color_stderr_red() {
-    # Sysread & syswrite are part of `zsh/system'.
     emulate -LR zsh
-    local stderr_red_esc_code=$'\e[37;1;41m'
-    while sysread; do
-        syswrite -o 2 "${stderr_red_esc_code}${REPLY}$terminfo[sgr0]"
+
+    local red=$'\e[37;1;41m'
+    local reset=$'\e[0m'
+    local line
+
+    while IFS= read -r line; do
+        print -ru2 -- "${red}${line}${reset}"
     done
 }
 
