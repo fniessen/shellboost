@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20260213.1136>
+# Last modified: <20260728.1001>
 
 # Exit if not running in Zsh.
 if [ -z "$ZSH_VERSION" ]; then
@@ -74,6 +74,15 @@ done
 for i in {1..9}; do
     alias -g "T$i"="| awk -F \$'\\t' '{print \$$i}'"
 done
+
+function zle-reset-terminal() {
+  command reset
+  zle redisplay
+}
+zle -N zle-reset-terminal
+
+# C-l.
+bindkey '^l' zle-reset-terminal
 
 # Bind common escape sequences for arrow keys with modifiers.
 bindkey "\e[1;5D" backward-word         # Ctrl+Left.
