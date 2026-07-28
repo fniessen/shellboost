@@ -1764,13 +1764,13 @@ setopt HIST_EXPIRE_DUPS_FIRST
 alias history="history 0"
 #+end_src
 
-*** Stderr in red
+*** Color stderr messages in red
 
 Wrap text that goes to file with descriptor ~2~ with proper ANSI escape codes,
 making text red.
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
-# Color stderr.
+# Color stderr line by line, including a final unterminated line.
 color_stderr_red() {
     emulate -LR zsh
 
@@ -1778,7 +1778,7 @@ color_stderr_red() {
     local reset=$'\e[0m'
     local line
 
-    while IFS= read -r line; do
+    while IFS= read -r line || [[ -n $line ]]; do
         print -ru2 -- "${red}${line}${reset}"
     done
 }

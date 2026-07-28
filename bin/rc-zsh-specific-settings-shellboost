@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20260728.1018>
+# Last modified: <20260728.1031>
 
 # Exit if not running in Zsh.
 if [ -z "$ZSH_VERSION" ]; then
@@ -252,7 +252,7 @@ setopt HIST_EXPIRE_DUPS_FIRST
 # Show full command history without line numbers.
 alias history="history 0"
 
-# Color stderr.
+# Color stderr line by line, including a final unterminated line.
 color_stderr_red() {
     emulate -LR zsh
 
@@ -260,7 +260,7 @@ color_stderr_red() {
     local reset=$'\e[0m'
     local line
 
-    while IFS= read -r line; do
+    while IFS= read -r line || [[ -n $line ]]; do
         print -ru2 -- "${red}${line}${reset}"
     done
 }
