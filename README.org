@@ -248,8 +248,8 @@ export TIME_STYLE=+"%Y-%m-%d %a %H:%M"
 
 This setting formats timestamps in a human-readable ISO-like format with the day
 of the week included.
-
-* 2. Paths
+. Paths
+* 2
 
 This section covers essential paths for files and directories, including how to
 configure the ~PATH~ environment variable. The ~PATH~ variable tells the shell where
@@ -313,7 +313,7 @@ TL_PLATFORM="$(uname -m)-linux"
 
 # Pick newest installed /usr/local/texlive/YYYY.
 TEXLIVE_DIR="$(
-  find "$TEXLIVE_BASE" -mindepth 1 -maxdepth 1 -type d -name '20[0-9][0-9]' 2> /dev/null \
+  find "$TEXLIVE_BASE" -mindepth 1 -maxdepth 1 -type d -name '20[0-9][0-9]' 2>/dev/null \
       | sort -r \
       | head -n 1
 )"
@@ -333,9 +333,9 @@ if [ -n "$TEXLIVE_DIR" ] && [ -d "$TEXLIVE_DIR" ]; then
     export MANPATH="${MANPATH:+${MANPATH}:}${TEXLIVE_DIR}/texmf-dist/doc/man"
     export INFOPATH="${INFOPATH:+${INFOPATH}:}${TEXLIVE_DIR}/texmf-dist/doc/info"
 
-    printf >&2 'TeX Live found: %s (%s)\n' "$TEXLIVE_DIR" "$TL_PLATFORM"
+    printf 'TeX Live found: %s (%s)\n' "$TEXLIVE_DIR" "$TL_PLATFORM" >&2
 else
-    printf >&2 'No TeX Live installation detected.\n'
+    printf 'No TeX Live installation detected.\n' >&2
 fi
 #+end_src
 
@@ -352,26 +352,30 @@ frequently used shell operations.
 
 ** Listing directories and files
 
-The following aliases enhance the functionality of the ~ls~ command, making it
-easier to navigate and view directory contents:
+The following aliases provide concise variants of the GNU ~ls~ command for common
+directory inspection tasks.
+
+Color output is enabled only when writing to a terminal. This preserves readable
+output when a command is redirected to a file or passed through a pipeline.
 
 #+begin_src shell
-# Columnar format with type indicators.
-alias l='ls -CF'
+# Display entries in columns and append an indicator to each recognised type,
+# such as "/" for directories, "*" for executable files, and "@" for links.
+alias ls='ls -CF --color=auto'
 
-# List directories only.
-alias lsd='ls -d */'
+# Display only non-hidden directories in the current directory.
+alias lsd='ls -d --color=auto -- */'
 
-# List files only.
-alias lsf='ls -p | grep -v /'
+# Display only visible, non-directory entries.
+alias lsf='ls -p --color=auto | grep -v '/$''
 
-# Detailed directory listing.
-alias ll='ls -l'
+# Display a detailed, human-readable listing of all entries.
+alias ll='ls -lahF --color=auto'
 #+end_src
 
 ** Changing working directory
 
-*** Navigating up levels
+*** Navigating levels up
 
 #+begin_src shell
 # Define aliases for changing directory up levels.
@@ -406,31 +410,31 @@ DIRSTACKSIZE=10
 export DIRSTACKSIZE
 
 # Check if realpath is available; if not, warn about potential issues.
-if ! command -v realpath > /dev/null 2>&1; then
+if ! command -v realpath >/dev/null 2>&1; then
     printf >&2 "Warning: 'realpath' not found. Directory stack normalization may not work correctly.\n"
 fi
 
 # Custom cd function that maintains a directory stack with unique entries.
 cd() {
     # Attempt to change directory using built-in cd.
-    if builtin cd "$@" 2> /dev/null; then
+    if builtin cd "$@" 2>/dev/null; then
         # Normalize the current directory path for comparison.
         local current_dir
-        current_dir=$(realpath "$PWD" 2> /dev/null || printf "%s\n" "$PWD")
+        current_dir=$(realpath "$PWD" 2>/dev/null || printf "%s\n" "$PWD")
 
         # Get the current directory stack without the top entry (current dir).
         local stack
         stack=$(dirs -p -l | tail -n +2)
 
         # Clear the existing stack to rebuild it without duplicates.
-        while popd -n > /dev/null 2>&1; do :; done
+        while popd -n >/dev/null 2>&1; do :; done
 
         # Rebuild the stack, excluding the current directory.
         local temp_stack=()
         while IFS= read -r dir; do
             # Normalize directory path for comparison.
             local normalized_dir
-            normalized_dir=$(realpath "$dir" 2> /dev/null || printf "%s\n" "$dir")
+            normalized_dir=$(realpath "$dir" 2>/dev/null || printf "%s\n" "$dir")
             if [[ "$normalized_dir" != "$current_dir" ]]; then
                 temp_stack+=("$dir")
             fi
@@ -439,17 +443,17 @@ cd() {
         # Push unique directories back to the stack, respecting DIRSTACKSIZE.
         local stack_size=${#temp_stack[@]}
         for ((i=$stack_size-1; i>=0 && stack_size<${DIRSTACKSIZE:-10}-1; i--)); do
-            pushd -n "${temp_stack[$i]}" > /dev/null 2>&1
+            pushd -n "${temp_stack[$i]}" >/dev/null 2>&1
             ((stack_size++))
         done
 
         # Add the current directory to the stack.
-        pushd -n "$PWD" > /dev/null 2>&1
+        pushd -n "$PWD" >/dev/null 2>&1
 
         # # Provide feedback (show stack excluding the current directory at index 0).
         # dirs -v | tail -n +2 | head -n 9 | sed 's_^ __'
     else
-        printf >&2 "cd: Failed to change directory to: %s\n" "$*"
+        printf "cd: Failed to change directory to: %s\n" "$*" >&2
         return 2
     fi
 }
@@ -462,7 +466,7 @@ This ensures every ~cd~ command saves the directory in the stack.
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 # Exit if not running in Zsh.
 if [ -z "$ZSH_VERSION" ]; then
-    printf >&2 "ERROR: This script requires Zsh. Aborting.\n"
+    printf "ERROR: This script requires Zsh. Aborting.\n" >&2
     return 1
 fi
 
@@ -504,7 +508,7 @@ jumpd() {
     local index="$1"
 
     if ! [[ "$index" =~ ^[0-9]+$ ]]; then
-        printf >&2 "jumpd: Index must be a non-negative number\n"
+        printf "jumpd: Index must be a non-negative number\n" >&2
         return 64                       # EX_USAGE: Command-line usage error.
     fi
 
@@ -512,7 +516,7 @@ jumpd() {
     line=$(dirs -v | awk -v idx="$index" '$1 == idx { $1=""; sub(/^ +/, ""); print }')
 
     if [ -z "$line" ]; then
-        printf >&2 "jumpd: Invalid index: %s\n" "$index"
+        printf "jumpd: Invalid index: %s\n" "$index" >&2
         return 65                       # EX_DATAERR: Data format error.
     fi
 
@@ -520,11 +524,11 @@ jumpd() {
     local target_dir
     target_dir=$(eval printf "%s\\\n" "$line") # With newline.
 
-    if builtin cd "$target_dir" 2> /dev/null; then
+    if builtin cd "$target_dir" 2>/dev/null; then
         # Successfully changed directory, do nothing.
         :
     else
-        printf >&2 "jumpd: Failed to cd to: %s\n" "$target_dir"
+        printf "jumpd: Failed to cd to: %s\n" "$target_dir" >&2
         return 71                       # EX_OSERR: System error.
     fi
 }
@@ -595,7 +599,7 @@ provided to enhance its functionality:
 
 #+begin_src shell
 # Check if 'rg' command is available.
-if command -v rg > /dev/null 2>&1; then
+if command -v rg >/dev/null 2>&1; then
     # Note: Install ripgrep with 'sudo apt install ripgrep' if missing.
 #+end_src
 
@@ -605,7 +609,7 @@ if command -v rg > /dev/null 2>&1; then
     # Ripgrep with context, colorized output, and case-insensitive search.
     rgci() {
         if [[ $# -eq 0 ]]; then
-            printf >&2 '\033[1;37;41mUsage: rgci SEARCH_PATTERN...\033[0m\n'
+            printf '\033[1;37;41mUsage: rgci SEARCH_PATTERN...\033[0m\n' >&2
             return 64                   # EX_USAGE: Command-line usage error.
         fi
 
@@ -638,8 +642,8 @@ if command -v rg > /dev/null 2>&1; then
     # Search by file extension (case-insensitive).
     rgext() {
         if [[ $# -ne 2 ]]; then
-            printf >&2 '\033[1;37;41mUsage: rgext EXTENSION PATTERN\033[0m\n'
-            printf >&2 "Example: rgext txt 'hello world'\n"
+            printf '\033[1;37;41mUsage: rgext EXTENSION PATTERN\033[0m\n' >&2
+            printf "Example: rgext txt 'hello world'\n" >&2
             return 64                   # EX_USAGE: Command-line usage error.
         fi
         rg --hidden --no-ignore -i -C 1 --iglob "*.$1" "$2"
@@ -672,8 +676,8 @@ more concise and easy to use:
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 alias -g 21="2>&1"                      # Redirect stderr to stdout.
-alias -g N='> /dev/null'                # Redirect output to null (discard).
-alias -g NN='> /dev/null 2>&1'          # Redirect both stdout and stderr to null.
+alias -g N='>/dev/null'                 # Redirect output to null (discard).
+alias -g NN='>/dev/null 2>&1'           # Redirect both stdout and stderr to null.
 #+end_src
 
 *** Data processing
@@ -803,7 +807,7 @@ a better user interface for viewing files.
 
 #+begin_src shell
 # Check if bat is installed before aliasing cat.
-if command -v bat > /dev/null 2>&1; then
+if command -v bat >/dev/null 2>&1; then
     # Better cat.
     alias cat='bat'
 fi
@@ -819,7 +823,7 @@ performance, making it a better alternative.
 
 #+begin_src shell
 # Check if moar is installed before aliasing less.
-if command -v moar > /dev/null 2>&1; then
+if command -v moar >/dev/null 2>&1; then
     # Better less.
     alias less='moar'
 fi
@@ -834,7 +838,7 @@ detailed metrics.
 
 #+begin_src shell
 # Check if htop is installed before aliasing top.
-if command -v htop > /dev/null 2>&1; then
+if command -v htop >/dev/null 2>&1; then
     # Better top.
     alias top='htop'
 fi
@@ -849,7 +853,7 @@ information.
 
 #+begin_src shell
 # Check if duf is installed before aliasing df.
-if command -v duf > /dev/null 2>&1; then
+if command -v duf >/dev/null 2>&1; then
     # Better df.
     alias df='duf'
 fi
@@ -864,7 +868,7 @@ network diagnostics with a clearer and more dynamic interface.
 
 #+begin_src shell
 # Check if mtr is installed before aliasing traceroute.
-if command -v mtr > /dev/null 2>&1; then
+if command -v mtr >/dev/null 2>&1; then
     # Better traceroute.
     alias traceroute='mtr -t'
     # Better tracepath.
@@ -1196,7 +1200,7 @@ run-help() {
     # Check if there's a command to process.
     if [[ -n "$cmd" ]]; then
         # Show the man page for the command (if it exists).
-        man "$cmd" 2> /dev/null || {
+        man "$cmd" 2>/dev/null || {
             # If no man page, use the `whatis` command for a brief description.
             whatis "$cmd" || printf "No help available for '%s'.\n" "$cmd"
         }
@@ -1366,15 +1370,15 @@ colors, the text that is displayed, and the layout of the prompt.
 # ───────────────────────────────────────────────────────────────
 
 # Check if 'git' command is available.
-if ! command -v git > /dev/null 2>&1; then
-    printf >&2 "\033[1;37;41mERROR: 'git' command not found.\033[0m\n"
+if ! command -v git >/dev/null 2>&1; then
+    printf "\033[1;37;41mERROR: 'git' command not found.\033[0m\n" >&2
 fi
 
 boost_git_ps1() {
-    git rev-parse --is-inside-work-tree > /dev/null 2>&1 || return
+    git rev-parse --is-inside-work-tree >/dev/null 2>&1 || return
     local branch status dirty staged stash untracked outgoing incoming
 
-    branch="$(git symbolic-ref --short -q HEAD 2> /dev/null || git rev-parse --short HEAD 2> /dev/null)"
+    branch="$(git symbolic-ref --short -q HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)"
 
     # Custom colors.
     local GIT_DIRTY_COLOR="\033[31;1m"
@@ -1396,19 +1400,19 @@ boost_git_ps1() {
     fi
 
     # Stash.
-    if git rev-parse --verify --quiet refs/stash > /dev/null 2>&1; then
+    if git rev-parse --verify --quiet refs/stash >/dev/null 2>&1; then
         stash="${GIT_STASH_COLOR}\$"
     fi
 
     # Untracked.
-    if git ls-files --others --exclude-standard 2> /dev/null | grep -q .; then
+    if git ls-files --others --exclude-standard 2>/dev/null | grep -q .; then
         untracked="${GIT_UNTRACKED_COLOR}?"
     fi
 
     # Ahead / Behind.
-    if git rev-parse --abbrev-ref @{u} &> /dev/null 2>&1; then
+    if git rev-parse --abbrev-ref @{u} &>/dev/null 2>&1; then
         local counts count_outgoing count_incoming
-        counts="$(git rev-list --left-right --count HEAD...@{u} 2> /dev/null)"
+        counts="$(git rev-list --left-right --count HEAD...@{u} 2>/dev/null)"
         count_outgoing=$(printf "%s\n" "$counts" | awk '{print $1}')
         count_incoming=$(printf "%s\n" "$counts" | awk '{print $2}')
         (( count_outgoing > 0 )) && outgoing="${GIT_OUTGOING_COLOR}▲$count_outgoing"
@@ -1507,7 +1511,7 @@ set_prompt() {
     PS1+="${DIR_BG}${DIR_FG} \w ${RESET}"
 
     # Git status, only if inside repo.
-    if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
         PS1+="${GIT_BG}\[\033[38;5;25m\]${SEPARATOR_RIGHT}${RESET}"
         PS1+="${GIT_BG}${GIT_FG} $(boost_git_ps1) ${RESET}"
         PS1+="${GIT_SEP_FG}${FINAL_BG}${SEPARATOR_RIGHT}${RESET}"
@@ -1537,22 +1541,22 @@ git_prompt_info() {
 
     local branch git_status=''  # ← Renamed from 'status' to avoid conflict
 
-    branch=$(git symbolic-ref --short HEAD 2> /dev/null || git rev-parse --short HEAD 2> /dev/null)
+    branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
 
     # Unstaged changes
     [[ -n $(git diff --no-ext-diff --shortstat 2> /dev/null) ]] && git_status+='%F{red}●%f'
     # Staged changes
-    [[ -n $(git diff --cached --shortstat 2> /dev/null) ]] && git_status+='%F{green}+%f'
+    [[ -n $(git diff --cached --shortstat 2>/dev/null) ]] && git_status+='%F{green}+%f'
     # Stashes
     git rev-parse --verify refs/stash &>/dev/null && git_status+='%F{cyan}$%f'
     # Untracked files
-    [[ -n $(git ls-files --others --exclude-standard 2> /dev/null) ]] && git_status+='%F{yellow}?%f'
+    [[ -n $(git ls-files --others --exclude-standard 2>/dev/null) ]] && git_status+='%F{yellow}?%f'
 
     # Ahead / Behind
-    if upstream=$(git rev-parse --abbrev-ref @{u} 2> /dev/null); then
+    if upstream=$(git rev-parse --abbrev-ref @{u} 2>/dev/null); then
         local ahead behind
-        ahead=$(git rev-list --count "$upstream"..HEAD 2> /dev/null)
-        behind=$(git rev-list --count HEAD.."$upstream" 2> /dev/null)
+        ahead=$(git rev-list --count "$upstream"..HEAD 2>/dev/null)
+        behind=$(git rev-list --count HEAD.."$upstream" 2>/dev/null)
         (( ahead )) && git_status+="%F{magenta}▲$ahead%f"
         (( behind )) && git_status+="%F{cyan}▼$behind%f"
     fi
@@ -1661,7 +1665,7 @@ Up/Down arrow → history search (search-as-you-type)
 
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
 # Check if history search bindings are already set.
-if ! bind -q history-search-backward > /dev/null 2>&1; then
+if ! bind -q history-search-backward >/dev/null 2>&1; then
     # If not set, configure Up and Down arrow keys for history search.
     bind '"\e[A": history-search-backward'  # Up arrow: Search backward in command history.
     bind '"\e[B": history-search-forward'   # Down arrow: Search forward in command history.
@@ -1766,8 +1770,8 @@ alias history="history 0"
 
 *** Color stderr messages in red
 
-Wrap text that goes to file with descriptor ~2~ with proper ANSI escape codes,
-making text red.
+Messages sent to file descriptor ~2~ (*stderr*) are wrapped with ANSI escape
+sequences so that they are displayed in red in the terminal.
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 # Color stderr line by line, including a final unterminated line.
@@ -1779,15 +1783,34 @@ color_stderr_red() {
     local line
 
     while IFS= read -r line || [[ -n $line ]]; do
-        print -ru2 -- "${red}${line}${reset}"
+        printf '%s%s%s\n' "$red" "$line" "$reset" >&2
+
+        # Force immediate display.
+        [[ -t 2 ]] && zmodload zsh/system 2>/dev/null \
+            && syswrite -o 2 ''
     done
 }
 
-# Color stderr in interactive shells when stderr is a terminal.
+# Color stderr in interactive shells when stderr is connected to a terminal.
 if [[ -o interactive && -t 2 ]]; then
     exec 2> >(color_stderr_red)
 fi
 #+end_src
+
+#+begin_warning
+This transforms stderr into an asynchronous pipeline:
+
+stderr -> pipe -> color_stderr_red -> terminal
+
+As a consequence, the relative ordering of stdout and stderr messages is no
+longer guaranteed.  Error messages may appear later than expected, and prompts
+displayed with commands such as ~read -p~ may be delayed, duplicated, or appear
+out of order.
+
+This behaviour has been observed with scripts such as ~git-switch-https-to-ssh~,
+where stderr messages are displayed after an interactive prompt even though they
+were emitted beforehand.
+#+end_warning
 
 * Contribute to ShellBoost
 

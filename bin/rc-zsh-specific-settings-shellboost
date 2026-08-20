@@ -1,11 +1,11 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20260728.1035>
+# Last modified: <20260820.0909>
 
 # Exit if not running in Zsh.
 if [ -z "$ZSH_VERSION" ]; then
-    printf >&2 "ERROR: This script requires Zsh. Aborting.\n"
+    printf "ERROR: This script requires Zsh. Aborting.\n" >&2
     return 1
 fi
 
@@ -26,8 +26,8 @@ done
 # etc.
 
 alias -g 21="2>&1"                      # Redirect stderr to stdout.
-alias -g N='> /dev/null'                # Redirect output to null (discard).
-alias -g NN='> /dev/null 2>&1'          # Redirect both stdout and stderr to null.
+alias -g N='>/dev/null'                 # Redirect output to null (discard).
+alias -g NN='>/dev/null 2>&1'           # Redirect both stdout and stderr to null.
 
 alias -g A='| awk'                      # Pipe output to awk.
 alias -g G='| grep --color=auto -E'     # Grep with color highlighting and extended regex.
@@ -140,22 +140,22 @@ git_prompt_info() {
 
     local branch git_status=''  # ← Renamed from 'status' to avoid conflict
 
-    branch=$(git symbolic-ref --short HEAD 2> /dev/null || git rev-parse --short HEAD 2> /dev/null)
+    branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
 
     # Unstaged changes
     [[ -n $(git diff --no-ext-diff --shortstat 2> /dev/null) ]] && git_status+='%F{red}●%f'
     # Staged changes
-    [[ -n $(git diff --cached --shortstat 2> /dev/null) ]] && git_status+='%F{green}+%f'
+    [[ -n $(git diff --cached --shortstat 2>/dev/null) ]] && git_status+='%F{green}+%f'
     # Stashes
     git rev-parse --verify refs/stash &>/dev/null && git_status+='%F{cyan}$%f'
     # Untracked files
-    [[ -n $(git ls-files --others --exclude-standard 2> /dev/null) ]] && git_status+='%F{yellow}?%f'
+    [[ -n $(git ls-files --others --exclude-standard 2>/dev/null) ]] && git_status+='%F{yellow}?%f'
 
     # Ahead / Behind
-    if upstream=$(git rev-parse --abbrev-ref @{u} 2> /dev/null); then
+    if upstream=$(git rev-parse --abbrev-ref @{u} 2>/dev/null); then
         local ahead behind
-        ahead=$(git rev-list --count "$upstream"..HEAD 2> /dev/null)
-        behind=$(git rev-list --count HEAD.."$upstream" 2> /dev/null)
+        ahead=$(git rev-list --count "$upstream"..HEAD 2>/dev/null)
+        behind=$(git rev-list --count HEAD.."$upstream" 2>/dev/null)
         (( ahead )) && git_status+="%F{magenta}▲$ahead%f"
         (( behind )) && git_status+="%F{cyan}▼$behind%f"
     fi
@@ -261,11 +261,15 @@ color_stderr_red() {
     local line
 
     while IFS= read -r line || [[ -n $line ]]; do
-        print -ru2 -- "${red}${line}${reset}"
+        printf '%s%s%s\n' "$red" "$line" "$reset" >&2
+
+        # Force immediate display.
+        [[ -t 2 ]] && zmodload zsh/system 2>/dev/null \
+            && syswrite -o 2 ''
     done
 }
 
-# Color stderr in interactive shells when stderr is a terminal.
+# Color stderr in interactive shells when stderr is connected to a terminal.
 if [[ -o interactive && -t 2 ]]; then
     exec 2> >(color_stderr_red)
 fi

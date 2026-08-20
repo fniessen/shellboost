@@ -1,38 +1,38 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20260213.1136>
+# Last modified: <20260820.0909>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
 export DIRSTACKSIZE
 
 # Check if realpath is available; if not, warn about potential issues.
-if ! command -v realpath > /dev/null 2>&1; then
+if ! command -v realpath >/dev/null 2>&1; then
     printf >&2 "Warning: 'realpath' not found. Directory stack normalization may not work correctly.\n"
 fi
 
 # Custom cd function that maintains a directory stack with unique entries.
 cd() {
     # Attempt to change directory using built-in cd.
-    if builtin cd "$@" 2> /dev/null; then
+    if builtin cd "$@" 2>/dev/null; then
         # Normalize the current directory path for comparison.
         local current_dir
-        current_dir=$(realpath "$PWD" 2> /dev/null || printf "%s\n" "$PWD")
+        current_dir=$(realpath "$PWD" 2>/dev/null || printf "%s\n" "$PWD")
 
         # Get the current directory stack without the top entry (current dir).
         local stack
         stack=$(dirs -p -l | tail -n +2)
 
         # Clear the existing stack to rebuild it without duplicates.
-        while popd -n > /dev/null 2>&1; do :; done
+        while popd -n >/dev/null 2>&1; do :; done
 
         # Rebuild the stack, excluding the current directory.
         local temp_stack=()
         while IFS= read -r dir; do
             # Normalize directory path for comparison.
             local normalized_dir
-            normalized_dir=$(realpath "$dir" 2> /dev/null || printf "%s\n" "$dir")
+            normalized_dir=$(realpath "$dir" 2>/dev/null || printf "%s\n" "$dir")
             if [[ "$normalized_dir" != "$current_dir" ]]; then
                 temp_stack+=("$dir")
             fi
@@ -41,17 +41,17 @@ cd() {
         # Push unique directories back to the stack, respecting DIRSTACKSIZE.
         local stack_size=${#temp_stack[@]}
         for ((i=$stack_size-1; i>=0 && stack_size<${DIRSTACKSIZE:-10}-1; i--)); do
-            pushd -n "${temp_stack[$i]}" > /dev/null 2>&1
+            pushd -n "${temp_stack[$i]}" >/dev/null 2>&1
             ((stack_size++))
         done
 
         # Add the current directory to the stack.
-        pushd -n "$PWD" > /dev/null 2>&1
+        pushd -n "$PWD" >/dev/null 2>&1
 
         # # Provide feedback (show stack excluding the current directory at index 0).
         # dirs -v | tail -n +2 | head -n 9 | sed 's_^ __'
     else
-        printf >&2 "cd: Failed to change directory to: %s\n" "$*"
+        printf "cd: Failed to change directory to: %s\n" "$*" >&2
         return 2
     fi
 }
@@ -61,7 +61,7 @@ jumpd() {
     local index="$1"
 
     if ! [[ "$index" =~ ^[0-9]+$ ]]; then
-        printf >&2 "jumpd: Index must be a non-negative number\n"
+        printf "jumpd: Index must be a non-negative number\n" >&2
         return 64                       # EX_USAGE: Command-line usage error.
     fi
 
@@ -69,7 +69,7 @@ jumpd() {
     line=$(dirs -v | awk -v idx="$index" '$1 == idx { $1=""; sub(/^ +/, ""); print }')
 
     if [ -z "$line" ]; then
-        printf >&2 "jumpd: Invalid index: %s\n" "$index"
+        printf "jumpd: Invalid index: %s\n" "$index" >&2
         return 65                       # EX_DATAERR: Data format error.
     fi
 
@@ -77,11 +77,11 @@ jumpd() {
     local target_dir
     target_dir=$(eval printf "%s\\\n" "$line") # With newline.
 
-    if builtin cd "$target_dir" 2> /dev/null; then
+    if builtin cd "$target_dir" 2>/dev/null; then
         # Successfully changed directory, do nothing.
         :
     else
-        printf >&2 "jumpd: Failed to cd to: %s\n" "$target_dir"
+        printf "jumpd: Failed to cd to: %s\n" "$target_dir" >&2
         return 71                       # EX_OSERR: System error.
     fi
 }
@@ -148,7 +148,7 @@ run-help() {
     # Check if there's a command to process.
     if [[ -n "$cmd" ]]; then
         # Show the man page for the command (if it exists).
-        man "$cmd" 2> /dev/null || {
+        man "$cmd" 2>/dev/null || {
             # If no man page, use the `whatis` command for a brief description.
             whatis "$cmd" || printf "No help available for '%s'.\n" "$cmd"
         }
@@ -166,15 +166,15 @@ bind -x '"\eh": run-help'
 # ───────────────────────────────────────────────────────────────
 
 # Check if 'git' command is available.
-if ! command -v git > /dev/null 2>&1; then
-    printf >&2 "\033[1;37;41mERROR: 'git' command not found.\033[0m\n"
+if ! command -v git >/dev/null 2>&1; then
+    printf "\033[1;37;41mERROR: 'git' command not found.\033[0m\n" >&2
 fi
 
 boost_git_ps1() {
-    git rev-parse --is-inside-work-tree > /dev/null 2>&1 || return
+    git rev-parse --is-inside-work-tree >/dev/null 2>&1 || return
     local branch status dirty staged stash untracked outgoing incoming
 
-    branch="$(git symbolic-ref --short -q HEAD 2> /dev/null || git rev-parse --short HEAD 2> /dev/null)"
+    branch="$(git symbolic-ref --short -q HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)"
 
     # Custom colors.
     local GIT_DIRTY_COLOR="\033[31;1m"
@@ -196,19 +196,19 @@ boost_git_ps1() {
     fi
 
     # Stash.
-    if git rev-parse --verify --quiet refs/stash > /dev/null 2>&1; then
+    if git rev-parse --verify --quiet refs/stash >/dev/null 2>&1; then
         stash="${GIT_STASH_COLOR}\$"
     fi
 
     # Untracked.
-    if git ls-files --others --exclude-standard 2> /dev/null | grep -q .; then
+    if git ls-files --others --exclude-standard 2>/dev/null | grep -q .; then
         untracked="${GIT_UNTRACKED_COLOR}?"
     fi
 
     # Ahead / Behind.
-    if git rev-parse --abbrev-ref @{u} &> /dev/null 2>&1; then
+    if git rev-parse --abbrev-ref @{u} &>/dev/null 2>&1; then
         local counts count_outgoing count_incoming
-        counts="$(git rev-list --left-right --count HEAD...@{u} 2> /dev/null)"
+        counts="$(git rev-list --left-right --count HEAD...@{u} 2>/dev/null)"
         count_outgoing=$(printf "%s\n" "$counts" | awk '{print $1}')
         count_incoming=$(printf "%s\n" "$counts" | awk '{print $2}')
         (( count_outgoing > 0 )) && outgoing="${GIT_OUTGOING_COLOR}▲$count_outgoing"
@@ -307,7 +307,7 @@ set_prompt() {
     PS1+="${DIR_BG}${DIR_FG} \w ${RESET}"
 
     # Git status, only if inside repo.
-    if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
         PS1+="${GIT_BG}\[\033[38;5;25m\]${SEPARATOR_RIGHT}${RESET}"
         PS1+="${GIT_BG}${GIT_FG} $(boost_git_ps1) ${RESET}"
         PS1+="${GIT_SEP_FG}${FINAL_BG}${SEPARATOR_RIGHT}${RESET}"
@@ -324,7 +324,7 @@ set_prompt() {
 PROMPT_COMMAND='last=$?; show_exit_code_rprompt $last; set_prompt'
 
 # Check if history search bindings are already set.
-if ! bind -q history-search-backward > /dev/null 2>&1; then
+if ! bind -q history-search-backward >/dev/null 2>&1; then
     # If not set, configure Up and Down arrow keys for history search.
     bind '"\e[A": history-search-backward'  # Up arrow: Search backward in command history.
     bind '"\e[B": history-search-forward'   # Down arrow: Search forward in command history.

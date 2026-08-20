@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20260728.1020>
+# Last modified: <20260820.0909>
 
 # Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 
@@ -46,7 +46,7 @@ TL_PLATFORM="$(uname -m)-linux"
 
 # Pick newest installed /usr/local/texlive/YYYY.
 TEXLIVE_DIR="$(
-  find "$TEXLIVE_BASE" -mindepth 1 -maxdepth 1 -type d -name '20[0-9][0-9]' 2> /dev/null \
+  find "$TEXLIVE_BASE" -mindepth 1 -maxdepth 1 -type d -name '20[0-9][0-9]' 2>/dev/null \
       | sort -r \
       | head -n 1
 )"
@@ -66,22 +66,23 @@ if [ -n "$TEXLIVE_DIR" ] && [ -d "$TEXLIVE_DIR" ]; then
     export MANPATH="${MANPATH:+${MANPATH}:}${TEXLIVE_DIR}/texmf-dist/doc/man"
     export INFOPATH="${INFOPATH:+${INFOPATH}:}${TEXLIVE_DIR}/texmf-dist/doc/info"
 
-    printf >&2 'TeX Live found: %s (%s)\n' "$TEXLIVE_DIR" "$TL_PLATFORM"
+    printf 'TeX Live found: %s (%s)\n' "$TEXLIVE_DIR" "$TL_PLATFORM" >&2
 else
-    printf >&2 'No TeX Live installation detected.\n'
+    printf 'No TeX Live installation detected.\n' >&2
 fi
 
-# Columnar format with type indicators.
-alias l='ls -CF'
+# Display entries in columns and append an indicator to each recognised type,
+# such as "/" for directories, "*" for executable files, and "@" for links.
+alias ls='ls -CF --color=auto'
 
-# List directories only.
-alias lsd='ls -d */'
+# Display only non-hidden directories in the current directory.
+alias lsd='ls -d --color=auto -- */'
 
-# List files only.
-alias lsf='ls -p | grep -v /'
+# Display only visible, non-directory entries.
+alias lsf='ls -p --color=auto | grep -v '/$''
 
-# Detailed directory listing.
-alias ll='ls -l'
+# Display a detailed, human-readable listing of all entries.
+alias ll='ls -lahF --color=auto'
 
 # Define aliases for changing directory up levels.
 alias ..='cd ..'
@@ -103,13 +104,13 @@ hgrep() {
 rr='fc -s'
 
 # Check if 'rg' command is available.
-if command -v rg > /dev/null 2>&1; then
+if command -v rg >/dev/null 2>&1; then
     # Note: Install ripgrep with 'sudo apt install ripgrep' if missing.
 
     # Ripgrep with context, colorized output, and case-insensitive search.
     rgci() {
         if [[ $# -eq 0 ]]; then
-            printf >&2 '\033[1;37;41mUsage: rgci SEARCH_PATTERN...\033[0m\n'
+            printf '\033[1;37;41mUsage: rgci SEARCH_PATTERN...\033[0m\n' >&2
             return 64                   # EX_USAGE: Command-line usage error.
         fi
 
@@ -136,8 +137,8 @@ if command -v rg > /dev/null 2>&1; then
     # Search by file extension (case-insensitive).
     rgext() {
         if [[ $# -ne 2 ]]; then
-            printf >&2 '\033[1;37;41mUsage: rgext EXTENSION PATTERN\033[0m\n'
-            printf >&2 "Example: rgext txt 'hello world'\n"
+            printf '\033[1;37;41mUsage: rgext EXTENSION PATTERN\033[0m\n' >&2
+            printf "Example: rgext txt 'hello world'\n" >&2
             return 64                   # EX_USAGE: Command-line usage error.
         fi
         rg --hidden --no-ignore -i -C 1 --iglob "*.$1" "$2"
@@ -150,31 +151,31 @@ fi
 alias path='echo "$PATH" | tr ":" "\n"'
 
 # Check if bat is installed before aliasing cat.
-if command -v bat > /dev/null 2>&1; then
+if command -v bat >/dev/null 2>&1; then
     # Better cat.
     alias cat='bat'
 fi
 
 # Check if moar is installed before aliasing less.
-if command -v moar > /dev/null 2>&1; then
+if command -v moar >/dev/null 2>&1; then
     # Better less.
     alias less='moar'
 fi
 
 # Check if htop is installed before aliasing top.
-if command -v htop > /dev/null 2>&1; then
+if command -v htop >/dev/null 2>&1; then
     # Better top.
     alias top='htop'
 fi
 
 # Check if duf is installed before aliasing df.
-if command -v duf > /dev/null 2>&1; then
+if command -v duf >/dev/null 2>&1; then
     # Better df.
     alias df='duf'
 fi
 
 # Check if mtr is installed before aliasing traceroute.
-if command -v mtr > /dev/null 2>&1; then
+if command -v mtr >/dev/null 2>&1; then
     # Better traceroute.
     alias traceroute='mtr -t'
     # Better tracepath.
