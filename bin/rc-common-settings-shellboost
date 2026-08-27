@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20260827.1257>
+# Last modified: <20260827.2221>
 
 # Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 
@@ -63,8 +63,8 @@ if [ -n "$TEXLIVE_DIR" ] && [ -d "$TEXLIVE_DIR" ]; then
     INFOPATH="${INFOPATH:-}"
 
     # Add TeX Live documentation paths.
-    export MANPATH="${TEXLIVE_DIR}/texmf-dist/doc/man${MANPATH:+:$MANPATH}:"
-    export INFOPATH="${TEXLIVE_DIR}/texmf-dist/doc/info${INFOPATH:+:$INFOPATH}:"
+    export MANPATH="${TEXLIVE_DIR}/texmf-dist/doc/man${MANPATH:+:${MANPATH}}:"
+    export INFOPATH="${TEXLIVE_DIR}/texmf-dist/doc/info${INFOPATH:+:${INFOPATH}}"
     printf 'TeX Live found: %s (%s)\n' "$TEXLIVE_DIR" "$TL_PLATFORM" >&2
 else
     printf 'No TeX Live installation detected.\n' >&2
