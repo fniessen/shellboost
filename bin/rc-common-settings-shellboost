@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20260820.0909>
+# Last modified: <20260827.1257>
 
 # Customize shell environment with aliases, PATH tweaks, and tool enhancements.
 
@@ -62,10 +62,9 @@ if [ -n "$TEXLIVE_DIR" ] && [ -d "$TEXLIVE_DIR" ]; then
     MANPATH="${MANPATH:-}"
     INFOPATH="${INFOPATH:-}"
 
-    # Add TeX Live documentation paths (append with ':' only if non-empty).
-    export MANPATH="${MANPATH:+${MANPATH}:}${TEXLIVE_DIR}/texmf-dist/doc/man"
-    export INFOPATH="${INFOPATH:+${INFOPATH}:}${TEXLIVE_DIR}/texmf-dist/doc/info"
-
+    # Add TeX Live documentation paths.
+    export MANPATH="${TEXLIVE_DIR}/texmf-dist/doc/man${MANPATH:+:$MANPATH}:"
+    export INFOPATH="${TEXLIVE_DIR}/texmf-dist/doc/info${INFOPATH:+:$INFOPATH}:"
     printf 'TeX Live found: %s (%s)\n' "$TEXLIVE_DIR" "$TL_PLATFORM" >&2
 else
     printf 'No TeX Live installation detected.\n' >&2
@@ -79,7 +78,7 @@ alias ls='ls -CF --color=auto'
 alias lsd='ls -d --color=auto -- */'
 
 # Display only visible, non-directory entries.
-alias lsf='ls -p --color=auto | grep -v '/$''
+alias lsf="ls -p --color=auto | grep -v '/$'"
 
 # Display a detailed, human-readable listing of all entries.
 alias ll='ls -lahF --color=auto'
@@ -97,11 +96,11 @@ alias d='dirs -v | tail -n +2 | head -n 9'
 
 # Search shell history for a term (case-insensitive, with color highlights).
 hgrep() {
-    history | grep -i --color=auto "$@"
+    history | command grep -i --color=auto -- "$@"
 }
 
 # Re-run previous commands using 'fc' (without conflicts with the R language).
-rr='fc -s'
+alias rr='fc -s'
 
 # Check if 'rg' command is available.
 if command -v rg >/dev/null 2>&1; then
@@ -115,7 +114,7 @@ if command -v rg >/dev/null 2>&1; then
         fi
 
         rg -n -i -C 1 --hidden --no-ignore \
-           --glob '!.git' \
+           --glob '!.git/**' \
            --color=always \
            --colors 'match:fg:red' \
            --colors 'match:style:bold' \
@@ -130,8 +129,10 @@ if command -v rg >/dev/null 2>&1; then
     # - Including hidden and ignored files
     # - Excluding any files under `.git/` directories
     rgno() {
-        rg --hidden --no-ignore -l -- "$@" |
-            grep -v '\.git/'
+        command rg --hidden --no-ignore \
+            --glob '!.git/**' \
+            --files-with-matches \
+            -- "$@"
     }
 
     # Search by file extension (case-insensitive).
