@@ -62,9 +62,9 @@ if [ -n "$TEXLIVE_DIR" ] && [ -d "$TEXLIVE_DIR" ]; then
     MANPATH="${MANPATH:-}"
     INFOPATH="${INFOPATH:-}"
 
-    # Add TeX Live documentation paths.
-    export MANPATH="${TEXLIVE_DIR}/texmf-dist/doc/man${MANPATH:+:${MANPATH}}:"
-    export INFOPATH="${TEXLIVE_DIR}/texmf-dist/doc/info${INFOPATH:+:${INFOPATH}}"
+    # Add TeX Live documentation paths (append with ':' only if non-empty).
+    export MANPATH="${MANPATH:+${MANPATH}:}${TEXLIVE_DIR}/texmf-dist/doc/man"
+    export INFOPATH="${INFOPATH:+${INFOPATH}:}${TEXLIVE_DIR}/texmf-dist/doc/info"
     printf 'TeX Live found: %s (%s)\n' "$TEXLIVE_DIR" "$TL_PLATFORM" >&2
 else
     printf 'No TeX Live installation detected.\n' >&2
