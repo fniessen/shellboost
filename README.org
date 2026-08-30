@@ -248,8 +248,8 @@ export TIME_STYLE=+"%Y-%m-%d %a %H:%M"
 
 This setting formats timestamps in a human-readable ISO-like format with the day
 of the week included.
-. Paths
-* 2
+
+* 2. Paths
 
 This section covers essential paths for files and directories, including how to
 configure the ~PATH~ environment variable. The ~PATH~ variable tells the shell where
@@ -1774,20 +1774,14 @@ Messages sent to file descriptor ~2~ (*stderr*) are wrapped with ANSI escape
 sequences so that they are displayed in red in the terminal.
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
-# Color stderr line by line, including a final unterminated line.
+# Color stderr.
+zmodload zsh/system
 color_stderr_red() {
+    # Sysread & syswrite are part of `zsh/system'.
     emulate -LR zsh
-
-    local red=$'\e[37;1;41m'
-    local reset=$'\e[0m'
-    local line
-
-    while IFS= read -r line || [[ -n $line ]]; do
-        printf '%s%s%s\n' "$red" "$line" "$reset" >&2
-
-        # Force immediate display.
-        [[ -t 2 ]] && zmodload zsh/system 2>/dev/null \
-            && syswrite -o 2 ''
+    local stderr_red_esc_code=$'\e[37;1;41m'
+    while sysread; do
+        syswrite -o 2 "${stderr_red_esc_code}${REPLY}$terminfo[sgr0]"
     done
 }
 
