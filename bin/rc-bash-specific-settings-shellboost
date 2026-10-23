@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20261023.1051>
+# Last modified: <20261023.1128>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
@@ -306,7 +306,7 @@ set_prompt() {
 
     # First line: user@host and working directory.
     PS1+="\n"
-    PS1+="${USER_BG}${USER_FG}\u@\h ${RESET}${DIR_BG}\[\033[38;5;136m\]${SEPARATOR_RIGHT}${RESET}"
+    PS1+="${USER_BG}${USER_FG}[bash] \u@\h ${RESET}${DIR_BG}\[\033[38;5;136m\]${SEPARATOR_RIGHT}${RESET}"
     PS1+="${DIR_BG}${DIR_FG} \w ${RESET}"
 
     # Git status, only if inside repo.

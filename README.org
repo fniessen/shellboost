@@ -1508,7 +1508,7 @@ set_prompt() {
 
     # First line: user@host and working directory.
     PS1+="\n"
-    PS1+="${USER_BG}${USER_FG}\u@\h ${RESET}${DIR_BG}\[\033[38;5;136m\]${SEPARATOR_RIGHT}${RESET}"
+    PS1+="${USER_BG}${USER_FG}[bash] \u@\h ${RESET}${DIR_BG}\[\033[38;5;136m\]${SEPARATOR_RIGHT}${RESET}"
     PS1+="${DIR_BG}${DIR_FG} \w ${RESET}"
 
     # Git status, only if inside repo.
@@ -1589,7 +1589,7 @@ exit_code_rprompt() {
 
 # === Build Main Prompt ===
 build_prompt() {
-    local userhost="%K{136}%F{234} %n@%m %f%k"
+    local userhost="%K{136}%F{234}[zsh] %n@%m %f%k"
     local dir="%K{25}%F{15} %~ %f%k"
     local sep1="%F{136}%K{25}%f%k"
     local sep2="%F{25}%K{240}%f%k"

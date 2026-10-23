@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20261023.1051>
+# Last modified: <20261023.1128>
 
 # Exit if not running in Zsh.
 if [ -z "$ZSH_VERSION" ]; then
@@ -188,7 +188,7 @@ exit_code_rprompt() {
 
 # === Build Main Prompt ===
 build_prompt() {
-    local userhost="%K{136}%F{234} %n@%m %f%k"
+    local userhost="%K{136}%F{234}[zsh] %n@%m %f%k"
     local dir="%K{25}%F{15} %~ %f%k"
     local sep1="%F{136}%K{25}%f%k"
     local sep2="%F{25}%K{240}%f%k"
