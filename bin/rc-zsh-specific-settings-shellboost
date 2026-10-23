@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20261023.1128>
+# Last modified: <20261023.1149>
 
 # Exit if not running in Zsh.
 if [ -z "$ZSH_VERSION" ]; then
@@ -180,20 +180,20 @@ exit_code_rprompt() {
     local msg=" Exit $code${sym:+ ($sym)}"
 
     local cols=${COLUMNS:-$(tput cols)}
-    local len=$(( ${#msg} + 4 ))  #  + msg + ■ + space
+    local len=$(( ${#msg} + 4 ))  # ◄ + msg + ■ + space
     local pad=$(( cols - len ))
 
-    RPROMPT="%F{red}%K{black}%f%k%K{red}%F{white}$msg%f%k%F{white}%K{red} ■ %f%k%${pad}G"
+    RPROMPT="%F{red}%K{black}◄%f%k%K{red}%F{white}$msg%f%k%F{white}%K{red} ■ %f%k%${pad}G"
 }
 
 # === Build Main Prompt ===
 build_prompt() {
     local userhost="%K{136}%F{234}[zsh] %n@%m %f%k"
     local dir="%K{25}%F{15} %~ %f%k"
-    local sep1="%F{136}%K{25}%f%k"
-    local sep2="%F{25}%K{240}%f%k"
-    local sep3="%F{240}%K{black}%f%k"
-    local final_sep="%F{25}%K{black}%f%k"
+    local sep1="%F{136}%K{25}►%f%k"
+    local sep2="%F{25}%K{240}►%f%k"
+    local sep3="%F{240}%K{black}►%f%k"
+    local final_sep="%F{25}%K{black}►%f%k"
 
     PS1=$'\n'"$userhost$sep1$dir"
 

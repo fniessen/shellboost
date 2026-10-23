@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20261023.1128>
+# Last modified: <20261023.1149>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
@@ -229,7 +229,7 @@ boost_git_ps1() {
 show_exit_code_rprompt() {
     local exit_code=$1
     if [[ $exit_code -ne 0 ]]; then
-        local separator_left=""
+        local separator_left="◄"
         local white_square="■"
 
         # BSD-style symbolic names for exit codes 64-78.
@@ -270,7 +270,7 @@ show_exit_code_rprompt() {
         local formatted_square="${square_color}${white_square} ${reset_color}"
 
         # Calculate visible length.
-        local visible_len=$((${#msg} + 4))  #  + msg + ■ + 1 space.
+        local visible_len=$((${#msg} + 4))  # ◄ + msg + ■ + 1 space.
 
         local term_cols=$(tput cols)
         local padding=$(( term_cols - visible_len ))
@@ -284,7 +284,7 @@ show_exit_code_rprompt() {
 
 set_prompt() {
     # Powerline separators.
-    local SEPARATOR_RIGHT=""
+    local SEPARATOR_RIGHT="►"
 
     # Colors (with proper Bash escapes).
     local RESET="\[\033[0m\]"
