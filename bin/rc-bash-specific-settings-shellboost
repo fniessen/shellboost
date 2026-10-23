@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20260820.0909>
+# Last modified: <20261023.1051>
 
 # Set the maximum directory stack size to 10.
 DIRSTACKSIZE=10
@@ -95,15 +95,19 @@ done
 # etc.
 
 repeat() {
-  local count=$1
-  shift
-  if [[ -z "$count" || "$count" -le 0 ]]; then
-    printf "Usage: repeat N command [args...]\n"
-    return 1
-  fi
-  for ((i=1; i<=count; i++)); do
-    "$@"
-  done
+    if (( $# < 2 )) || [[ $1 != +([0-9]) ]] || (( $1 == 0 )); then
+        printf 'Usage: repeat COUNT COMMAND [ARG ...]\n' >&2
+        return 64
+    fi
+
+    local count=$1
+    local i
+
+    shift
+
+    for ((i = 0; i < count; i++)); do
+        "$@" || return
+    done
 }
 
 # M-S-l: Send the string 'ls' followed by a newline.
@@ -281,7 +285,6 @@ show_exit_code_rprompt() {
 set_prompt() {
     # Powerline separators.
     local SEPARATOR_RIGHT=""
-    local SEPARATOR_LEFT=""
 
     # Colors (with proper Bash escapes).
     local RESET="\[\033[0m\]"

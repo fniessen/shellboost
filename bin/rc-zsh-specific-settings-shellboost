@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 # NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
-# Last modified: <20260830.1308>
+# Last modified: <20261023.1051>
 
 # Exit if not running in Zsh.
 if [ -z "$ZSH_VERSION" ]; then
@@ -75,14 +75,15 @@ for i in {1..9}; do
     alias -g "T$i"="| awk -F \$'\\t' '{print \$$i}'"
 done
 
-function zle-reset-terminal() {
-  command reset
-  zle redisplay
-}
-zle -N zle-reset-terminal
-
-# C-l.
-bindkey '^l' zle-reset-terminal
+# function zle-reset-terminal() {
+#   command reset
+#   zle redisplay
+# }
+# zle -N zle-reset-terminal
+#
+# # C-l.
+# bindkey '^l' zle-reset-terminal
+bindkey '^l' clear-screen
 
 # Bind common escape sequences for arrow keys with modifiers.
 bindkey "\e[1;5D" backward-word         # Ctrl+Left.
@@ -166,7 +167,7 @@ git_prompt_info() {
 
 # === Right Prompt: Exit Code ===
 exit_code_rprompt() {
-    local code=$?
+    local code=$1
     (( code == 0 )) && { RPROMPT=''; return; }
 
     local -A bsd_codes=(
@@ -206,13 +207,13 @@ build_prompt() {
 }
 
 # === Update on every command ===
-precmd() {
-    exit_code_rprompt
+shellboost_precmd() {
+    local exit_code=$?
+    exit_code_rprompt "$exit_code"
     build_prompt
 }
 
-# Activate
-add-zsh-hook precmd precmd
+add-zsh-hook precmd shellboost_precmd
 
 # Enable case-insensitive tab completion
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
@@ -237,13 +238,6 @@ SAVEHIST=20000
 
 # Share history between all running sessions.
 setopt SHARE_HISTORY
-
-# Append commands to the history file incrementally, instead of overwriting the
-# history file when the shell exits.
-setopt INC_APPEND_HISTORY
-
-# Append to the history file instead of overwriting it.
-setopt APPEND_HISTORY
 
 setopt HIST_IGNORE_SPACE
 setopt HIST_SAVE_NO_DUPS

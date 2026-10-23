@@ -329,10 +329,9 @@ if [ -n "$TEXLIVE_DIR" ] && [ -d "$TEXLIVE_DIR" ]; then
     MANPATH="${MANPATH:-}"
     INFOPATH="${INFOPATH:-}"
 
-    # Add TeX Live documentation paths (append with ':' only if non-empty).
-    export MANPATH="${MANPATH:+${MANPATH}:}${TEXLIVE_DIR}/texmf-dist/doc/man"
-    export INFOPATH="${INFOPATH:+${INFOPATH}:}${TEXLIVE_DIR}/texmf-dist/doc/info"
-
+    # Add TeX Live documentation paths.
+    export MANPATH="${TEXLIVE_DIR}/texmf-dist/doc/man${MANPATH:+:${MANPATH}}:"
+    export INFOPATH="${TEXLIVE_DIR}/texmf-dist/doc/info${INFOPATH:+:${INFOPATH}}"
     printf 'TeX Live found: %s (%s)\n' "$TEXLIVE_DIR" "$TL_PLATFORM" >&2
 else
     printf 'No TeX Live installation detected.\n' >&2
@@ -367,7 +366,7 @@ alias ls='ls -CF --color=auto'
 alias lsd='ls -d --color=auto -- */'
 
 # Display only visible, non-directory entries.
-alias lsf='ls -p --color=auto | grep -v '/$''
+alias lsf="ls -p --color=auto | grep -v '/$'"
 
 # Display a detailed, human-readable listing of all entries.
 alias ll='ls -lahF --color=auto'
@@ -570,7 +569,7 @@ Search the command history for a specified term, ignoring case sensitivity.
 #+begin_src shell
 # Search shell history for a term (case-insensitive, with color highlights).
 hgrep() {
-    history | grep -i --color=auto "$@"
+    history | command grep -i --color=auto -- "$@"
 }
 #+end_src
 
@@ -581,7 +580,7 @@ Agnoster theme (checking for the presence of the ~hg~ command).
 
 #+begin_src shell
 # Re-run previous commands using 'fc' (without conflicts with the R language).
-rr='fc -s'
+alias rr='fc -s'
 #+end_src
 
 Examples:
@@ -603,8 +602,6 @@ if command -v rg >/dev/null 2>&1; then
     # Note: Install ripgrep with 'sudo apt install ripgrep' if missing.
 #+end_src
 
-*************** TODO Exclude any file inside a .git/ directory, while still allowing results from Git repositories themselves
-
 #+begin_src shell
     # Ripgrep with context, colorized output, and case-insensitive search.
     rgci() {
@@ -614,7 +611,7 @@ if command -v rg >/dev/null 2>&1; then
         fi
 
         rg -n -i -C 1 --hidden --no-ignore \
-           --glob '!.git' \
+           --glob '!.git/**' \
            --color=always \
            --colors 'match:fg:red' \
            --colors 'match:style:bold' \
@@ -633,8 +630,10 @@ if command -v rg >/dev/null 2>&1; then
     # - Including hidden and ignored files
     # - Excluding any files under `.git/` directories
     rgno() {
-        rg --hidden --no-ignore -l -- "$@" |
-            grep -v '\.git/'
+        command rg --hidden --no-ignore \
+            --glob '!.git/**' \
+            --files-with-matches \
+            -- "$@"
     }
 #+end_src
 
@@ -914,15 +913,19 @@ empty_trash() {
 
 #+begin_src shell :tangle bin/rc-bash-specific-settings-shellboost
 repeat() {
-  local count=$1
-  shift
-  if [[ -z "$count" || "$count" -le 0 ]]; then
-    printf "Usage: repeat N command [args...]\n"
-    return 1
-  fi
-  for ((i=1; i<=count; i++)); do
-    "$@"
-  done
+    if (( $# < 2 )) || [[ $1 != +([0-9]) ]] || (( $1 == 0 )); then
+        printf 'Usage: repeat COUNT COMMAND [ARG ...]\n' >&2
+        return 64
+    fi
+
+    local count=$1
+    local i
+
+    shift
+
+    for ((i = 0; i < count; i++)); do
+        "$@" || return
+    done
 }
 #+end_src
 
@@ -930,22 +933,23 @@ repeat() {
 
 These are mappings of keys to commands.
 
-- ~C-l~: clear the terminal screen.
+- ~C-l~: clear scrollback.
 
 XXX it's not really cleared neither in Bash nor in Zsh
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
-function zle-reset-terminal() {
-  command reset
-  zle redisplay
-}
-zle -N zle-reset-terminal
-
-# C-l.
-bindkey '^l' zle-reset-terminal
+# function zle-reset-terminal() {
+#   command reset
+#   zle redisplay
+# }
+# zle -N zle-reset-terminal
+#
+# # C-l.
+# bindkey '^l' zle-reset-terminal
+bindkey '^l' clear-screen
 #+end_src
 
-Does it delete command history?
+It does not delete shell command history.
 
 ** Finding and highlighting strings with C-S-f in WSL terminal
 
@@ -1029,7 +1033,6 @@ bindkey "\e[1;3C" forward-word          # Alt+Right.
 - ~C-k~: Kill (cut) text from the cursor to the end of the line.
 - ~C-y~: Yank (paste) the previously killed text.
 - ~C-c~: Cancel the current command (and clear the command line).
-- ~M-e~: Open the current command line in your preferred text editor.
 - ~C-u~: Clear the line from the cursor to the beginning.
 
 ** Case and Word Manipulation
@@ -1042,8 +1045,7 @@ bindkey "\e[1;3C" forward-word          # Alt+Right.
 ** Shell Utilities
 
 - ~M-w~: Show short description of a command.
-- ~M-d~: Show documentation for current command.
-- ~M-p~: Prepend 'sudo' to the current command.
+- ~M-h~: Show documentation for current command.
 - ~M-.~: Insert (yank) the *last argument* of the *previous command*. \\
   Pressing it *again repeatedly* cycles backward through earlier commands' last
   arguments.
@@ -1057,12 +1059,12 @@ For example:
 
 Refresh command line
 
-| Key binding | Meaning                                                                                               |
-|-------------+-------------------------------------------------------------------------------------------------------|
-| C-M-u       | Move to parent directory                                                                              |
-| M-s         | Prepend 'sudo ' to the current command                                                                |
-| M-S-l       | List directory contents                                                                               |
-| C-x C-e     | Edit the current command line in an external editor; similar to the ~fc~ ("fix command") shell built-in |
+| Key binding | Meaning                                                                                                       |
+|-------------+---------------------------------------------------------------------------------------------------------------|
+| C-M-u       | Move to parent directory                                                                                      |
+| M-s         | Prepend 'sudo ' to the current command                                                                        |
+| M-S-l       | List directory contents                                                                                       |
+| C-x C-e     | Edit the current command line in your preferred text editor; similar to the ~fc~ ("fix command") shell built-in |
 
 *** ls
 
@@ -1485,7 +1487,6 @@ show_exit_code_rprompt() {
 set_prompt() {
     # Powerline separators.
     local SEPARATOR_RIGHT=""
-    local SEPARATOR_LEFT=""
 
     # Colors (with proper Bash escapes).
     local RESET="\[\033[0m\]"
@@ -1567,7 +1568,7 @@ git_prompt_info() {
 
 # === Right Prompt: Exit Code ===
 exit_code_rprompt() {
-    local code=$?
+    local code=$1
     (( code == 0 )) && { RPROMPT=''; return; }
 
     local -A bsd_codes=(
@@ -1607,13 +1608,13 @@ build_prompt() {
 }
 
 # === Update on every command ===
-precmd() {
-    exit_code_rprompt
+shellboost_precmd() {
+    local exit_code=$?
+    exit_code_rprompt "$exit_code"
     build_prompt
 }
 
-# Activate
-add-zsh-hook precmd precmd
+add-zsh-hook precmd shellboost_precmd
 #+end_src
 
 * 7. Autosuggestions
@@ -1752,14 +1753,24 @@ SAVEHIST=20000
 
 # Share history between all running sessions.
 setopt SHARE_HISTORY
+#+end_src
 
+~SHARE_HISTORY~ already includes incremental appending behaviour and also imports
+commands from the history file.
+
+https://askubuntu.com/questions/23630/how-do-you-share-history-between-terminals-in-zsh
+says ~INC_APPEND_HISTORY~ should be turned off when ~SHARE_HISTORY~ is active.
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost :tangle no
 # Append commands to the history file incrementally, instead of overwriting the
 # history file when the shell exits.
 setopt INC_APPEND_HISTORY
 
 # Append to the history file instead of overwriting it.
 setopt APPEND_HISTORY
+#+end_src
 
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-shellboost
 setopt HIST_IGNORE_SPACE
 setopt HIST_SAVE_NO_DUPS
 setopt HIST_EXPIRE_DUPS_FIRST
