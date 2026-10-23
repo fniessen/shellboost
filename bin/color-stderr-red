@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# Ensure at least one argument (the script to run).
+if [[ $# -lt 1 ]]; then
+    printf '%s\n' "Usage: $0 /PATH/TO/SCRIPT [args...]" >&2
+    exit 1
+fi
+
+# ANSI codes.
+RED='\033[31m'
+RESET='\033[0m'
+
+# Extract the script path and shift to get the rest as arguments.
+TARGET_SCRIPT="$1"
+shift
+
+# Launch the target script with stderr wrapped in red.
+(
+    # Redirect stderr inside a subshell to isolate it.
+    exec 2> >(
+        awk -v red="$RED" -v reset="$RESET" \
+            '{ printf "%s%s%s\n", red, $0, reset > "/dev/stderr" }'
+    )
+    exec "$TARGET_SCRIPT" "$@"
+)
